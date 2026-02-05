@@ -43,7 +43,5 @@ void Bounding_Box::Render_Box(StaticMesh* mesh, const DirectX::XMFLOAT3 position
 	
 	box_mesh->render(world, {1, 1, 1, 1});
 
-	//test
-
 	graphics::getInstance().SetRasterizerState(graphics::RasterizerState::FS_ON_CB_OFF_CW_OFF);
 }
