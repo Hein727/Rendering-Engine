@@ -1,6 +1,7 @@
 #include "Bounding_Box.h"
 #include "Graphics.h"
 
+// Send the same position, scale and rotation as the thing you're trying to render bounding box on 
 void Bounding_Box::Render_Box(StaticMesh* mesh, const DirectX::XMFLOAT3 position, const DirectX::XMFLOAT3 scale, const DirectX::XMFLOAT3 rotation)
 {
 	//set the rasterizer to wireframe

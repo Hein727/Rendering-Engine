@@ -5,8 +5,7 @@
 
 void TestScene::Init()
 {
-	static_meshes[0] = std::make_unique<StaticMesh>(L".\\Data\\Mr.Incredible\\Mr.Incredible.obj");
-	bounding_boxes[0] = std::make_unique<Bounding_Box>();
+	skinned_meshes[0] = std::make_unique<Skinned_Mesh>(".\\Data\\plantune.fbx");
 }
 
 
@@ -24,8 +23,6 @@ void TestScene::Render()
 	DirectX::XMFLOAT4X4 worldMatrix;
 	DirectX::XMStoreFloat4x4(&worldMatrix, W);
 
-	static_meshes[0]->render(worldMatrix, color);
-	bounding_boxes[0]->Render_Box(static_meshes[0].get(), translation, scale, rotation);
 }
 
 void TestScene::Uninit()

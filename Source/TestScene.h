@@ -5,7 +5,7 @@
 #include <memory>
 #include "System/Geometric_Primitive.h"
 #include <DirectXMath.h>
-#include "System/Static_Mesh.h"
+#include "System/Skinned_Mesh.h"
 #include "System/Bounding_Box.h"
 
 class TestScene : public Scene
@@ -30,7 +30,7 @@ private :
 	DirectX::XMFLOAT3 translation = { 0.0f, 0.0f, 0.0f };	
 	DirectX::XMFLOAT4 color{ 1, 1, 1, 1 };
 
-	std::unique_ptr<StaticMesh> static_meshes[8];
+	std::unique_ptr<Skinned_Mesh> skinned_meshes[8];
 
 	std::unique_ptr<Bounding_Box> bounding_boxes[8];
 };

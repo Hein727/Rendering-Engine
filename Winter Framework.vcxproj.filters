@@ -75,6 +75,9 @@
     <ClCompile Include="Source\System\Bounding_Box.cpp">
       <Filter>Source\System</Filter>
     </ClCompile>
+    <ClCompile Include="Source\System\Skinned_Mesh.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\Framework.h">
@@ -144,6 +147,9 @@
       <Filter>Source\System</Filter>
     </ClInclude>
     <ClInclude Include="Source\System\Bounding_Box.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\Skinned_Mesh.h">
       <Filter>Source\System</Filter>
     </ClInclude>
   </ItemGroup>

@@ -102,14 +102,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\DirectXTK-main\Inc;Imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\DirectXTK-main\Inc;Imgui;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>.\DirectXTK-main\Bin\Desktop_2022\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\DirectXTK-main\Bin\Desktop_2022\x64\Debug;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7\lib\x64\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;zlib-md.lib;libxml2-md.lib;libfbxsdk-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -126,15 +126,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>Imgui;.\DirectXTK-main\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Imgui;.\DirectXTK-main\Inc;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>.\DirectXTK-main\Bin\Desktop_2022\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;zlib-md.lib;libxml2-md.lib;libfbxsdk-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\DirectXTK-main\Bin\Desktop_2022\x64\Release;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7\lib\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <AssemblerOutput>AssemblyCode</AssemblerOutput>
@@ -161,6 +161,7 @@
     <ClCompile Include="Source\System\Graphics.cpp" />
     <ClCompile Include="Source\System\Main.cpp" />
     <ClCompile Include="Source\System\Shader.cpp" />
+    <ClCompile Include="Source\System\Skinned_Mesh.cpp" />
     <ClCompile Include="Source\System\Sprite.cpp" />
     <ClCompile Include="Source\System\SpriteBatch.cpp" />
     <ClCompile Include="Source\System\Static_Mesh.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="Source\System\Graphics.h" />
     <ClInclude Include="Source\System\Misc.h" />
     <ClInclude Include="Source\System\Shader.h" />
+    <ClInclude Include="Source\System\Skinned_Mesh.h" />
     <ClInclude Include="Source\System\Sprite.h" />
     <ClInclude Include="Source\System\SpriteBatch.h" />
     <ClInclude Include="Source\System\Static_Mesh.h" />
