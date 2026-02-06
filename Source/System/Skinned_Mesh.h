@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <fbxsdk.h>
+#include <unordered_map>
 
 // Structure representing an FBX scene with nodes
 struct scene
@@ -71,6 +72,21 @@ public :
 	};
 	std::vector<Mesh> meshes;
 
+	// Material data
+	struct Material
+	{
+		uint64_t unique_id{ 0 };
+		std::string name;
+
+		DirectX::XMFLOAT4 ka{ 0.2f, 0.2f, 0.2f, 1.0f }; // Ambient color
+		DirectX::XMFLOAT4 kd{ 0.8f, 0.8f, 0.8f, 1.0f };    // Diffuse color
+		DirectX::XMFLOAT4 ks{ 1.0f, 1.0f, 1.0f, 1.0f };    // Specular color
+
+		std::string texture_filenames[4]; // Texture filename
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvs[4];
+	};
+	std::unordered_map<uint64_t, Material> materials;	
+
 private :
 	
 	// All the shaders with input layout and constant buffer
@@ -84,10 +100,16 @@ public :
 	Skinned_Mesh(const char* fbx_filename, bool triangulate = false);
 	virtual ~Skinned_Mesh() = default;
 
+	// Fetch meshes from the FBX scene
 	void Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes);
 
+	// Fetch materials from the FBX scene
+	void Fetch_materials(FbxScene* fbx_scene, std::unordered_map<uint64_t, Material>& materials);
+	
+	// Create COM objects for rendering
 	void Create_com_object(const char* fbx_filename);
 
+	// Render the skinned mesh
 	void Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4& material_color = {0, 0, 0, 1});
 
 protected:
