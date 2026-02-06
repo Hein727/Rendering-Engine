@@ -166,6 +166,9 @@
     <None Include="Source\Shader\Common.hlsli">
       <Filter>Source\Shader</Filter>
     </None>
+    <None Include="Source\Shader\Skinned_Mesh.hlsli">
+      <Filter>Source\Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Source\Shader\Sprite_ps.hlsl">
@@ -184,6 +187,12 @@
       <Filter>Source\Shader</Filter>
     </FxCompile>
     <FxCompile Include="Source\Shader\Static_Mesh_ps.hlsl">
+      <Filter>Source\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\Skinned_Mesh_vs.hlsl">
+      <Filter>Source\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\Skinned_Mesh_ps.hlsl">
       <Filter>Source\Shader</Filter>
     </FxCompile>
   </ItemGroup>

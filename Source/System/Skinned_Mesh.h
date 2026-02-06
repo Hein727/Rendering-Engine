@@ -39,7 +39,7 @@ class Skinned_Mesh
 {
 public :
 	// Vertex structure representing a vertex in the skinned mesh
-	struct vertex
+	struct Vertex
 	{
 		DirectX::XMFLOAT3 position;
 		DirectX::XMFLOAT3 normal{ 0, 1, 0 };
@@ -47,15 +47,33 @@ public :
 	};
 
 	// Constant buffer structure for shader constants
-	struct constants
+	struct Constants
 	{
 		DirectX::XMFLOAT4X4 world;
 		DirectX::XMFLOAT4 material_color;
 	};
 
+	// Mesh data
+	struct Mesh
+	{
+		uint64_t unique_id{ 0 };
+		std::string name;
+		// 'node_index' is an index that refers to the node array of the scene. 
+		int64_t node_index{ 0 };
+
+		std::vector<Vertex>vertices;
+		std::vector<uint32_t> indices;
+
+	private :
+		Microsoft::WRL::ComPtr<ID3D11Buffer> vertex_buffer;
+		Microsoft::WRL::ComPtr<ID3D11Buffer> index_buffer;
+		friend class Skinned_Mesh;
+	};
+	std::vector<Mesh> meshes;
+
 private :
 	
-	//All the shaders with input layout and constant buffer
+	// All the shaders with input layout and constant buffer
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
@@ -66,8 +84,14 @@ public :
 	Skinned_Mesh(const char* fbx_filename, bool triangulate = false);
 	virtual ~Skinned_Mesh() = default;
 
+	void Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes);
+
+	void Create_com_object(const char* fbx_filename);
+
+	void Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4& material_color = {0, 0, 0, 1});
+
 protected:
 
-	//Hold the scene data here
+	// Hold the scene data here
 	scene scene_view;
 };

@@ -5,7 +5,7 @@
 
 void TestScene::Init()
 {
-	skinned_meshes[0] = std::make_unique<Skinned_Mesh>(".\\Data\\plantune.fbx");
+	skinned_meshes[0] = std::make_unique<Skinned_Mesh>(".\\Data\\cube.000.fbx");
 }
 
 
@@ -22,6 +22,8 @@ void TestScene::Render()
 	DirectX::XMMATRIX W = S * R * T;
 	DirectX::XMFLOAT4X4 worldMatrix;
 	DirectX::XMStoreFloat4x4(&worldMatrix, W);
+
+	skinned_meshes[0]->Render(worldMatrix, color);
 
 }
 

@@ -1,0 +1,21 @@
+struct VS_IN
+{
+    float4 position : POSITION;
+    float4 normal : NORMAL;
+    float2 texcoord : TEXCOORD;
+};
+
+struct VS_OUT
+{
+    float4 position : SV_Position;
+    float4 world_position : POSITION;
+    float4 world_normal : NORMAL;
+    float2 texcoord : TEXCOORD;
+    float4 color : COLOR;
+};
+
+cbuffer Constant_Buffer : register(b1)
+{
+    row_major float4x4 world;
+    float4 material_color;
+}
