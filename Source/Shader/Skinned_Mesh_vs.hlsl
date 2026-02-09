@@ -9,6 +9,8 @@ VS_OUT main(VS_IN vin)
     vin.normal.w = 0;
     vout.world_normal = normalize(mul(vin.normal, world));
     vout.texcoord = vin.texcoord;
+    
     vout.color = material_color;
+    
     return vout;
 }

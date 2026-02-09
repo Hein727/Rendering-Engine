@@ -207,6 +207,73 @@ void graphics::initialize(HWND hwnd)
 	hr = device->CreateRasterizerState(&rasterizer_desc, rasterizerStates[FS_OFF_CB_ON_CW_ON].GetAddressOf());
 
 	////////////////////////////////////////////////////////////////////////////////////////////
+
+	///////////////////////////Sampler State//////////////////////////////////
+
+	D3D11_SAMPLER_DESC sampler_desc{};
+	sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampler_desc.MinLOD = 0;
+	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = device->CreateSamplerState(&sampler_desc, samplerStates[LINEAR_WRAP].GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+
+	sampler_desc = {};
+	sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;	
+	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampler_desc.MinLOD = 0;
+	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = device->CreateSamplerState(&sampler_desc, samplerStates[LINEAR_CLAMP].GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+
+	// HIGH QUALITY use it for walls and grounds idk 
+	sampler_desc = {};
+	sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC;
+	sampler_desc.MaxAnisotropy = 16;
+	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampler_desc.MinLOD = 0;
+	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = device->CreateSamplerState(&sampler_desc, samplerStates[ANISOTROPIC_WRAP].GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+
+	//PIXEL PERFECT for ui type shit]
+	sampler_desc = {};
+	sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	sampler_desc.AddressU = sampler_desc.AddressV = sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampler_desc.MinLOD = 0;
+	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = device->CreateSamplerState(&sampler_desc, samplerStates[POINT_CLAMP].GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+
+	sampler_desc = {};
+	sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	sampler_desc.AddressU = sampler_desc.AddressV = sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampler_desc.MinLOD = 0;
+	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = device->CreateSamplerState(&sampler_desc, samplerStates[POINT_WRAP].GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+
+	sampler_desc = {};
+	sampler_desc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampler_desc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	sampler_desc.MinLOD = 0;
+	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = device->CreateSamplerState(&sampler_desc, samplerStates[SHADOW_COMPARISON_SAMPLER].GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
 }
 
 //Call at the beginning of every frame for rendering
@@ -224,6 +291,12 @@ void graphics::renderingBegin()
 	deviceContext->OMSetDepthStencilState(depthStencilStates[DepthStencilState::DEPTH_MASK_ALL].Get(), 1);
 
 	deviceContext->OMSetBlendState(blendStates[BlendState::BLEND_ALPHA].Get(), nullptr, 0xffffffff);
+
+	deviceContext->PSSetSamplers(
+		0,
+		7,
+		samplerStates->GetAddressOf()
+	);
 
 	// Get the current viewport dimensions
 	D3D11_VIEWPORT viewport{};	

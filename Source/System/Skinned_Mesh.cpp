@@ -39,6 +39,35 @@ inline DirectX::XMFLOAT4 to_xmfloat4(const FbxVector4 vector)
 	return result;
 }
 
+void Fetch_Bone_Influences(const FbxMesh* fbx_mesh, std::vector<Bone_Influences_Per_Control_Point>& bone_influences)
+{
+	const int control_points_count{ fbx_mesh->GetControlPointsCount() };
+	bone_influences.resize(control_points_count);
+
+	const int skin_count{ fbx_mesh->GetDeformerCount(FbxDeformer::eSkin) };
+	for (int skin_index = 0; skin_index < skin_count; ++skin_index)
+	{
+		const FbxSkin* fbx_skin{ static_cast<FbxSkin*>(fbx_mesh->GetDeformer(skin_index, FbxDeformer::eSkin)) };
+
+		const int cluster_count{ fbx_skin->GetClusterCount() };
+		for (int cluster_index = 0; cluster_index < cluster_count; ++cluster_index)
+		{
+			const FbxCluster* fbx_cluster{ fbx_skin->GetCluster(cluster_index) };
+
+			const int control_point_indices_count{ fbx_cluster->GetControlPointIndicesCount() };
+			for (int control_point_indices_index = 0; control_point_indices_index < control_point_indices_count; ++control_point_indices_index)
+			{
+				int control_point_index{ fbx_cluster->GetControlPointIndices()[control_point_indices_index] };
+				double control_point_weight{ fbx_cluster->GetControlPointWeights()[control_point_indices_index] };
+
+				Bone_Influence& bone_influence{ bone_influences.at(control_point_index).emplace_back() };
+				bone_influence.bone_index = static_cast<uint32_t>(cluster_index);
+				bone_influence.bone_weight = static_cast<float>(control_point_weight);
+			}
+		}
+	}
+}
+
 Skinned_Mesh::Skinned_Mesh(const char* fbx_filename, bool triangulate)
 {
 	// Calling in device from graphics
@@ -118,6 +147,10 @@ void Skinned_Mesh::Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes)
 		mesh.unique_id = fbx_node->GetUniqueID();
 		mesh.name = fbx_node->GetName();
 		mesh.node_index = scene_view.indexof(mesh.unique_id);
+		mesh.default_gobal_transform = to_xmfloat4x4(fbx_node->EvaluateGlobalTransform());
+
+		std::vector<Bone_Influences_Per_Control_Point>  bone_influences;
+		Fetch_Bone_Influences(fbx_mesh, bone_influences);
 
 		std::vector<Mesh::Subsets>& subsets{ mesh.subsets };
 		const int material_count{ fbx_mesh->GetNode()->GetMaterialCount() };
@@ -181,6 +214,16 @@ void Skinned_Mesh::Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes)
 				vertex.position.y = static_cast<float>(control_points[polygon_vertex][1]);
 				vertex.position.z = static_cast<float>(control_points[polygon_vertex][2]);
 
+				const Bone_Influences_Per_Control_Point& influences_per_contorl_point{ bone_influences.at(polygon_vertex) };
+				for (size_t influence_index = 0; influence_index < influences_per_contorl_point.size(); ++influence_index)
+				{
+					if (influence_index < MAX_BONE_INFLUENCE)
+					{
+						vertex.bone_weights[influence_index] = influences_per_contorl_point.at(influence_index).bone_weight;
+						vertex.bone_indices[influence_index] = influences_per_contorl_point.at(influence_index).bone_index;
+					}
+				}
+
 				if (fbx_mesh->GetElementNormalCount() > 0)
 				{
 					// Normal
@@ -209,8 +252,6 @@ void Skinned_Mesh::Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes)
 				subset.index_count++;	
 			}
 		}
-
-		mesh.default_gobal_transform = to_xmfloat4x4(fbx_node->EvaluateGlobalTransform());
 	}
 }
 
@@ -254,6 +295,8 @@ void Skinned_Mesh::Create_com_object(const char* fbx_filename)
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT},
 		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT},
 		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT},
+		{"WEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT},
+		{"BONES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT},
 	};
 
 	createVsFromCso(device, "Shader\\Skinned_Mesh_vs.cso", vertexShader.ReleaseAndGetAddressOf(), inputLayout.ReleaseAndGetAddressOf(), input_element_desc, ARRAYSIZE(input_element_desc));
@@ -386,3 +429,4 @@ void Skinned_Mesh::Fetch_materials(FbxScene* fbx_scene, std::unordered_map<uint6
 	// This is to avoid accessing invalid iterator in Render function
 	materials.emplace(0, Material{});
 }
+

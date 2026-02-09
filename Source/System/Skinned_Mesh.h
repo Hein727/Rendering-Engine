@@ -40,11 +40,14 @@ class Skinned_Mesh
 {
 public :
 	// Vertex structure representing a vertex in the skinned mesh
+	static const int MAX_BONE_INFLUENCE{ 4 };
 	struct Vertex
 	{
 		DirectX::XMFLOAT3 position;
 		DirectX::XMFLOAT3 normal{ 0, 1, 0 };
 		DirectX::XMFLOAT2 texcoord{ 0, 0 };
+		float bone_weights[MAX_BONE_INFLUENCE]{ 1, 0, 0, 0 };
+		uint32_t bone_indices[MAX_BONE_INFLUENCE]{};
 	};
 
 	// Constant buffer structure for shader constants
@@ -135,3 +138,10 @@ protected:
 	// Hold the scene data here
 	scene scene_view;
 };
+
+struct Bone_Influence
+{
+	uint32_t bone_index;
+	float bone_weight;
+};
+using Bone_Influences_Per_Control_Point = std::vector<Bone_Influence>;

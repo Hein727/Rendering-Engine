@@ -48,6 +48,17 @@ public:
 		FS_OFF_CB_ON_CW_ON,
 		FS_OFF_CB_OFF_CW_ON,
 	};
+
+	enum SamplerState
+	{
+		LINEAR_WRAP,
+		LINEAR_CLAMP,
+		ANISOTROPIC_WRAP,
+		POINT_CLAMP,
+		POINT_WRAP,
+		SHADOW_COMPARISON_SAMPLER,
+		NORMAL_MAP_SAMPLER
+	};
 	
 	enum CoordChange
 	{
@@ -80,6 +91,7 @@ public:
 	// State Setters
 	void SetRasterizerState(RasterizerState state) const { deviceContext->RSSetState(rasterizerStates[state].Get()); }
 	void SetDepthStencilState(DepthStencilState state, UINT stencilRef = 0) const { deviceContext->OMSetDepthStencilState(depthStencilStates[state].Get(), stencilRef); }
+	void SetSamplerState(SamplerState state) const { deviceContext->PSSetSamplers(0, 1, samplerStates[state].GetAddressOf()); }
 
 	// Prevent copying
 	graphics(const graphics&) = delete;
@@ -99,4 +111,5 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilStates[4];
 	Microsoft::WRL::ComPtr<ID3D11BlendState> blendStates[4];
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerStates[8];
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerStates[7];
 };
