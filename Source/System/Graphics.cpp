@@ -207,8 +207,6 @@ void graphics::initialize(HWND hwnd)
 	hr = device->CreateRasterizerState(&rasterizer_desc, rasterizerStates[FS_OFF_CB_ON_CW_ON].GetAddressOf());
 
 	////////////////////////////////////////////////////////////////////////////////////////////
-
-
 }
 
 //Call at the beginning of every frame for rendering
@@ -263,4 +261,16 @@ void graphics::renderingEnd()
 void graphics::uninitialize()
 {
 			
+}
+
+DirectX::XMMATRIX graphics::coordinate_system_transform(CoordChange type, float scale_factor/*1.0f for meters 0.01f is centimeters*/)
+{
+	const DirectX::XMFLOAT4X4 coord_system_transforms[]{
+		{-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 },
+		{ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 },
+		{-1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1 },
+		{ 1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1 }
+	};
+
+	return DirectX::XMMatrixScaling(scale_factor, scale_factor, scale_factor) * DirectX::XMLoadFloat4x4(&coord_system_transforms[type]);
 }

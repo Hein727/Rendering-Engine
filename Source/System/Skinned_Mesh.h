@@ -57,6 +57,13 @@ public :
 	// Mesh data
 	struct Mesh
 	{
+		DirectX::XMFLOAT4X4 default_gobal_transform =
+		{
+			1,0,0,0,
+			0,1,0,0,
+			0,0,1,0,
+			0,0,0,1.
+		};
 		uint64_t unique_id{ 0 };
 		std::string name;
 		// 'node_index' is an index that refers to the node array of the scene. 

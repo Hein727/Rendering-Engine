@@ -48,6 +48,15 @@ public:
 		FS_OFF_CB_ON_CW_ON,
 		FS_OFF_CB_OFF_CW_ON,
 	};
+	
+	enum CoordChange
+	{
+		RHS_Y_UP,
+		LHS_Y_UP,	
+		RHS_Z_UP,
+		LHS_Z_UP
+	};
+	DirectX::XMMATRIX coordinate_system_transform(CoordChange type, float scale_factor = 1.0f/*1.0f for meters 0.01f is centimeters*/);
 
 	// Scene Constants
 	struct SceneConstants

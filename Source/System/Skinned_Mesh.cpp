@@ -7,6 +7,38 @@
 #include <functional>
 #include <sstream>
 
+inline DirectX::XMFLOAT4X4 to_xmfloat4x4(const FbxAMatrix matrix)
+{
+	DirectX::XMFLOAT4X4 result;
+	for(int i = 0; i < 4; ++i)
+	{
+		for(int j = 0; j < 4; ++j)
+		{
+			result.m[i][j] = static_cast<float>(matrix.Get(i, j));
+		}
+	}
+	return result;
+}
+
+inline DirectX::XMFLOAT3 to_xmfloat3(const FbxVector4 vector)
+{
+	DirectX::XMFLOAT3 result;
+	result.x = static_cast<float>(vector[0]);
+	result.y = static_cast<float>(vector[1]);
+	result.z = static_cast<float>(vector[2]);
+	return result;
+}
+
+inline DirectX::XMFLOAT4 to_xmfloat4(const FbxVector4 vector)
+{
+	DirectX::XMFLOAT4 result;
+	result.x = static_cast<float>(vector[0]);
+	result.y = static_cast<float>(vector[1]);
+	result.z = static_cast<float>(vector[2]);
+	result.w = static_cast<float>(vector[3]);
+	return result;
+}
+
 Skinned_Mesh::Skinned_Mesh(const char* fbx_filename, bool triangulate)
 {
 	// Calling in device from graphics
@@ -102,7 +134,20 @@ void Skinned_Mesh::Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes)
 			const int polygon_count{ fbx_mesh->GetPolygonCount() };
 			for (int polygon_index = 0; polygon_index < polygon_count; ++polygon_index)
 			{
-				const int material{};
+				const int material_index
+				{
+					fbx_mesh->GetElementMaterial()->GetIndexArray().GetAt(polygon_index)
+				};
+
+				subsets.at(material_index).index_count += 3; // Each polygon is a triangle (3 indices)
+			}
+			uint32_t offset{ 0 };
+			for (auto& subset : subsets)
+			{
+				subset.index_start = offset;
+				offset += subset.index_count;
+				// This will be used in Render function to set correct material
+				subset.index_count = 0;
 			}
 		}
 			
@@ -118,6 +163,10 @@ void Skinned_Mesh::Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes)
 		const FbxVector4* control_points{ fbx_mesh->GetControlPoints() };
 		for (int polygon_index = 0; polygon_index < polygon_count; ++polygon_index)
 		{
+			const int material_index{ material_count > 0 ? fbx_mesh->GetElementMaterial()->GetIndexArray().GetAt(polygon_index) : 0 };
+			Mesh::Subsets& subset{ subsets.at(material_index) };
+			const uint32_t offset{ subset.index_start + subset.index_count };
+
 			for (int position_in_polygon = 0; position_in_polygon < 3; ++position_in_polygon)
 			{
 				// Calculate vertex index
@@ -156,9 +205,12 @@ void Skinned_Mesh::Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes)
 				mesh.vertices.at(vertex_index) = std::move(vertex);
 
 				// Fill index data
-				mesh.indices.at(vertex_index) = vertex_index;
+				mesh.indices.at(static_cast<size_t>(offset) + position_in_polygon) = vertex_index;
+				subset.index_count++;	
 			}
 		}
+
+		mesh.default_gobal_transform = to_xmfloat4x4(fbx_node->EvaluateGlobalTransform());
 	}
 }
 
@@ -252,16 +304,20 @@ void Skinned_Mesh::Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLO
 
 		// Update constant buffer
 		Constants data;
-		data.world = world;
-		XMStoreFloat4(&data.material_color,XMLoadFloat4(&material_color) * XMLoadFloat4(&materials.cbegin()->second.kd));
-		context->UpdateSubresource(constantBuffer.Get(), 0, 0, &data, 0, 0);
-		context->VSSetConstantBuffers(1, 1, constantBuffer.GetAddressOf());
-		context->PSSetShaderResources(0, 1, materials.cbegin()->second.srvs[0].GetAddressOf());
+		DirectX::XMStoreFloat4x4(&data.world, DirectX::XMLoadFloat4x4(&mesh.default_gobal_transform) * DirectX::XMLoadFloat4x4(&world));
 
-		// Draw call
-		D3D11_BUFFER_DESC buffer_desc{};
-		mesh.index_buffer->GetDesc(&buffer_desc);
-		context->DrawIndexed(buffer_desc.ByteWidth / sizeof(uint32_t), 0, 0);
+		for (const auto& subset : mesh.subsets)
+		{
+			const Material& material{ materials.at(subset.material_unique_id) };
+
+			DirectX::XMStoreFloat4(&data.material_color, DirectX::XMLoadFloat4(&material_color) * DirectX::XMLoadFloat4(&material.kd));
+			context->UpdateSubresource(constantBuffer.Get(), 0, 0, &data, 0, 0);
+			context->VSSetConstantBuffers(1, 1, constantBuffer.GetAddressOf());
+
+			context->PSSetShaderResources(0, 1, material.srvs[0].GetAddressOf());
+
+			context->DrawIndexed(subset.index_count, subset.index_start, 0);
+		}
 	}
 }
 
