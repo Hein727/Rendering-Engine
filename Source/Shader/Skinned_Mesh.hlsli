@@ -16,8 +16,10 @@ struct VS_OUT
     float4 color : COLOR;
 };
 
-cbuffer Constant_Buffer : register(b1)
+static const int MAX_BONES = 256;
+cbuffer OBJECT_CONSTANTS : register(b1)
 {
     row_major float4x4 world;
     float4 material_color;
+    row_major float4x4 bone_transforms[MAX_BONES];
 }

@@ -25,7 +25,6 @@ void TestScene::Render()
 	DirectX::XMStoreFloat4x4(&worldMatrix, W);
 
 	skinned_meshes[0]->Render(worldMatrix, color);
-
 }
 
 void TestScene::Uninit()

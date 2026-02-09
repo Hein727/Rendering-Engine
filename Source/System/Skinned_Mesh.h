@@ -51,11 +51,19 @@ public :
 	};
 
 	// Constant buffer structure for shader constants
+	static const int MAX_BONES{ 256 };
 	struct Constants
 	{
 		DirectX::XMFLOAT4X4 world;
 		DirectX::XMFLOAT4 material_color;
-	};
+		DirectX::XMFLOAT4X4 bone_transforms[MAX_BONES]
+		{
+			{1,0,0,0,
+			 0,1,0,0,
+			 0,0,1,0,
+			 0,0,0,1.}
+		};
+	};	
 
 	// Mesh data
 	struct Mesh
