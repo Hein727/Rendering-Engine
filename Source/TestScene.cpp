@@ -5,7 +5,7 @@
 
 void TestScene::Init()
 {
-	skinned_meshes[0] = std::make_unique<Skinned_Mesh>(".\\Data\\cube.000.fbx");
+	skinned_meshes[0] = std::make_unique<Skinned_Mesh>(".\\Data\\cube.001.0.fbx");
 }
 
 

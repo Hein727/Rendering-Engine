@@ -87,6 +87,26 @@ void Skinned_Mesh::Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes)
 		mesh.name = fbx_node->GetName();
 		mesh.node_index = scene_view.indexof(mesh.unique_id);
 
+		std::vector<Mesh::Subsets>& subsets{ mesh.subsets };
+		const int material_count{ fbx_mesh->GetNode()->GetMaterialCount() };
+		subsets.resize(material_count > 0 ? material_count : 1);
+		for (int material_index = 0; material_index < material_count; ++material_index)
+		{
+			const FbxSurfaceMaterial* fbx_material{ fbx_mesh->GetNode()->GetMaterial(material_index) };
+			subsets.at(material_index).material_name = fbx_material->GetName();
+			subsets.at(material_index).material_unique_id = fbx_material->GetUniqueID();
+		}
+
+		if (material_count > 0)
+		{
+			const int polygon_count{ fbx_mesh->GetPolygonCount() };
+			for (int polygon_index = 0; polygon_index < polygon_count; ++polygon_index)
+			{
+				const int material{};
+			}
+		}
+			
+
 		// Fetch vertices and indices
 		const int polygon_count{ fbx_mesh->GetPolygonCount() };
 		mesh.vertices.resize(polygon_count * 3LL);
