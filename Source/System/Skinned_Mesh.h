@@ -71,6 +71,23 @@ struct Skeleton
 	}
 };
 
+struct Animation
+{
+	std::string name;
+	float sampling_rate{ 0 };
+
+	struct Keyframe
+	{
+		struct Node
+		{
+			// 'global_transform' is used to convert from local space of node to global space of scene. 
+			DirectX::XMFLOAT4X4 global_transform{ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+		};
+		std::vector<Node> nodes;
+	};
+	std::vector<Keyframe> keyframes;
+};
+
 class Skinned_Mesh
 {
 public :
@@ -151,7 +168,7 @@ public :
 		std::string texture_filenames[4]; // Texture filename
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvs[4];
 	};
-	std::unordered_map<uint64_t, Material> materials;	
+	std::unordered_map<uint64_t, Material> materials;
 
 private :
 	
@@ -172,18 +189,26 @@ public :
 	// Fetch materials from the FBX scene
 	void Fetch_materials(FbxScene* fbx_scene, std::unordered_map<uint64_t, Material>& materials);
 
+	// Fetch skeleton from the FBX mesh
 	void Fetch_skeleton(FbxMesh* fbx_mesh, Skeleton& bind_pose);
+
+	void Fetch_Animation(FbxScene* fbx_scene, std::vector<Animation>& animations,
+		float sampling_rate = 0.0f/*If this value is 0, the animation data will be sampled at the default frame rate.*/);
 	
 	// Create COM objects for rendering
 	void Create_com_object(const char* fbx_filename);
 
 	// Render the skinned mesh
-	void Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4& material_color = {0, 0, 0, 1});
+	void Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4& material_color, const Animation::Keyframe* keyframe);
+
+	std::vector<Animation> animations; // it's animation clips ffs
 
 protected:
 
 	// Hold the scene data here
 	scene scene_view;
+
+	
 };
 
 struct Bone_Influence

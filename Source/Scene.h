@@ -9,7 +9,7 @@ public :
 	virtual ~Scene() = default;
 	virtual void Init() = 0;
 	virtual void Update(float deltaTime) = 0;	
-	virtual void Render() = 0;
+	virtual void Render(float deltaTime) = 0;
 	virtual void Uninit() = 0;
 	virtual void DebugUI() = 0; // Renders Imgui for debugging purposes
 };

@@ -17,7 +17,7 @@ public:
 
 	void Init() override;
 	void Update(float deltaTime) override;
-	void Render() override;
+	void Render(float deltaTime) override;
 	void Uninit() override;
 	void DebugUI() override;
 

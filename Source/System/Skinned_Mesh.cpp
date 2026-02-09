@@ -120,6 +120,9 @@ Skinned_Mesh::Skinned_Mesh(const char* fbx_filename, bool triangulate)
 	// Get materials
 	Fetch_materials(fbx_scene, materials);
 
+	// Get animations
+	Fetch_Animation(fbx_scene, animations);
+
 	// Destroy the FbxManager after use
 	fbx_manager->Destroy();
 
@@ -330,7 +333,7 @@ void Skinned_Mesh::Create_com_object(const char* fbx_filename)
 
 }
 
-void Skinned_Mesh::Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4& material_color)
+void Skinned_Mesh::Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4& material_color, const Animation::Keyframe* keyframe)
 {
 	auto context = graphics::getInstance().GetDeviceContext();
 	for (const auto& mesh : meshes)
@@ -351,21 +354,17 @@ void Skinned_Mesh::Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLO
 		Constants data;
 		DirectX::XMStoreFloat4x4(&data.world, DirectX::XMLoadFloat4x4(&mesh.default_gobal_transform) * DirectX::XMLoadFloat4x4(&world));
 
-#if 1 
-		XMMATRIX B[3];
-		B[0] = XMLoadFloat4x4(&mesh.bind_pose.bones.at(0).offset_transform);
-		B[1] = XMLoadFloat4x4(&mesh.bind_pose.bones.at(1).offset_transform);
-		B[2] = XMLoadFloat4x4(&mesh.bind_pose.bones.at(2).offset_transform);
-
-		XMMATRIX A[3];
-		A[0] = XMMatrixRotationRollPitchYaw(XMConvertToRadians(90), 0, 0);
-		A[1] = XMMatrixRotationRollPitchYaw(0, 0, XMConvertToRadians(45)) * XMMatrixTranslation(0, 2, 0);
-		A[2] = XMMatrixRotationRollPitchYaw(0, 0, XMConvertToRadians(-45)) * XMMatrixTranslation(0, 2, 0);
-
-		XMStoreFloat4x4(&data.bone_transforms[0], B[0] * A[0]);
-		XMStoreFloat4x4(&data.bone_transforms[1], B[1] * A[1] * A[0]);
-		XMStoreFloat4x4(&data.bone_transforms[2], B[2] * A[2] * A[1] * A[0]);
-#endif
+		const size_t bone_count{ mesh.bind_pose.bones.size() };
+		for (int bone_index = 0; bone_index < bone_count; ++bone_index)
+		{
+			const Skeleton::Bone& bone{ mesh.bind_pose.bones.at(bone_index) };
+			const Animation::Keyframe::Node& bone_node{ keyframe->nodes.at(bone.node_index) };
+			XMStoreFloat4x4(&data.bone_transforms[bone_index],
+				XMLoadFloat4x4(&bone.offset_transform) *
+				XMLoadFloat4x4(&bone_node.global_transform) *
+				XMMatrixInverse(nullptr, XMLoadFloat4x4(&mesh.default_gobal_transform))
+			);
+		}
 
 		for (const auto& subset : mesh.subsets)
 		{
@@ -482,5 +481,51 @@ void Skinned_Mesh::Fetch_skeleton(FbxMesh* fbx_mesh, Skeleton& bind_pose)
 
 			bone.offset_transform = to_xmfloat4x4(cluster_global_init_position.Inverse() * reference_global_init_position);
 		}
+	}
+}
+
+void Skinned_Mesh::Fetch_Animation(FbxScene* fbx_scene, std::vector<Animation>& animations, float sampling_rate)
+{
+	FbxArray<FbxString*> animation_stack_names;
+	fbx_scene->FillAnimStackNameArray(animation_stack_names);
+	const int animation_stack_count{ animation_stack_names.GetCount() };
+	for (int i = 0; i < animation_stack_count; ++i)
+	{
+		Animation& animation{ animations.emplace_back() };
+		animation.name = animation_stack_names[i]->Buffer();
+
+		FbxAnimStack* animation_stack{ fbx_scene->FindMember<FbxAnimStack>(animation.name.c_str()) };
+		fbx_scene->SetCurrentAnimationStack(animation_stack);
+
+		const FbxTime::EMode time_mode{ fbx_scene->GetGlobalSettings().GetTimeMode() };
+		FbxTime one_sec;
+		one_sec.SetTime(0, 0, 1, 0, 0, time_mode);
+		animation.sampling_rate = sampling_rate > 0 ? sampling_rate : static_cast<float>(one_sec.GetFrameRate(time_mode));
+		const FbxTime sampling_interval{ static_cast<FbxLongLong>(one_sec.Get() / animation.sampling_rate) };
+		const FbxTakeInfo* take_info{ fbx_scene->GetTakeInfo(animation.name.c_str()) };
+		const FbxTime start_time{ take_info->mLocalTimeSpan.GetStart() };
+		const FbxTime stop_time{ take_info->mLocalTimeSpan.GetStop() };
+		for (FbxTime time = start_time; time < stop_time; time += sampling_interval)
+		{
+			Animation::Keyframe& keyframe{ animation.keyframes.emplace_back()};
+
+			const size_t node_count{ scene_view.nodes.size() };
+			keyframe.nodes.resize(node_count);
+			for (size_t node_index = 0; node_index < node_count; ++node_index)
+			{
+				FbxNode* fbx_node{ fbx_scene->FindNodeByName(scene_view.nodes.at(node_index).name.c_str()) };
+				if (fbx_node)
+				{
+					Animation::Keyframe::Node& node{ keyframe.nodes.at(node_index) };
+					// 'global_transform' is a transformation matrix of a node with respect to the scene's global coordinate system. 
+					node.global_transform = to_xmfloat4x4(fbx_node->EvaluateGlobalTransform(time));
+				}
+			}
+		}
+	}
+
+	for (int animation_stack_index = 0; animation_stack_index < animation_stack_count; ++animation_stack_index)
+	{
+		delete animation_stack_names[animation_stack_index];
 	}
 }

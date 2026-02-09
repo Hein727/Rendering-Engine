@@ -19,7 +19,7 @@ public :
 
 	void Update(float deltaTime);
 	
-	void Render();
+	void Render(float deltaTime);
 
 	void ChangeScene(std::unique_ptr<Scene> new_scene);
 	

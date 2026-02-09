@@ -55,7 +55,7 @@ void framework::render(float delta_time)
 	
 	graph.renderingBegin();
 
-	SceneManager::GetInstance().Render();
+	SceneManager::GetInstance().Render(delta_time);
 
 #ifdef _DEBUG
 

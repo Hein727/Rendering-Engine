@@ -19,11 +19,11 @@ void SceneManager::Update(float deltaTime)
 	}
 }
 
-void SceneManager::Render()
+void SceneManager::Render(float deltaTime)
 {
 	if (currentScene != nullptr)
 	{
-		currentScene->Render();
+		currentScene->Render(deltaTime);
 
 #ifdef _DEBUG
 
