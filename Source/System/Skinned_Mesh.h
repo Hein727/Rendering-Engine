@@ -36,6 +36,41 @@ struct scene
 	}
 };
 
+struct Skeleton
+{
+	struct Bone
+	{
+		uint64_t unique_id{ 0 };
+		std::string name;
+		int64_t parent_index{ -1 };
+		int64_t node_index{ 0 };
+		DirectX::XMFLOAT4X4 offset_transform =
+		{
+			1,0,0,0,
+			0,1,0,0,
+			0,0,1,0,
+			0,0,0,1.
+		};
+
+		bool is_orphan() const { return parent_index < 0; }
+	};
+
+	std::vector<Bone> bones;
+	int64_t indexof(uint64_t unique_id) const
+	{
+		int64_t index{ 0 };
+		for (const auto& bone : bones)
+		{
+			if (bone.unique_id == unique_id)
+			{
+				return index;
+			}
+			++index;
+		}
+		return -1;
+	}
+};
+
 class Skinned_Mesh
 {
 public :
@@ -98,6 +133,8 @@ public :
 		Microsoft::WRL::ComPtr<ID3D11Buffer> vertex_buffer;
 		Microsoft::WRL::ComPtr<ID3D11Buffer> index_buffer;
 		friend class Skinned_Mesh;
+
+		Skeleton bind_pose;
 	};
 	std::vector<Mesh> meshes;
 
@@ -134,6 +171,8 @@ public :
 
 	// Fetch materials from the FBX scene
 	void Fetch_materials(FbxScene* fbx_scene, std::unordered_map<uint64_t, Material>& materials);
+
+	void Fetch_skeleton(FbxMesh* fbx_mesh, Skeleton& bind_pose);
 	
 	// Create COM objects for rendering
 	void Create_com_object(const char* fbx_filename);

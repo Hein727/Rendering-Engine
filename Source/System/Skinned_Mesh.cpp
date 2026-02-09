@@ -149,8 +149,10 @@ void Skinned_Mesh::Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes)
 		mesh.node_index = scene_view.indexof(mesh.unique_id);
 		mesh.default_gobal_transform = to_xmfloat4x4(fbx_node->EvaluateGlobalTransform());
 
+		// Get bone and skeleton 
 		std::vector<Bone_Influences_Per_Control_Point>  bone_influences;
 		Fetch_Bone_Influences(fbx_mesh, bone_influences);
+		Fetch_skeleton(fbx_mesh, mesh.bind_pose);
 
 		std::vector<Mesh::Subsets>& subsets{ mesh.subsets };
 		const int material_count{ fbx_mesh->GetNode()->GetMaterialCount() };
@@ -350,9 +352,19 @@ void Skinned_Mesh::Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLO
 		DirectX::XMStoreFloat4x4(&data.world, DirectX::XMLoadFloat4x4(&mesh.default_gobal_transform) * DirectX::XMLoadFloat4x4(&world));
 
 #if 1 
-		DirectX::XMStoreFloat4x4(&data.bone_transforms[0], DirectX::XMMatrixIdentity());
-		DirectX::XMStoreFloat4x4(&data.bone_transforms[1], XMMatrixRotationRollPitchYaw(0, 0, XMConvertToRadians(+45)));
-		DirectX::XMStoreFloat4x4(&data.bone_transforms[2], XMMatrixRotationRollPitchYaw(0, 0, XMConvertToRadians(-45)));
+		XMMATRIX B[3];
+		B[0] = XMLoadFloat4x4(&mesh.bind_pose.bones.at(0).offset_transform);
+		B[1] = XMLoadFloat4x4(&mesh.bind_pose.bones.at(1).offset_transform);
+		B[2] = XMLoadFloat4x4(&mesh.bind_pose.bones.at(2).offset_transform);
+
+		XMMATRIX A[3];
+		A[0] = XMMatrixRotationRollPitchYaw(XMConvertToRadians(90), 0, 0);
+		A[1] = XMMatrixRotationRollPitchYaw(0, 0, XMConvertToRadians(45)) * XMMatrixTranslation(0, 2, 0);
+		A[2] = XMMatrixRotationRollPitchYaw(0, 0, XMConvertToRadians(-45)) * XMMatrixTranslation(0, 2, 0);
+
+		XMStoreFloat4x4(&data.bone_transforms[0], B[0] * A[0]);
+		XMStoreFloat4x4(&data.bone_transforms[1], B[1] * A[1] * A[0]);
+		XMStoreFloat4x4(&data.bone_transforms[2], B[2] * A[2] * A[1] * A[0]);
 #endif
 
 		for (const auto& subset : mesh.subsets)
@@ -436,3 +448,39 @@ void Skinned_Mesh::Fetch_materials(FbxScene* fbx_scene, std::unordered_map<uint6
 	materials.emplace(0, Material{});
 }
 
+void Skinned_Mesh::Fetch_skeleton(FbxMesh* fbx_mesh, Skeleton& bind_pose)
+{
+	const int deformer_count = fbx_mesh->GetDeformerCount(FbxDeformer::eSkin);
+	for (int deformer_index = 0; deformer_index < deformer_count; ++deformer_index)
+	{
+		FbxSkin* fbx_skin = static_cast<FbxSkin*>(fbx_mesh->GetDeformer(deformer_index, FbxDeformer::eSkin));
+		const int cluster_count = fbx_skin->GetClusterCount();
+		bind_pose.bones.resize(cluster_count);
+
+		for (int cluster_index = 0; cluster_index < cluster_count; ++cluster_index)
+		{
+			FbxCluster* cluster = fbx_skin->GetCluster(cluster_index);
+
+			auto& bone{ bind_pose.bones.at(cluster_index) };
+			bone.name = cluster->GetLink()->GetName();
+			bone.unique_id = cluster->GetLink()->GetUniqueID();
+			bone.parent_index = bind_pose.indexof(cluster->GetLink()->GetParent()->GetUniqueID());
+			bone.node_index = scene_view.indexof(bone.unique_id);
+
+			//'reference_global_init_position' is used to convert from local space of model(mesh) to global space of scene.
+			FbxAMatrix reference_global_init_position;
+			cluster->GetTransformMatrix(reference_global_init_position);
+
+			//'cluster_global_init_position' is used to convert from local space of bone to global space of scene. 
+			FbxAMatrix cluster_global_init_position;
+			cluster->GetTransformLinkMatrix(cluster_global_init_position);
+
+			// Matrices are defined using the Column Major scheme. When a FbxAMatrix represents a transformation
+			// (translation, rotation and scale), the last row of the matrix represents the translation part of the transformation. 
+			// Compose 'bone.offset_transform' matrix that trnasforms position from mesh space to bone space. 
+			// This matrix is called the offset matrix. 
+
+			bone.offset_transform = to_xmfloat4x4(cluster_global_init_position.Inverse() * reference_global_init_position);
+		}
+	}
+}
