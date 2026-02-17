@@ -82,6 +82,11 @@ struct Animation
 		{
 			// 'global_transform' is used to convert from local space of node to global space of scene. 
 			DirectX::XMFLOAT4X4 global_transform{ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+
+			// The transformation data of a node includes its translation, rotation and scaling vectors with respect to its parent.
+			DirectX::XMFLOAT3 scaling{ 1, 1, 1 };	
+			DirectX::XMFLOAT4 rotation{ 0, 0, 0, 1 };
+			DirectX::XMFLOAT3 translation{ 0, 0, 0 };	
 		};
 		std::vector<Node> nodes;
 	};
@@ -192,8 +197,11 @@ public :
 	// Fetch skeleton from the FBX mesh
 	void Fetch_skeleton(FbxMesh* fbx_mesh, Skeleton& bind_pose);
 
+	// Fetch animation data from the FBX scene. The animation data will be sampled at the specified sampling rate. If the sampling rate is 0, the animation data will be sampled at the default frame rate.
 	void Fetch_Animation(FbxScene* fbx_scene, std::vector<Animation>& animations,
 		float sampling_rate = 0.0f/*If this value is 0, the animation data will be sampled at the default frame rate.*/);
+
+	void Update_Animation(Animation::Keyframe& keyframe);
 	
 	// Create COM objects for rendering
 	void Create_com_object(const char* fbx_filename);

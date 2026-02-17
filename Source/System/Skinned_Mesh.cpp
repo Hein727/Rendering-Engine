@@ -39,6 +39,16 @@ inline DirectX::XMFLOAT4 to_xmfloat4(const FbxVector4 vector)
 	return result;
 }
 
+inline DirectX::XMFLOAT4 to_xmfloat4(const FbxQuaternion quaternion)
+{
+	DirectX::XMFLOAT4 result;
+	result.x = static_cast<float>(quaternion[0]);
+	result.y = static_cast<float>(quaternion[1]);
+	result.z = static_cast<float>(quaternion[2]);
+	result.w = static_cast<float>(quaternion[3]);
+	return result;
+}	
+
 void Fetch_Bone_Influences(const FbxMesh* fbx_mesh, std::vector<Bone_Influences_Per_Control_Point>& bone_influences)
 {
 	const int control_points_count{ fbx_mesh->GetControlPointsCount() };
@@ -522,6 +532,12 @@ void Skinned_Mesh::Fetch_Animation(FbxScene* fbx_scene, std::vector<Animation>& 
 					Animation::Keyframe::Node& node{ keyframe.nodes.at(node_index) };
 					// 'global_transform' is a transformation matrix of a node with respect to the scene's global coordinate system. 
 					node.global_transform = to_xmfloat4x4(fbx_node->EvaluateGlobalTransform(time));
+
+					// 'local_transform' is a transformation matrix of a node with respect to its parent's local coordinate system.
+					const FbxAMatrix local_transform{ fbx_node->EvaluateLocalTransform(time) };
+					node.scaling = to_xmfloat3(local_transform.GetS());
+					node.rotation = to_xmfloat4(local_transform.GetQ()); // FbxAMatrix::GetQ() returns a quaternion that represents the rotation part of the transformation. The quaternion is in the form of (x, y, z, w).
+					node.translation = to_xmfloat3(local_transform.GetT());
 				}
 			}
 		}
@@ -530,5 +546,23 @@ void Skinned_Mesh::Fetch_Animation(FbxScene* fbx_scene, std::vector<Animation>& 
 	for (int animation_stack_index = 0; animation_stack_index < animation_stack_count; ++animation_stack_index)
 	{
 		delete animation_stack_names[animation_stack_index];
+	}
+}
+
+void Skinned_Mesh::Update_Animation(Animation::Keyframe& keyframe)
+{
+	size_t node_count{ scene_view.nodes.size() };	
+
+	for (auto node_index = 0; node_index < node_count; node_index++)
+	{
+		Animation::Keyframe::Node& node{ keyframe.nodes.at(node_index) };	
+		XMMATRIX S{ XMMatrixScaling(node.scaling.x, node.scaling.y, node.scaling.z) };
+		XMMATRIX R{ XMMatrixRotationQuaternion(XMLoadFloat4(&node.rotation)) };
+		XMMATRIX T{ XMMatrixTranslation(node.translation.x, node.translation.y, node.translation.z) };
+
+		int64_t parent_index{ scene_view.nodes.at(node_index).parent_index };	
+		XMMATRIX P{ parent_index >= 0 ? XMLoadFloat4x4(&keyframe.nodes.at(parent_index).global_transform) : XMMatrixIdentity() };
+
+		XMStoreFloat4x4(&node.global_transform, S * R * T * P);
 	}
 }
