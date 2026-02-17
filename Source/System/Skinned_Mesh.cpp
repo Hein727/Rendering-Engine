@@ -352,7 +352,10 @@ void Skinned_Mesh::Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLO
 
 		// Update constant buffer
 		Constants data;
-		DirectX::XMStoreFloat4x4(&data.world, DirectX::XMLoadFloat4x4(&mesh.default_gobal_transform) * DirectX::XMLoadFloat4x4(&world));
+
+		// Get the keyframe node data the global transform for animation that have displacement in them 
+		const Animation::Keyframe::Node& mesh_node{ keyframe->nodes.at(mesh.node_index) };
+		XMStoreFloat4x4(&data.world, XMLoadFloat4x4(&mesh_node.global_transform) * XMLoadFloat4x4(&world));
 
 		const size_t bone_count{ mesh.bind_pose.bones.size() };
 		for (int bone_index = 0; bone_index < bone_count; ++bone_index)
@@ -362,7 +365,7 @@ void Skinned_Mesh::Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLO
 			XMStoreFloat4x4(&data.bone_transforms[bone_index],
 				XMLoadFloat4x4(&bone.offset_transform) *
 				XMLoadFloat4x4(&bone_node.global_transform) *
-				XMMatrixInverse(nullptr, XMLoadFloat4x4(&mesh.default_gobal_transform))
+				XMMatrixInverse(nullptr, XMLoadFloat4x4(&mesh_node.global_transform)) //use the mesh_node's so that you can animate the displaced nodes
 			);
 		}
 

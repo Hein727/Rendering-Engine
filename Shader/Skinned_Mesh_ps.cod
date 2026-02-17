@@ -42,7 +42,7 @@
 // SV_Target                0   xyzw        0   TARGET   float   xyzw
 //
 ps_5_0
-dcl_globalFlags refactoringAllowed | skipOptimization
+dcl_globalFlags refactoringAllowed
 dcl_constantbuffer CB0[5], immediateIndexed
 dcl_sampler s2, mode_default
 dcl_resource_texture2d (float,float,float,float) t0
@@ -50,37 +50,17 @@ dcl_input_ps linear v2.xyz
 dcl_input_ps linear v3.xy
 dcl_input_ps linear v4.xyzw
 dcl_output o0.xyzw
-dcl_temps 3
-//
-// Initial variable locations:
-//   v0.x <- pin.position.x; v0.y <- pin.position.y; v0.z <- pin.position.z; v0.w <- pin.position.w; 
-//   v1.x <- pin.world_position.x; v1.y <- pin.world_position.y; v1.z <- pin.world_position.z; v1.w <- pin.world_position.w; 
-//   v2.x <- pin.world_normal.x; v2.y <- pin.world_normal.y; v2.z <- pin.world_normal.z; v2.w <- pin.world_normal.w; 
-//   v3.x <- pin.texcoord.x; v3.y <- pin.texcoord.y; 
-//   v4.x <- pin.color.x; v4.y <- pin.color.y; v4.z <- pin.color.z; v4.w <- pin.color.w; 
-//   o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z; o0.w <- <main return value>.w
-//
-#line 8 "C:\Users\2240705\Desktop\Rendering-Engine-\Source\Shader\Skinned_Mesh_ps.hlsl"
-sample_indexable(texture2d)(float,float,float,float) r0.xyzw, v3.xyxx, t0.xyzw, s2  // r0.x <- color.x; r0.y <- color.y; r0.z <- color.z; r0.w <- color.w
-
-#line 9
-dp3 r1.x, v2.xyzx, v2.xyzx
-rsq r1.x, r1.x
-mul r1.xyz, r1.xxxx, v2.xyzx  // r1.x <- N.x; r1.y <- N.y; r1.z <- N.z
-
-#line 10
-mov r2.xyz, -cb0[4].xyzx
-dp3 r1.w, r2.xyzx, r2.xyzx
-rsq r1.w, r1.w
-mul r2.xyz, r1.wwww, r2.xyzx  // r2.x <- L.x; r2.y <- L.y; r2.z <- L.z
-
-#line 11
-itof r1.w, l(0)
-dp3 r1.x, r1.xyzx, r2.xyzx
-max r1.x, r1.x, r1.w
-mul r0.xyz, r0.xyzx, r1.xxxx  // r0.x <- diffuse.x; r0.y <- diffuse.y; r0.z <- diffuse.z
-
-#line 12
-mul o0.xyzw, r0.xyzw, v4.xyzw
+dcl_temps 2
+dp3 r0.x, v2.xyzx, v2.xyzx
+rsq r0.x, r0.x
+mul r0.xyz, r0.xxxx, v2.xyzx
+dp3 r0.w, -cb0[4].xyzx, -cb0[4].xyzx
+rsq r0.w, r0.w
+mul r1.xyz, r0.wwww, -cb0[4].xyzx
+dp3 r0.x, r0.xyzx, r1.xyzx
+max r0.x, r0.x, l(0.000000)
+sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v3.xyxx, t0.xyzw, s2
+mul r1.xyz, r0.xxxx, r1.xyzx
+mul o0.xyzw, r1.xyzw, v4.xyzw
 ret 
-// Approximately 14 instruction slots used
+// Approximately 12 instruction slots used

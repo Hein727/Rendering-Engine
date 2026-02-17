@@ -5,7 +5,7 @@
 
 void TestScene::Init()
 {
-	skinned_meshes[0] = std::make_unique<Skinned_Mesh>(".\\Data\\plantune.fbx");
+	skinned_meshes[0] = std::make_unique<Skinned_Mesh>(".\\Data\\Drone166\\Drone166.1.fbx");
 }
 
 
@@ -19,7 +19,7 @@ void TestScene::Render(float deltaTime)
 	DirectX::XMMATRIX S{ DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) };
 	DirectX::XMMATRIX R{ DirectX::XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) };
 	DirectX::XMMATRIX T{ DirectX::XMMatrixTranslation(translation.x, translation.y, translation.z) };
-	DirectX::XMMATRIX C = graphics::getInstance().coordinate_system_transform(graphics::RHS_Y_UP, 0.01f);
+	DirectX::XMMATRIX C = graphics::getInstance().coordinate_system_transform(graphics::RHS_Y_UP, 1.0f);
 	DirectX::XMMATRIX W = C * S * R * T;
 	DirectX::XMFLOAT4X4 worldMatrix;
 	DirectX::XMStoreFloat4x4(&worldMatrix, W);
