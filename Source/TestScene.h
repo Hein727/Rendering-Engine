@@ -33,4 +33,6 @@ private :
 	std::unique_ptr<Skinned_Mesh> skinned_meshes[8];
 
 	std::unique_ptr<Bounding_Box> bounding_boxes[8];
+
+	float blend_factor = 0.5f;
 };

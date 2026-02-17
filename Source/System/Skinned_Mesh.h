@@ -197,11 +197,21 @@ public :
 	// Fetch skeleton from the FBX mesh
 	void Fetch_skeleton(FbxMesh* fbx_mesh, Skeleton& bind_pose);
 
-	// Fetch animation data from the FBX scene. The animation data will be sampled at the specified sampling rate. If the sampling rate is 0, the animation data will be sampled at the default frame rate.
+	// Fetch animation data from the FBX scene. The animation data will be sampled at the specified sampling rate. 
+	// If the sampling rate is 0, the animation data will be sampled at the default frame rate.
 	void Fetch_Animation(FbxScene* fbx_scene, std::vector<Animation>& animations,
 		float sampling_rate = 0.0f/*If this value is 0, the animation data will be sampled at the default frame rate.*/);
 
+	// Used for updating animation keyframe data
 	void Update_Animation(Animation::Keyframe& keyframe);
+
+	// Adding in animation data from another FBX file. The animation data will be sampled at the specified sampling rate. 
+	// If the sampling rate is 0, the animation data will be sampled at the default frame rate.
+	bool Append_Animation(const char* animation_filename, float sampling_rate = 0);
+
+	// Blends two animation keyframes together based on the specified blending factor. The resulting blended keyframe is stored in 'resulting_keyframe'. 
+	// The blending factor should be in the range [0, 1], where 0 corresponds to the first keyframe and 1 corresponds to the second keyframe.	
+	void Blend_Animation(const Animation::Keyframe* keyframes[2], float factor, Animation::Keyframe& resulting_keyframe);
 	
 	// Create COM objects for rendering
 	void Create_com_object(const char* fbx_filename);

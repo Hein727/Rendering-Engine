@@ -363,21 +363,34 @@ void Skinned_Mesh::Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLO
 		// Update constant buffer
 		Constants data;
 
-		// Get the keyframe node data the global transform for animation that have displacement in them 
-		const Animation::Keyframe::Node& mesh_node{ keyframe->nodes.at(mesh.node_index) };
-		XMStoreFloat4x4(&data.world, XMLoadFloat4x4(&mesh_node.global_transform) * XMLoadFloat4x4(&world));
-
-		const size_t bone_count{ mesh.bind_pose.bones.size() };
-		for (int bone_index = 0; bone_index < bone_count; ++bone_index)
+		if(!keyframe)
 		{
-			const Skeleton::Bone& bone{ mesh.bind_pose.bones.at(bone_index) };
-			const Animation::Keyframe::Node& bone_node{ keyframe->nodes.at(bone.node_index) };
-			XMStoreFloat4x4(&data.bone_transforms[bone_index],
-				XMLoadFloat4x4(&bone.offset_transform) *
-				XMLoadFloat4x4(&bone_node.global_transform) *
-				XMMatrixInverse(nullptr, XMLoadFloat4x4(&mesh_node.global_transform)) //use the mesh_node's so that you can animate the displaced nodes
-			);
+			XMStoreFloat4x4(&data.world, XMLoadFloat4x4(&mesh.default_gobal_transform) * XMLoadFloat4x4(&world));
+			
+			for(size_t i = 0; i < mesh.bind_pose.bones.size(); ++i)
+			{
+				DirectX::XMStoreFloat4x4(&data.bone_transforms[i], XMLoadFloat4x4(&mesh.bind_pose.bones.at(i).offset_transform));	
+			}	
 		}
+		else
+		{
+			// Get the keyframe node data the global transform for animation that have displacement in them 
+			const Animation::Keyframe::Node& mesh_node{ keyframe->nodes.at(mesh.node_index) };
+			XMStoreFloat4x4(&data.world, XMLoadFloat4x4(&mesh_node.global_transform) * XMLoadFloat4x4(&world));
+
+			const size_t bone_count{ mesh.bind_pose.bones.size() };
+			for (int bone_index = 0; bone_index < bone_count; ++bone_index)
+			{
+				const Skeleton::Bone& bone{ mesh.bind_pose.bones.at(bone_index) };
+				const Animation::Keyframe::Node& bone_node{ keyframe->nodes.at(bone.node_index) };
+				XMStoreFloat4x4(&data.bone_transforms[bone_index],
+					XMLoadFloat4x4(&bone.offset_transform) *
+					XMLoadFloat4x4(&bone_node.global_transform) *
+					XMMatrixInverse(nullptr, XMLoadFloat4x4(&mesh_node.global_transform)) //use the mesh_node's so that you can animate the displaced nodes
+				);
+			}
+		}
+		
 
 		for (const auto& subset : mesh.subsets)
 		{
@@ -565,4 +578,53 @@ void Skinned_Mesh::Update_Animation(Animation::Keyframe& keyframe)
 
 		XMStoreFloat4x4(&node.global_transform, S * R * T * P);
 	}
+}
+
+bool Skinned_Mesh::Append_Animation(const char* animation_filename, float sampling_rate)
+{
+	FbxManager* fbx_manager{ FbxManager::Create() };
+	FbxScene* fbx_scene{ FbxScene::Create(fbx_manager, "") };
+
+	FbxImporter* fbx_importer{ FbxImporter::Create(fbx_manager, "") };
+	bool import_status{ false };	
+	import_status = fbx_importer->Initialize(animation_filename);
+	_ASSERT_EXPR(import_status, fbx_importer->GetStatus().GetErrorString());
+	import_status = fbx_importer->Import(fbx_scene);
+	_ASSERT_EXPR(import_status, fbx_importer->GetStatus().GetErrorString());
+
+	Fetch_Animation(fbx_scene, animations, sampling_rate);
+
+	fbx_manager->Destroy();
+
+	return true;
+}
+
+void Skinned_Mesh::Blend_Animation(const Animation::Keyframe* keyframes[2], float factor, Animation::Keyframe& resulting_keyframe)
+{
+	size_t node_count{ scene_view.nodes.size() };	
+	resulting_keyframe.nodes.resize(node_count);
+	for (auto node_index = 0; node_index < node_count; ++node_index)
+	{
+		XMVECTOR S[2]
+		{
+			XMLoadFloat3(&keyframes[0]->nodes.at(node_index).scaling),
+			XMLoadFloat3(&keyframes[1]->nodes.at(node_index).scaling)
+		};
+		XMStoreFloat3(&resulting_keyframe.nodes.at(node_index).scaling, XMVectorLerp(S[0], S[1], factor));
+
+		XMVECTOR R[2]
+		{
+			XMLoadFloat4(&keyframes[0]->nodes.at(node_index).rotation),
+			XMLoadFloat4(&keyframes[1]->nodes.at(node_index).rotation)
+		};
+		XMStoreFloat4(&resulting_keyframe.nodes.at(node_index).rotation, XMQuaternionSlerp(R[0], R[1], factor));
+
+		XMVECTOR T[2]
+		{
+			XMLoadFloat3(&keyframes[0]->nodes.at(node_index).translation),
+			XMLoadFloat3(&keyframes[1]->nodes.at(node_index).translation)
+		};	
+		XMStoreFloat3(&resulting_keyframe.nodes.at(node_index).translation, XMVectorLerp(T[0], T[1], factor));
+	}
+
 }
