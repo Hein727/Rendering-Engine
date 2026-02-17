@@ -6,6 +6,55 @@
 #include <string>
 #include <fbxsdk.h>
 #include <unordered_map>
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/set.hpp>
+#include <cereal/types/unordered_map.hpp>	
+
+namespace DirectX
+{
+	template<class T>
+	void serialize(T& archive, DirectX::XMFLOAT2& v)
+	{
+		archive(
+			cereal::make_nvp("x", v.x),
+			cereal::make_nvp("y", v.y)
+		);
+	}
+
+	template<class T>
+	void serialize(T& archive, DirectX::XMFLOAT3& v)
+	{
+		archive(
+			cereal::make_nvp("x", v.x),
+			cereal::make_nvp("y", v.y),
+			cereal::make_nvp("z", v.z)
+		);
+	}
+
+	template<class T>
+	void serialize(T& archive, DirectX::XMFLOAT4& v)
+	{
+		archive(
+			cereal::make_nvp("x", v.x),
+			cereal::make_nvp("y", v.y),
+			cereal::make_nvp("z", v.z),
+			cereal::make_nvp("w", v.w)
+		);
+	}
+
+	template<class T>
+	void serialize(T& archive, DirectX::XMFLOAT4X4& m)
+	{
+		archive(
+			cereal::make_nvp("_11", m._11), cereal::make_nvp("_12", m._12), cereal::make_nvp("_13", m._13), cereal::make_nvp("_14", m._14),
+			cereal::make_nvp("_21", m._21), cereal::make_nvp("_22", m._22), cereal::make_nvp("_23", m._23), cereal::make_nvp("_24", m._24),
+			cereal::make_nvp("_31", m._31), cereal::make_nvp("_32", m._32), cereal::make_nvp("_33", m._33), cereal::make_nvp("_34", m._34),
+			cereal::make_nvp("_41", m._41), cereal::make_nvp("_42", m._42), cereal::make_nvp("_43", m._43), cereal::make_nvp("_44", m._44)
+		);
+	}
+};
 
 // Structure representing an FBX scene with nodes
 struct scene
@@ -17,8 +66,20 @@ struct scene
 		std::string name;
 		FbxNodeAttribute::EType attribute{ FbxNodeAttribute::eUnknown };	
 		int64_t parent_index{ -1 };
+
+		template<class T>
+		void serialize(T& archive)
+		{
+			archive(unique_id, name, attribute, parent_index);
+		}
 	};
 	std::vector<node> nodes;
+
+	template<class T>
+	void serialize(T& archive)
+	{
+		archive(nodes);
+	}
 	
 	// Function to find the index of a node by its unique ID
 	int64_t indexof(uint64_t unique_id) const
@@ -52,10 +113,22 @@ struct Skeleton
 			0,0,0,1.
 		};
 
+		template<class T>
+		void serialize(T& archive)
+		{
+			archive(unique_id, name, parent_index, node_index, offset_transform);
+		}
+
 		bool is_orphan() const { return parent_index < 0; }
 	};
 
 	std::vector<Bone> bones;
+	template<class T>
+	void serialize(T& archive)
+	{
+		archive(bones);
+	}
+
 	int64_t indexof(uint64_t unique_id) const
 	{
 		int64_t index{ 0 };
@@ -87,10 +160,28 @@ struct Animation
 			DirectX::XMFLOAT3 scaling{ 1, 1, 1 };	
 			DirectX::XMFLOAT4 rotation{ 0, 0, 0, 1 };
 			DirectX::XMFLOAT3 translation{ 0, 0, 0 };	
+
+			template<class T>
+			void serialize(T& archive)
+			{
+				archive(global_transform, scaling, rotation, translation);
+			}
 		};
 		std::vector<Node> nodes;
+
+		template<class T>
+		void serialize(T& archive)
+		{
+			archive(nodes);
+		}
 	};
 	std::vector<Keyframe> keyframes;
+
+	template<class T>
+	void serialize(T& archive)
+	{
+		archive(name, sampling_rate, keyframes);
+	}
 };
 
 class Skinned_Mesh
@@ -102,9 +193,16 @@ public :
 	{
 		DirectX::XMFLOAT3 position;
 		DirectX::XMFLOAT3 normal{ 0, 1, 0 };
+		DirectX::XMFLOAT4 tangent{ 1, 0, 0, 1 };	
 		DirectX::XMFLOAT2 texcoord{ 0, 0 };
 		float bone_weights[MAX_BONE_INFLUENCE]{ 1, 0, 0, 0 };
 		uint32_t bone_indices[MAX_BONE_INFLUENCE]{};
+
+		template<class T>
+		void serialize(T& archive)
+		{
+			archive(position, normal, tangent, texcoord, bone_weights, bone_indices);
+		}
 	};
 
 	// Constant buffer structure for shader constants
@@ -148,8 +246,15 @@ public :
 
 			uint32_t index_start{ 0 };
 			uint32_t index_count{ 0 };
+
+			template<class T>
+			void serialize(T& archive)
+			{
+				archive(material_unique_id, material_name, index_start, index_count);
+			}
 		};
 		std::vector<Subsets> subsets;
+
 
 	private :
 		Microsoft::WRL::ComPtr<ID3D11Buffer> vertex_buffer;
@@ -157,6 +262,21 @@ public :
 		friend class Skinned_Mesh;
 
 		Skeleton bind_pose;
+
+	public :
+
+		DirectX::XMFLOAT3 bounding_box[2] =
+		{
+			{ +D3D11_FLOAT32_MAX, +D3D11_FLOAT32_MAX, +D3D11_FLOAT32_MAX},
+			{ -D3D11_FLOAT32_MAX, -D3D11_FLOAT32_MAX, -D3D11_FLOAT32_MAX},
+		};
+
+		template<class T>
+		void serialize(T& archive)
+		{
+			archive(unique_id, name, node_index, vertices, indices, subsets, default_gobal_transform, bind_pose, bounding_box);
+		}
+
 	};
 	std::vector<Mesh> meshes;
 
@@ -172,6 +292,12 @@ public :
 
 		std::string texture_filenames[4]; // Texture filename
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvs[4];
+
+		template<class T>
+		void serialize(T& archive)
+		{
+			archive(unique_id, name, ka, kd, ks, texture_filenames);
+		}	
 	};
 	std::unordered_map<uint64_t, Material> materials;
 
@@ -220,6 +346,7 @@ public :
 	void Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4& material_color, const Animation::Keyframe* keyframe);
 
 	std::vector<Animation> animations; // it's animation clips ffs
+
 
 protected:
 

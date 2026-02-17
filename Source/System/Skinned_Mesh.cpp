@@ -5,6 +5,7 @@
 #include "Texture.h"
 #include <filesystem>
 #include <functional>
+#include <fstream>
 #include <sstream>
 
 inline DirectX::XMFLOAT4X4 to_xmfloat4x4(const FbxAMatrix matrix)
@@ -80,6 +81,19 @@ void Fetch_Bone_Influences(const FbxMesh* fbx_mesh, std::vector<Bone_Influences_
 
 Skinned_Mesh::Skinned_Mesh(const char* fbx_filename, bool triangulate)
 {
+	std::filesystem::path cereal_filename(fbx_filename);
+	cereal_filename.replace_extension("cereal");
+	if (std::filesystem::exists(cereal_filename.c_str()))
+	{
+		std::ifstream ifs(cereal_filename.c_str(), std::ios::binary);
+		cereal::BinaryInputArchive deserialization(ifs);
+		deserialization(scene_view, meshes, materials, animations);
+
+		// Create COM objects
+		Create_com_object(fbx_filename);
+		return;
+	}
+
 	// Calling in device from graphics
 	auto device = graphics::getInstance().GetDevice();
 	
@@ -136,13 +150,16 @@ Skinned_Mesh::Skinned_Mesh(const char* fbx_filename, bool triangulate)
 	// Destroy the FbxManager after use
 	fbx_manager->Destroy();
 
+	std::ofstream ofs(cereal_filename.c_str(), std::ios::binary);
+	cereal::BinaryOutputArchive serialization(ofs);
+	serialization(scene_view, meshes, materials, animations);
+
 	// Create COM objects
 	Create_com_object(fbx_filename);
 }
 
-void Skinned_Mesh::Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes)
+void Skinned_Mesh::Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes)	
 {
-
 	// Iterate through nodes in scene_view to find meshes
 	for (const auto& node : scene_view.nodes)
 	{
@@ -204,6 +221,9 @@ void Skinned_Mesh::Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes)
 		const int polygon_count{ fbx_mesh->GetPolygonCount() };
 		mesh.vertices.resize(polygon_count * 3LL);
 		mesh.indices.resize(polygon_count * 3LL);
+
+		// Check for tangents 
+		bool has_tangent{ fbx_mesh->GenerateTangentsData(0, false) };
 		
 		// Get UV set names
 		FbxStringList uv_names;
@@ -259,13 +279,31 @@ void Skinned_Mesh::Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes)
 					vertex.texcoord.y = 1.0f - static_cast<float>(uv[1]);
 				}
 
+				if (has_tangent)
+				{
+					const FbxGeometryElementTangent* tangent = fbx_mesh->GetElementTangent(0);
+					vertex.tangent.x = static_cast<float>(tangent->GetDirectArray().GetAt(polygon_vertex)[0]);
+					vertex.tangent.y = static_cast<float>(tangent->GetDirectArray().GetAt(polygon_vertex)[1]);
+					vertex.tangent.z = static_cast<float>(tangent->GetDirectArray().GetAt(polygon_vertex)[2]);
+					vertex.tangent.w = static_cast<float>(tangent->GetDirectArray().GetAt(polygon_vertex)[3]);
+				}
+
 				// Assign vertex to mesh
 				mesh.vertices.at(vertex_index) = std::move(vertex);
 
 				// Fill index data
 				mesh.indices.at(static_cast<size_t>(offset) + position_in_polygon) = vertex_index;
-				subset.index_count++;	
+				subset.index_count++;
 			}
+		}
+		for (const auto& vertex : mesh.vertices)
+		{
+			mesh.bounding_box[0].x = std::min<float>(mesh.bounding_box[0].x, vertex.position.x);
+			mesh.bounding_box[0].y = std::min<float>(mesh.bounding_box[0].y, vertex.position.y);
+			mesh.bounding_box[0].z = std::min<float>(mesh.bounding_box[0].z, vertex.position.z);
+			mesh.bounding_box[1].x = std::max<float>(mesh.bounding_box[1].x, vertex.position.x);
+			mesh.bounding_box[1].y = std::max<float>(mesh.bounding_box[1].y, vertex.position.y);
+			mesh.bounding_box[1].z = std::max<float>(mesh.bounding_box[1].z, vertex.position.z);
 		}
 	}
 }
@@ -309,6 +347,7 @@ void Skinned_Mesh::Create_com_object(const char* fbx_filename)
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT},
 		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT},
+		{"TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT},
 		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT},
 		{"WEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT},
 		{"BONES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT},
@@ -328,16 +367,19 @@ void Skinned_Mesh::Create_com_object(const char* fbx_filename)
 	// Create shader resource views for materials
 	for (std::unordered_map<uint64_t, Material>::iterator iterator = materials.begin(); iterator != materials.end(); ++iterator)
 	{
-		if (iterator->second.texture_filenames[0].size() > 0)
+		for (size_t texture_index = 0; texture_index < 2; ++texture_index)
 		{
-			std::filesystem::path path(fbx_filename);
-			path.replace_filename(iterator->second.texture_filenames[0]);
-			D3D11_TEXTURE2D_DESC texture2d_desc{};
-			loadTextureFromFile(device, path.c_str(), iterator->second.srvs[0].GetAddressOf(), &texture2d_desc);
-		}
-		else
-		{
-			makeDummyTexture(device, iterator->second.srvs[0].GetAddressOf(), 0xFFFFFFFF, 16);
+			if (iterator->second.texture_filenames[texture_index].size() > 0)
+			{
+				std::filesystem::path path(fbx_filename);
+				path.replace_filename(iterator->second.texture_filenames[texture_index]);
+				D3D11_TEXTURE2D_DESC texture_desc{};	
+				loadTextureFromFile(device, path.c_str(), iterator->second.srvs[texture_index].GetAddressOf(), &texture_desc);
+			}
+			else
+			{
+				makeDummyTexture(device, iterator->second.srvs[texture_index].GetAddressOf(), texture_index == 1 ? 0xFFFF7F7F : 0xFFFFFFFF, 16);
+			}
 		}
 	}
 
@@ -369,7 +411,7 @@ void Skinned_Mesh::Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLO
 			
 			for(size_t i = 0; i < mesh.bind_pose.bones.size(); ++i)
 			{
-				DirectX::XMStoreFloat4x4(&data.bone_transforms[i], XMLoadFloat4x4(&mesh.bind_pose.bones.at(i).offset_transform));	
+				data.bone_transforms[i] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 			}	
 		}
 		else
@@ -401,9 +443,12 @@ void Skinned_Mesh::Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLO
 			context->VSSetConstantBuffers(1, 1, constantBuffer.GetAddressOf());
 
 			context->PSSetShaderResources(0, 1, material.srvs[0].GetAddressOf());
+			context->PSSetShaderResources(1, 1, material.srvs[1].GetAddressOf());
 
 			context->DrawIndexed(subset.index_count, subset.index_start, 0);
 		}
+
+
 	}
 }
 
@@ -462,6 +507,13 @@ void Skinned_Mesh::Fetch_materials(FbxScene* fbx_scene, std::unordered_map<uint6
 				material.ks.z = static_cast<float>(fbx_color[2]);
 				const FbxFileTexture* fbx_texture{ fbx_property.GetSrcObject<FbxFileTexture>() };
 				material.texture_filenames[2] = fbx_texture ? fbx_texture->GetRelativeFileName() : "";
+			}
+
+			fbx_property = fbx_material->FindProperty(FbxSurfaceMaterial::sNormalMap);
+			if (fbx_property.IsValid())
+			{
+				const FbxFileTexture* fbx_texture{ fbx_property.GetSrcObject<FbxFileTexture>() };	
+				material.texture_filenames[1] = fbx_texture ? fbx_texture->GetRelativeFileName() : "";
 			}
 
 			materials.emplace(material.unique_id, std::move(material));

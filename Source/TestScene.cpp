@@ -5,8 +5,8 @@
 
 void TestScene::Init()
 {
-	skinned_meshes[0] = std::make_unique<Skinned_Mesh>(".\\Data\\AimTest\\MNK_Mesh.fbx");
-	skinned_meshes[0]->Append_Animation(".\\Data\\AimTest\\Aim_Space.fbx");
+	skinned_meshes[0] = std::make_unique<Skinned_Mesh>(".\\Data\\nico.fbx");
+	//skinned_meshes[0]->Append_Animation(".\\Data\\AimTest\\Aim_Space.fbx");
 }
 
 
@@ -20,7 +20,7 @@ void TestScene::Render(float deltaTime)
 	DirectX::XMMATRIX S{ DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) };
 	DirectX::XMMATRIX R{ DirectX::XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) };
 	DirectX::XMMATRIX T{ DirectX::XMMatrixTranslation(translation.x, translation.y, translation.z) };
-	DirectX::XMMATRIX C = graphics::getInstance().coordinate_system_transform(graphics::RHS_Z_UP, 0.01f);
+	DirectX::XMMATRIX C = graphics::getInstance().coordinate_system_transform(graphics::RHS_Y_UP, 0.01f);
 	DirectX::XMMATRIX W = C * S * R * T;
 	DirectX::XMFLOAT4X4 worldMatrix;
 	DirectX::XMStoreFloat4x4(&worldMatrix, W);
@@ -29,7 +29,7 @@ void TestScene::Render(float deltaTime)
 	int frame_index{ 0 };
 	static float animation_tick{ 0 };
 
-#if 0
+#if 1
 	if (!skinned_meshes[0]->animations.empty())
 	{
 		Animation& animation{ skinned_meshes[0]->animations.at(clip_index) };

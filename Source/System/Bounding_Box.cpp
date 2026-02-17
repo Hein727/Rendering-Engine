@@ -46,3 +46,34 @@ void Bounding_Box::Render_Box(StaticMesh* mesh, const DirectX::XMFLOAT3 position
 
 	graphics::getInstance().SetRasterizerState(graphics::RasterizerState::FS_ON_CB_OFF_CW_OFF);
 }
+
+void Bounding_Box::Render_Box(const DirectX::XMFLOAT3(&box)[2], const DirectX::XMFLOAT3 position, const DirectX::XMFLOAT3 rotation, float uniformscale)
+{
+	using namespace DirectX;
+
+	//set the rasterizer to wireframe
+	graphics::getInstance().SetRasterizerState(graphics::RasterizerState::FS_OFF_CB_OFF_CW_OFF);
+
+	XMFLOAT3 center
+	{
+		(box[0].x + box[1].x) * 0.5f, (box[0].y + box[1].y) * 0.5f, (box[0].z + box[1].z) * 0.5f
+	};
+
+	XMFLOAT3 extents
+	{
+		(box[1].x - box[0].x), (box[1].y - box[0].y), (box[1].z - box[0].z)
+	};
+
+	XMMATRIX S{ XMMatrixScaling(extents.x * uniformscale, extents.y * uniformscale, extents.z * uniformscale) };
+	XMMATRIX R{ XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) };
+	XMMATRIX T{ XMMatrixTranslation(center.x, center.y, center.z) * XMMatrixTranslation(position.x, position.y, position.z)};
+
+	XMMATRIX W = S * R * T;
+
+	XMFLOAT4X4 world;
+	XMStoreFloat4x4(&world, W);
+
+	box_mesh->render(world, { 1, 1, 1, 1 });	
+
+	graphics::getInstance().SetRasterizerState(graphics::RasterizerState::FS_ON_CB_OFF_CW_OFF);
+}
