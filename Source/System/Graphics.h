@@ -26,7 +26,6 @@ public:
 		DEPTH_MASK_ALL,
 		DEPTH_DISABLED,
 		DEPTH_READONLY,
-		DEPTH_NONE
 	};
 
 	enum BlendState
@@ -92,6 +91,7 @@ public:
 	void SetRasterizerState(RasterizerState state) const { deviceContext->RSSetState(rasterizerStates[state].Get()); }
 	void SetDepthStencilState(DepthStencilState state, UINT stencilRef = 0) const { deviceContext->OMSetDepthStencilState(depthStencilStates[state].Get(), stencilRef); }
 	void SetSamplerState(SamplerState state) const { deviceContext->PSSetSamplers(0, 1, samplerStates[state].GetAddressOf()); }
+	void SetBlendState(BlendState state) const { deviceContext->OMSetBlendState(blendStates[state].Get(), nullptr, 0xFFFFFFFF); }
 
 	// Prevent copying
 	graphics(const graphics&) = delete;

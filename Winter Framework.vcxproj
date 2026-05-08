@@ -156,7 +156,9 @@
     <ClCompile Include="Source\SceneManager.cpp" />
     <ClCompile Include="Source\System\Bounding_Box.cpp" />
     <ClCompile Include="Source\System\CameraControl.cpp" />
+    <ClCompile Include="Source\System\Framebuffer.cpp" />
     <ClCompile Include="Source\System\Framework.cpp" />
+    <ClCompile Include="Source\System\Fullscreen_Quad.cpp" />
     <ClCompile Include="Source\System\Geometeric_Primitive.cpp" />
     <ClCompile Include="Source\System\Graphics.cpp" />
     <ClCompile Include="Source\System\Main.cpp" />
@@ -181,7 +183,9 @@
     <ClInclude Include="Source\SceneManager.h" />
     <ClInclude Include="Source\System\Bounding_Box.h" />
     <ClInclude Include="Source\System\CameraControl.h" />
+    <ClInclude Include="Source\System\Framebuffer.h" />
     <ClInclude Include="Source\System\Framework.h" />
+    <ClInclude Include="Source\System\Fullscreen_Quad.h" />
     <ClInclude Include="Source\System\Geometric_Primitive.h" />
     <ClInclude Include="Source\System\Graphics.h" />
     <ClInclude Include="Source\System\Misc.h" />
@@ -196,12 +200,28 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\Shader\Common.hlsli" />
+    <None Include="Source\Shader\Fullscreen_Quad.hlsli" />
     <None Include="Source\Shader\Geometric_Primitive.hlsli" />
     <None Include="Source\Shader\Skinned_Mesh.hlsli" />
     <None Include="Source\Shader\Sprite.hlsli" />
     <None Include="Source\Shader\Static_Mesh.hlsli" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Source\Shader\Blur_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\Fullscreen_Quad_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\Fullscreen_Quad_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="Source\Shader\Geometric_Primitive_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -213,6 +233,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\Luminance_Extraction_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Source\Shader\Skinned_Mesh_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

@@ -20,25 +20,25 @@ HRESULT loadTextureFromFile(ID3D11Device* device, const wchar_t* filename,
 	}
 	else
 	{
-		hr = CreateWICTextureFromFile(device, filename, resource.GetAddressOf(), shader_resource_view);
-		_ASSERT_EXPR(SUCCEEDED(hr), "can't find the file");
+		std::filesystem::path dds_filename(filename);
+		dds_filename.replace_extension("dds");
+		if (std::filesystem::exists(dds_filename))
+		{
+			hr = CreateDDSTextureFromFile(device, dds_filename.c_str(), resource.GetAddressOf(), shader_resource_view);
+			_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+		}
+		else
+		{
+			hr = CreateWICTextureFromFile(device, filename, resource.GetAddressOf(), shader_resource_view);
+			_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+		}
 		textureCache.insert(make_pair(filename, *shader_resource_view));
 	}
 
 	ComPtr<ID3D11Texture2D> texture2d;
-	
-	std::filesystem::path dds_filename(filename);	
-	dds_filename.replace_extension("dds");
-	if (std::filesystem::exists(dds_filename))
-	{
-		hr = CreateDDSTextureFromFile(device, dds_filename.c_str(), resource.GetAddressOf(), nullptr);
-		_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
-	}
-	else
-	{
-		hr = CreateWICTextureFromFile(device, filename, resource.GetAddressOf(), shader_resource_view);
-		_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
-	}
+	hr = resource.Get()->QueryInterface<ID3D11Texture2D>(texture2d.GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+	texture2d->GetDesc(texture2d_desc);
 
 	return hr;
 }

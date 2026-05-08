@@ -90,13 +90,23 @@ void graphics::initialize(HWND hwnd)
 
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	//////////////Depth Stencil States and Blend States Creation//////////////////////
+	//////////////Depth Stencil States//////////////////////
 
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc{};
 	depthStencilDesc.DepthEnable = TRUE;
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
 	hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilStates[DEPTH_MASK_ALL].GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+
+	depthStencilDesc.DepthEnable = FALSE;
+	hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilStates[DEPTH_DISABLED].GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+
+	depthStencilDesc.DepthEnable = TRUE;	
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilStates[DEPTH_READONLY].GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
 
 	///////////////////////////////////////////////////////////////////////////////////

@@ -1,12 +1,17 @@
 #include "TestScene.h"
 #include "System/Graphics.h"
+#include "System/Shader.h"
 #include <imgui.h>
 
 
 void TestScene::Init()
 {
 	skinned_meshes[0] = std::make_unique<Skinned_Mesh>(".\\Data\\nico.fbx");
-	//skinned_meshes[0]->Append_Animation(".\\Data\\AimTest\\Aim_Space.fbx");
+	sprite_batches[0] = std::make_unique<SpriteBatch>(L".\\Data\\screenshot.jpg", 1);
+	framebuffers[0] = std::make_unique<Framebuffer>(SCREEN_WIDTH, SCREEN_HEIGHT);
+	framebuffers[1] = std::make_unique<Framebuffer>(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+	bit_block_transfer = std::make_unique<Fullscreen_Quad>();
+	createPsFromCso(graphics::getInstance().GetDevice(), "Shader\\Luminance_Extraction_ps.cso", pixel_shaders[0].GetAddressOf());
 }
 
 
@@ -17,6 +22,17 @@ void TestScene::Update(float deltaTime)
 
 void TestScene::Render(float deltaTime)
 {
+
+	graphics::getInstance().SetDepthStencilState(graphics::DEPTH_DISABLED);
+	graphics::getInstance().SetRasterizerState(graphics::FS_ON_CB_OFF_CW_OFF);
+	
+	sprite_batches[0]->Begin();
+	sprite_batches[0]->Render(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	sprite_batches[0]->End();
+
+	graphics::getInstance().SetDepthStencilState(graphics::DEPTH_MASK_ALL);
+	graphics::getInstance().SetRasterizerState(graphics::FS_ON_CB_OFF_CW_OFF);
+
 	DirectX::XMMATRIX S{ DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) };
 	DirectX::XMMATRIX R{ DirectX::XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) };
 	DirectX::XMMATRIX T{ DirectX::XMMatrixTranslation(translation.x, translation.y, translation.z) };

@@ -78,6 +78,12 @@
     <ClCompile Include="Source\System\Skinned_Mesh.cpp">
       <Filter>Source\System</Filter>
     </ClCompile>
+    <ClCompile Include="Source\System\Framebuffer.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\Fullscreen_Quad.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\Framework.h">
@@ -152,6 +158,12 @@
     <ClInclude Include="Source\System\Skinned_Mesh.h">
       <Filter>Source\System</Filter>
     </ClInclude>
+    <ClInclude Include="Source\System\Framebuffer.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\Fullscreen_Quad.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\Shader\Sprite.hlsli">
@@ -167,6 +179,9 @@
       <Filter>Source\Shader</Filter>
     </None>
     <None Include="Source\Shader\Skinned_Mesh.hlsli">
+      <Filter>Source\Shader</Filter>
+    </None>
+    <None Include="Source\Shader\Fullscreen_Quad.hlsli">
       <Filter>Source\Shader</Filter>
     </None>
   </ItemGroup>
@@ -193,6 +208,18 @@
       <Filter>Source\Shader</Filter>
     </FxCompile>
     <FxCompile Include="Source\Shader\Skinned_Mesh_ps.hlsl">
+      <Filter>Source\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\Fullscreen_Quad_vs.hlsl">
+      <Filter>Source\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\Fullscreen_Quad_ps.hlsl">
+      <Filter>Source\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\Luminance_Extraction_ps.hlsl">
+      <Filter>Source\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\Blur_ps.hlsl">
       <Filter>Source\Shader</Filter>
     </FxCompile>
   </ItemGroup>

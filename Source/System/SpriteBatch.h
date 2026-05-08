@@ -8,20 +8,11 @@ class SpriteBatch
 {
 private:
 
-	// Sampler States Enumeration
-	enum Sampler_States
-	{
-		SS_POINT,
-		SS_LINEAR,
-		SS_ANISOTROPIC,
-	}samplerStateIndex = SS_POINT;
-
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shader_resource_view;
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerStates[sizeof(Sampler_States)];
 	D3D11_TEXTURE2D_DESC texture2d_desc;
 
 	struct Vertex
