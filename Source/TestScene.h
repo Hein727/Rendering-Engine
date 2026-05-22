@@ -3,13 +3,8 @@
 #include "Scene.h"
 #include <vector>
 #include <memory>
-#include "System/Geometric_Primitive.h"
 #include <DirectXMath.h>
-#include "System/Skinned_Mesh.h"
-#include "System/Bounding_Box.h"
-#include "System/SpriteBatch.h"
-#include "System/Framebuffer.h"
-#include "System/Fullscreen_Quad.h"
+#include "System/GltfModel.h"
 
 class TestScene : public Scene
 {
@@ -26,24 +21,10 @@ public:
 
 private :
 
-	std::unique_ptr<Geometric_Primitive> primitives[8];
-
 	DirectX::XMFLOAT3 scale = { 1.0f, 1.0f, 1.0f };
 	DirectX::XMFLOAT3 rotation = { 0.0f, 0.0f, 0.0f };
 	DirectX::XMFLOAT3 translation = { 0.0f, 0.0f, 0.0f };	
 	DirectX::XMFLOAT4 color{ 1, 1, 1, 1 };
 
-	std::unique_ptr<SpriteBatch> sprite_batches[8];
-
-	std::unique_ptr<Skinned_Mesh> skinned_meshes[8];
-
-	std::unique_ptr<Bounding_Box> bounding_boxes[8];
-
-	std::unique_ptr<Framebuffer> framebuffers[8];
-
-	std::unique_ptr<Fullscreen_Quad> bit_block_transfer;
-
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixel_shaders[8];
-
-	float blend_factor = 0.5f;
+	std::unique_ptr<GltfModel> gltfModels[8];
 };

@@ -3,18 +3,10 @@
 #include "System/Shader.h"
 #include <imgui.h>
 
-
 void TestScene::Init()
 {
-	skinned_meshes[0] = std::make_unique<Skinned_Mesh>(".\\Data\\nico.fbx");
-	sprite_batches[0] = std::make_unique<SpriteBatch>(L".\\Data\\screenshot.jpg", 1);
-	framebuffers[0] = std::make_unique<Framebuffer>(SCREEN_WIDTH, SCREEN_HEIGHT);
-	framebuffers[1] = std::make_unique<Framebuffer>(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
-	bit_block_transfer = std::make_unique<Fullscreen_Quad>();
-	createPsFromCso(graphics::getInstance().GetDevice(), "Shader\\Luminance_Extraction_ps.cso", pixel_shaders[0].GetAddressOf());
-	createPsFromCso(graphics::getInstance().GetDevice(), "Shader\\Blur_ps.cso", pixel_shaders[1].GetAddressOf());
+	gltfModels[0] = std::make_unique<GltfModel>("Data\\glTF-Sample-Models-main\\2.0\\2CylinderEngine\\glTF\\2CylinderEngine.gltf");
 }
-
 
 void TestScene::Update(float deltaTime)
 {
@@ -23,79 +15,7 @@ void TestScene::Update(float deltaTime)
 
 void TestScene::Render(float deltaTime)
 {
-	framebuffers[0]->Clear();
-	framebuffers[0]->Activate();
 
-	graphics::getInstance().SetDepthStencilState(graphics::DEPTH_DISABLED);
-	graphics::getInstance().SetRasterizerState(graphics::FS_ON_CB_OFF_CW_OFF);
-	
-	sprite_batches[0]->Begin();
-	sprite_batches[0]->Render(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-	sprite_batches[0]->End();
-
-	graphics::getInstance().SetDepthStencilState(graphics::DEPTH_MASK_ALL);
-	graphics::getInstance().SetRasterizerState(graphics::FS_ON_CB_OFF_CW_OFF);
-
-	DirectX::XMMATRIX S{ DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) };
-	DirectX::XMMATRIX R{ DirectX::XMMatrixRotationRollPitchYaw(rotation.x, rotation.y, rotation.z) };
-	DirectX::XMMATRIX T{ DirectX::XMMatrixTranslation(translation.x, translation.y, translation.z) };
-	DirectX::XMMATRIX C = graphics::getInstance().coordinate_system_transform(graphics::RHS_Y_UP, 0.01f);
-	DirectX::XMMATRIX W = C * S * R * T;
-	DirectX::XMFLOAT4X4 worldMatrix;
-	DirectX::XMStoreFloat4x4(&worldMatrix, W);
-
-	int clip_index{ 0 };
-	int frame_index{ 0 };
-	static float animation_tick{ 0 };
-
-#if 1
-	if (!skinned_meshes[0]->animations.empty())
-	{
-		Animation& animation{ skinned_meshes[0]->animations.at(clip_index) };
-		frame_index = static_cast<int>(animation_tick * animation.sampling_rate);
-		if (frame_index > animation.keyframes.size() - 1)
-		{
-			frame_index = 0;
-			animation_tick = 0;
-		}
-		else
-		{
-			animation_tick += deltaTime;
-		}
-		Animation::Keyframe& keyframe{ animation.keyframes.at(frame_index) };
-		skinned_meshes[0]->Render(worldMatrix, color, &keyframe);
-	}
-	else
-		skinned_meshes[0]->Render(worldMatrix, color, nullptr);
-#else 
-	Animation::Keyframe keyframe{};
-	const Animation::Keyframe* keyframes[2]
-	{
-		&skinned_meshes[0]->animations.at(0).keyframes.at(40),
-		&skinned_meshes[0]->animations.at(0).keyframes.at(80)
-	};
-	skinned_meshes[0]->Blend_Animation(keyframes, blend_factor, keyframe);
-	skinned_meshes[0]->Update_Animation(keyframe);
-
-	skinned_meshes[0]->Render(worldMatrix, color, &keyframe);
-#endif
-
-	framebuffers[0]->Deactivate();	
-	
-	framebuffers[1]->Clear();	
-	framebuffers[1]->Activate();	
-	bit_block_transfer->blit(framebuffers[0]->shaderResourceViews[0].GetAddressOf(), 0, 1, pixel_shaders[0].Get());
-	framebuffers[1]->Deactivate();
-
-	graphics::getInstance().SetSamplerState(graphics::ANISOTROPIC_BORDER);
-
-	ID3D11ShaderResourceView* srvs[2] =
-	{
-		framebuffers[0]->shaderResourceViews[0].Get(),
-		framebuffers[1]->shaderResourceViews[0].Get()
-	};
-
-	bit_block_transfer->blit(srvs, 0, 2, pixel_shaders[1].Get());
 }
 
 void TestScene::Uninit()
@@ -106,21 +26,8 @@ void TestScene::Uninit()
 void TestScene::DebugUI()
 {
 	ImGui::Begin("Test Scene");
-	ImGui::SliderFloat3("Scaling", &scale.x, 1.0f, 10.0f);
-	ImGui::SliderFloat3("Rotation", &rotation.x, -DirectX::XM_PI, DirectX::XM_PI);	
-	ImGui::SliderFloat3("Translation", &translation.x, -10.0f, 10.0f);
-	ImGui::Separator();
-	ImGui::ColorPicker4("Color", &color.x);
-	ImGui::SliderFloat("luminance threshold", &bit_block_transfer->threshold, 0.0f, 1.0f);
-	ImGui::Separator();
-	ImGui::SliderFloat("Gaussian Sigma", &bit_block_transfer->gs, 0.0f, 10.0f);
-	ImGui::SliderFloat("Blur Intensity", &bit_block_transfer->bi, 0.0f, 10.0f);
-	ImGui::SliderFloat("Exposure", &bit_block_transfer->expo, 0.0f, 10.0f);
+	
 	ImGui::End();
-
-	/*ImGui::Separator();
-	ImGui::SliderFloat("Blend Factor", &blend_factor, 0.0f, 1.0f);
-	*/
 
 }
 
