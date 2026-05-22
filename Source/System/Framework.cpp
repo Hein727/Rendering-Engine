@@ -51,6 +51,13 @@ void framework::update(float delta_time)
 
 void framework::render(float delta_time)
 {
+	auto context = graphics::getInstance().GetDeviceContext();
+	ID3D11RenderTargetView* null_rtv[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT]{};
+	context->OMSetRenderTargets(D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, null_rtv, nullptr);
+	ID3D11ShaderResourceView* null_srv[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]{};
+	context->VSGetShaderResources(0, _countof(null_srv), null_srv);
+	context->PSSetShaderResources(0, _countof(null_srv), null_srv);
+
 	graphics& graph = graphics::getInstance();
 	
 	graph.renderingBegin();
@@ -72,6 +79,8 @@ bool framework::uninitialized()
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+
+	graphics::getInstance().uninitialize();
 
 	return true;
 }

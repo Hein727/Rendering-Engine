@@ -7,11 +7,13 @@ struct VS_OUT
 cbuffer LuminanceParams : register(b1)
 {
     float luminanceThreshold;
+    float3 padding;
 };
 
 cbuffer BlurParams : register(b2)
 {
-    float gs;
-    float bi;
-    float expo;
+    float gs; // Gaussian blur sigma
+    float bi; // Blur iteration
+    float expo; // Exponential blur power
+    float dummy;
 }

@@ -255,6 +255,23 @@ void graphics::initialize(HWND hwnd)
 	hr = device->CreateSamplerState(&sampler_desc, samplerStates[ANISOTROPIC_WRAP].GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
 
+	// border mode with anisotropic filtering ( use it for foliage and other alpha tested stuff to avoid artifacts on the edges )
+	sampler_desc = {};
+	sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC;
+	sampler_desc.MaxAnisotropy = 16;
+	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampler_desc.BorderColor[0] = 0.0f;
+	sampler_desc.BorderColor[1] = 0.0f;
+	sampler_desc.BorderColor[2] = 0.0f;
+	sampler_desc.BorderColor[3] = 0.0f;
+	sampler_desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampler_desc.MinLOD = 0;
+	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = device->CreateSamplerState(&sampler_desc, samplerStates[ANISOTROPIC_BORDER].GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+
 	//PIXEL PERFECT for ui type shit]
 	sampler_desc = {};
 	sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
@@ -343,7 +360,11 @@ void graphics::renderingEnd()
 
 void graphics::uninitialize()
 {
-			
+	if (deviceContext)
+	{
+		deviceContext->ClearState();
+		deviceContext->Flush();
+	}
 }
 
 DirectX::XMMATRIX graphics::coordinate_system_transform(CoordChange type, float scale_factor/*1.0f for meters 0.01f is centimeters*/)

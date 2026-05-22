@@ -10,6 +10,7 @@
 //   float gs;                          // Offset:    0 Size:     4
 //   float bi;                          // Offset:    4 Size:     4
 //   float expo;                        // Offset:    8 Size:     4
+//   float dummy;                       // Offset:   12 Size:     4 [unused]
 //
 // }
 //

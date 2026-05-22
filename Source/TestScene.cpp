@@ -12,6 +12,7 @@ void TestScene::Init()
 	framebuffers[1] = std::make_unique<Framebuffer>(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 	bit_block_transfer = std::make_unique<Fullscreen_Quad>();
 	createPsFromCso(graphics::getInstance().GetDevice(), "Shader\\Luminance_Extraction_ps.cso", pixel_shaders[0].GetAddressOf());
+	createPsFromCso(graphics::getInstance().GetDevice(), "Shader\\Blur_ps.cso", pixel_shaders[1].GetAddressOf());
 }
 
 
@@ -22,6 +23,8 @@ void TestScene::Update(float deltaTime)
 
 void TestScene::Render(float deltaTime)
 {
+	framebuffers[0]->Clear();
+	framebuffers[0]->Activate();
 
 	graphics::getInstance().SetDepthStencilState(graphics::DEPTH_DISABLED);
 	graphics::getInstance().SetRasterizerState(graphics::FS_ON_CB_OFF_CW_OFF);
@@ -76,6 +79,23 @@ void TestScene::Render(float deltaTime)
 
 	skinned_meshes[0]->Render(worldMatrix, color, &keyframe);
 #endif
+
+	framebuffers[0]->Deactivate();	
+	
+	framebuffers[1]->Clear();	
+	framebuffers[1]->Activate();	
+	bit_block_transfer->blit(framebuffers[0]->shaderResourceViews[0].GetAddressOf(), 0, 1, pixel_shaders[0].Get());
+	framebuffers[1]->Deactivate();
+
+	graphics::getInstance().SetSamplerState(graphics::ANISOTROPIC_BORDER);
+
+	ID3D11ShaderResourceView* srvs[2] =
+	{
+		framebuffers[0]->shaderResourceViews[0].Get(),
+		framebuffers[1]->shaderResourceViews[0].Get()
+	};
+
+	bit_block_transfer->blit(srvs, 0, 2, pixel_shaders[1].Get());
 }
 
 void TestScene::Uninit()
@@ -91,8 +111,17 @@ void TestScene::DebugUI()
 	ImGui::SliderFloat3("Translation", &translation.x, -10.0f, 10.0f);
 	ImGui::Separator();
 	ImGui::ColorPicker4("Color", &color.x);
+	ImGui::SliderFloat("luminance threshold", &bit_block_transfer->threshold, 0.0f, 1.0f);
 	ImGui::Separator();
-	ImGui::SliderFloat("Blend Factor", &blend_factor, 0.0f, 1.0f);	
+	ImGui::SliderFloat("Gaussian Sigma", &bit_block_transfer->gs, 0.0f, 10.0f);
+	ImGui::SliderFloat("Blur Intensity", &bit_block_transfer->bi, 0.0f, 10.0f);
+	ImGui::SliderFloat("Exposure", &bit_block_transfer->expo, 0.0f, 10.0f);
 	ImGui::End();
+
+	/*ImGui::Separator();
+	ImGui::SliderFloat("Blend Factor", &blend_factor, 0.0f, 1.0f);
+	*/
+
 }
+
 
