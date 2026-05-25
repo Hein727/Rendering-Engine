@@ -89,7 +89,7 @@ void camera_controls::Update(HWND hwnd, float elapsedTime, ID3D11DeviceContext* 
 		UINT num_viewports{ 1 };
 		dc->RSGetViewports(&num_viewports, &viewport);
 		float aspect{ viewport.Width / viewport.Height };
-		P = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(30.0f), aspect, 0.1f, 100.0f);
+		P = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(30.0f), aspect, 0.1f, 1000.0f);
 		DirectX::XMStoreFloat4x4(&projection, P);
 	}
 }

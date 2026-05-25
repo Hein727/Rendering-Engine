@@ -76,6 +76,54 @@ private :
 	std::vector<Mesh> meshes;
 	std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>> buffers;
 
+	struct TextureInfo
+	{
+		int index{ -1 };
+		int texcoord{ 0 };
+	};
+	struct NormalTextureInfo
+	{
+		int index{ -1 };
+		int texcoord{ 0 };
+		float scale{ 1.0f };
+	};
+	struct OcclusionTextureInfo
+	{
+		int index{ -1 };
+		int texcoord{ 0 };
+		float strength{ 1.0f };
+	};
+	struct PbrMetallicRoughness
+	{
+		float baseColorFactor[4]{ 1, 1, 1, 1 };
+		TextureInfo baseColorTexture;
+		float metallicFactor{ 1.0f };
+		float roughnessFactor{ 1.0f };
+		TextureInfo metallicRoughnessTexture;
+	};
+
+	struct Material
+	{
+		std::string name;
+		struct CBuffer
+		{
+			float emassiveFactor[3]{ 0, 0, 0 };
+			int alphaMode{ 0 }; // "OPAQUE" : 0, "MASK" : 1, or "BLEND" : 2
+			float alphaCutoff{ 0.5f };
+			int doubleSided{ 0 };
+
+			PbrMetallicRoughness pbrMetallicRoughness;
+
+			NormalTextureInfo normalTexture;
+			OcclusionTextureInfo occlusionTexture;
+			TextureInfo emissiveTexture;
+		};
+
+		CBuffer data;
+	};
+	std::vector<Material> materials;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> materialResourceView;
+
 	void FetchNodes(const tinygltf::Model& gltfModel);
 
 	void CumulateTransform(std::vector<Node>& nodes);
@@ -83,6 +131,8 @@ private :
 	DXGI_FORMAT ConvertFormat(const tinygltf::Accessor& accessor);
 
 	void FetchMesh(const tinygltf::Model& gltfModel);
+
+	void FetchMaterial(const tinygltf::Model& gltfModel);
 
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;	
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
