@@ -352,8 +352,6 @@ protected:
 
 	// Hold the scene data here
 	scene scene_view;
-
-	
 };
 
 struct Bone_Influence

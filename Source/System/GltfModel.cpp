@@ -3,6 +3,7 @@
 #include "../tinygltf-release/tiny_gltf.h"
 #include "Misc.h"
 #include <stack>
+#include "Shader.h"
 
 bool null_load_image_data(tinygltf::Image*, const int, std::string*, std::string*, int, int, const unsigned char*, int, void*)
 {
@@ -41,11 +42,29 @@ GltfModel::GltfModel(const std::string& filename) : filename(filename)
 
 	defaultScene = gltfModel.defaultScene < 0 ? 0 : gltfModel.defaultScene;
 
-	// fetch nodes before meshes and skins, as nodes contain mesh and skin indices
 	FetchNodes(gltfModel);
 
-	// fetch meshes before skins, as skins contain inverse bind matrices which are stored in mesh's buffer views
 	FetchMesh(gltfModel);
+
+	D3D11_INPUT_ELEMENT_DESC inputElementDescs[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 3, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "JOINTS", 0, DXGI_FORMAT_R16G16B16A16_UINT, 4, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "WEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 5, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+	createVsFromCso(device, "Shader\\GltfModel_vs.cso", vertexShader.ReleaseAndGetAddressOf(), 
+		inputLayout.ReleaseAndGetAddressOf(), inputElementDescs, _countof(inputElementDescs));
+	createPsFromCso(device, "Shader\\GltfModel_ps.cso", pixelShader.ReleaseAndGetAddressOf());
+
+	D3D11_BUFFER_DESC bufferDesc{};
+	bufferDesc.ByteWidth = sizeof(PrimitiveConst);
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	HRESULT hr = device->CreateBuffer(&bufferDesc, nullptr, primitiveConstBuffer.ReleaseAndGetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
 }
 
 void GltfModel::FetchNodes(const tinygltf::Model& gltfModel)
@@ -257,5 +276,104 @@ void GltfModel::FetchMesh(const tinygltf::Model& gltfModel)
 				primitive.vertexBufferViews.emplace(std::make_pair(gltfAttribute.first, vertexBufferView));
 			}
 		}
+	}
+}
+
+void GltfModel::Render(const DirectX::XMFLOAT4X4 world)
+{
+	using namespace DirectX;
+	
+	auto context = graphics::getInstance().GetDeviceContext();
+
+	context->VSSetShader(vertexShader.Get(), nullptr, 0);
+	context->PSSetShader(pixelShader.Get(), nullptr, 0);
+	context->IASetInputLayout(inputLayout.Get());	
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	std::function<void(int)> traverse{ [&](int nodeIndex) -> void
+	{
+			const Node& node{ nodes.at(nodeIndex) };
+			if (node.mesh > -1)
+			{
+				const Mesh& mesh{ meshes.at(node.mesh) };
+				for (std::vector<Mesh::Primitive>::const_reference primitive : mesh.primitives)
+				{
+					ID3D11Buffer* vertexBuffers[]{
+						primitive.has("POSITION") ?
+						buffers.at(primitive.vertexBufferViews.at("POSITION").buffer).Get() : NULL,
+						primitive.has("NORMAL") ?
+						buffers.at(primitive.vertexBufferViews.at("NORMAL").buffer).Get() : NULL,
+						primitive.has("TANGENT") ?
+						buffers.at(primitive.vertexBufferViews.at("TANGENT").buffer).Get() : NULL,
+						primitive.has("TEXCOORD_0") ?
+						buffers.at(primitive.vertexBufferViews.at("TEXCOORD_0").buffer).Get() : NULL,
+						primitive.has("JOINTS_0") ?
+						buffers.at(primitive.vertexBufferViews.at("JOINTS_0").buffer).Get() : NULL,
+						primitive.has("WEIGHTS_0") ?
+						buffers.at(primitive.vertexBufferViews.at("WEIGHTS_0").buffer).Get() : NULL
+					};
+
+					UINT strides[]{
+						primitive.has("POSITION") ?
+						static_cast<UINT>(primitive.vertexBufferViews.at("POSITION").strideInBytes) : 0,
+						primitive.has("NORMAL") ?
+						static_cast<UINT>(primitive.vertexBufferViews.at("NORMAL").strideInBytes) : 0,
+						primitive.has("TANGENT") ?
+						static_cast<UINT>(primitive.vertexBufferViews.at("TANGENT").strideInBytes) : 0,
+						primitive.has("TEXCOORD_0") ?
+						static_cast<UINT>(primitive.vertexBufferViews.at("TEXCOORD_0").strideInBytes) : 0,
+						primitive.has("JOINTS_0") ?
+						static_cast<UINT>(primitive.vertexBufferViews.at("JOINTS_0").strideInBytes) : 0,
+						primitive.has("WEIGHTS_0") ?
+						static_cast<UINT>(primitive.vertexBufferViews.at("WEIGHTS_0").strideInBytes) : 0
+					};
+
+					UINT offsets[]{
+						primitive.has("POSITION") ?
+						static_cast<UINT>(primitive.vertexBufferViews.at("POSITION").byteOffset) : 0,
+						primitive.has("NORMAL") ?
+						static_cast<UINT>(primitive.vertexBufferViews.at("NORMAL").byteOffset) : 0,
+						primitive.has("TANGENT") ?
+						static_cast<UINT>(primitive.vertexBufferViews.at("TANGENT").byteOffset) : 0,
+						primitive.has("TEXCOORD_0") ?
+						static_cast<UINT>(primitive.vertexBufferViews.at("TEXCOORD_0").byteOffset) : 0,
+						primitive.has("JOINTS_0") ?
+						static_cast<UINT>(primitive.vertexBufferViews.at("JOINTS_0").byteOffset) : 0,
+						primitive.has("WEIGHTS_0") ?
+						static_cast<UINT>(primitive.vertexBufferViews.at("WEIGHTS_0").byteOffset) : 0
+					};
+					context->IASetVertexBuffers(0, _countof(vertexBuffers), vertexBuffers, strides, offsets);
+
+					PrimitiveConst primitiveConst{};
+					primitiveConst.material = primitive.material;
+					primitiveConst.has_tangent = primitive.has("TANGENT");
+					primitiveConst.skin = node.skin;
+					XMStoreFloat4x4(&primitiveConst.world, XMLoadFloat4x4(&node.globalTransform) * XMLoadFloat4x4(&world));
+
+					context->UpdateSubresource(primitiveConstBuffer.Get(), 0, nullptr, &primitiveConst, 0, 0);
+					context->VSSetConstantBuffers(1, 1, primitiveConstBuffer.GetAddressOf());
+					context->PSSetConstantBuffers(1, 1, primitiveConstBuffer.GetAddressOf());
+
+					if (primitive.indexBufferView.buffer > -1)
+					{
+						context->IASetIndexBuffer(buffers.at(primitive.indexBufferView.buffer).Get(),
+							primitive.indexBufferView.format, static_cast<UINT>(primitive.indexBufferView.byteOffset));
+						context->DrawIndexed(static_cast<UINT>(primitive.indexBufferView.count), 0, 0);
+					}
+					else
+					{
+						context->Draw(static_cast<UINT>(primitive.vertexBufferViews.at("POSITION").count), 0);
+					}
+				}
+			}
+			for (std::vector<int>::value_type childIndex : node.children)
+			{
+				traverse(childIndex);
+			}
+	} };
+
+	for(std::vector<int>::value_type nodeIndex : scenes.at(defaultScene).nodes)
+	{
+		traverse(nodeIndex);
 	}
 }

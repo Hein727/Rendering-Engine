@@ -15,33 +15,30 @@ class GltfModel
 public :
 	GltfModel(const std::string& filename);
 	virtual ~GltfModel() = default;
+	void Render(const DirectX::XMFLOAT4X4 world);
 
 private :
 
-
-	// Scene Data
 	struct Scene
 	{
 		std::string name;
-		std::vector<int> nodes; // Array of root nodes
+		std::vector<int> nodes;
 	};
 
 	std::vector<Scene> scenes;
 	int defaultScene = 0;
 
-	// Node Data
 	struct Node
 	{
 		std::string name;
-		int skin{ -1 }; // index of skin referenced by this node
-		int mesh{ -1 }; // index of mesh referenced by this node	
+		int skin{ -1 }; 
+		int mesh{ -1 }; 
 
-		std::vector<int> children; // Array of indices of child nodes of this node
+		std::vector<int> children;
 
-		// Local transform
-		DirectX::XMFLOAT4 rotation{ 0, 0, 0, 1 }; // Rotation in quaternion
-		DirectX::XMFLOAT3 scale{ 1, 1, 1 }; // Non-uniform scale	
-		DirectX::XMFLOAT3 translation{ 0, 0, 0 }; // Translation
+		DirectX::XMFLOAT4 rotation{ 0, 0, 0, 1 };
+		DirectX::XMFLOAT3 scale{ 1, 1, 1 };	
+		DirectX::XMFLOAT3 translation{ 0, 0, 0 }; 
 
 		DirectX::XMFLOAT4X4 globalTransform{ 1, 0, 0, 0,
 									   0, 1, 0, 0,
@@ -50,7 +47,6 @@ private :
 	};
 	std::vector<Node> nodes;
 
-	// Buffer View Data
 	struct BufferView
 	{
 		DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
@@ -60,7 +56,6 @@ private :
 		size_t count{ 0 };
 	};
 
-	// Mesh Data
 	struct Mesh
 	{
 		std::string name;
@@ -87,5 +82,19 @@ private :
 
 	DXGI_FORMAT ConvertFormat(const tinygltf::Accessor& accessor);
 
-	void FetchMesh(const tinygltf::Model& gltfModel);	
+	void FetchMesh(const tinygltf::Model& gltfModel);
+
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;	
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
+
+	struct PrimitiveConst
+	{
+		DirectX::XMFLOAT4X4 world;
+		int material{ -1 };
+		int has_tangent{ 0 };	
+		int skin{ -1 };
+		int pad;
+	};
+	Microsoft::WRL::ComPtr<ID3D11Buffer> primitiveConstBuffer;
 };	
