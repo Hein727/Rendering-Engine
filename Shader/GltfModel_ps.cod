@@ -135,30 +135,30 @@ dcl_temps 3
 //   v4.x <- pin.texcoord.x; v4.y <- pin.texcoord.y; 
 //   o0.x <- <main return value>.x; o0.y <- <main return value>.y; o0.z <- <main return value>.z; o0.w <- <main return value>.w
 //
-#line 45 "C:\Users\2240705\Desktop\Rendering-Engine-\Source\Shader\GltfModel_ps.hlsl"
+#line 54 "C:\Users\2240705\Desktop\Rendering-Engine-\Source\Shader\GltfModel_ps.hlsl"
 mov r0.x, cb1[4].x
 ld_structured_indexable(structured_buffer, stride=96)(mixed,mixed,mixed,mixed) r1.x, r0.x, l(24), t0.xxxx  // r1.x <- m.pbrMetallicRoughness.basecolorFactor.x
 ld_structured_indexable(structured_buffer, stride=96)(mixed,mixed,mixed,mixed) r1.y, r0.x, l(28), t0.xxxx  // r1.y <- m.pbrMetallicRoughness.basecolorFactor.y
 ld_structured_indexable(structured_buffer, stride=96)(mixed,mixed,mixed,mixed) r1.z, r0.x, l(32), t0.xxxx  // r1.z <- m.pbrMetallicRoughness.basecolorFactor.z
 
-#line 47
+#line 56
 dp3 r0.x, v2.xyzx, v2.xyzx
 rsq r0.x, r0.x
 mul r0.xyz, r0.xxxx, v2.xyzx  // r0.x <- N.x; r0.y <- N.y; r0.z <- N.z
 
-#line 48
+#line 57
 mov r2.xyz, -cb0[4].xyzx
 dp3 r0.w, r2.xyzx, r2.xyzx
 rsq r0.w, r0.w
 mul r2.xyz, r0.wwww, r2.xyzx  // r2.x <- L.x; r2.y <- L.y; r2.z <- L.z
 
-#line 50
+#line 59
 itof r0.w, l(0)
 dp3 r0.x, r0.xyzx, r2.xyzx
 max r0.x, r0.x, r0.w
 mul r0.xyz, r1.xyzx, r0.xxxx  // r0.x <- color.x; r0.y <- color.y; r0.z <- color.z
 
-#line 52
+#line 61
 itof o0.w, l(1)
 mov o0.xyz, r0.xyzx
 ret 

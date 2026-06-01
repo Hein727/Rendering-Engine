@@ -27,3 +27,9 @@ cbuffer PrimaryConstBuffer : register(b1)
     int skin;
     int pad;
 }
+
+static const uint PRIMITIVE_MAX_JOINTS = 512;
+cbuffer PRIMITIVE_JOINTS_CONST : register(b2)
+{
+    row_major float4x4 jointMatrices[PRIMITIVE_MAX_JOINTS];
+}

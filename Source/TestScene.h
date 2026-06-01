@@ -21,7 +21,7 @@ public:
 
 private :
 
-	DirectX::XMFLOAT3 scale = { 1.0f, 1.0f, 1.0f };
+	DirectX::XMFLOAT3 scale = { 0.1f, 0.1f, 0.1f };
 	DirectX::XMFLOAT3 rotation = { 0.0f, 0.0f, 0.0f };
 	DirectX::XMFLOAT3 translation = { 0.0f, 0.0f, 0.0f };	
 	DirectX::XMFLOAT4 color{ 1, 1, 1, 1 };

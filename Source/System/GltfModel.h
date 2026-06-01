@@ -15,7 +15,6 @@ class GltfModel
 public :
 	GltfModel(const std::string& filename);
 	virtual ~GltfModel() = default;
-	void Render(const DirectX::XMFLOAT4X4 world);
 
 private :
 
@@ -27,25 +26,6 @@ private :
 
 	std::vector<Scene> scenes;
 	int defaultScene = 0;
-
-	struct Node
-	{
-		std::string name;
-		int skin{ -1 }; 
-		int mesh{ -1 }; 
-
-		std::vector<int> children;
-
-		DirectX::XMFLOAT4 rotation{ 0, 0, 0, 1 };
-		DirectX::XMFLOAT3 scale{ 1, 1, 1 };	
-		DirectX::XMFLOAT3 translation{ 0, 0, 0 }; 
-
-		DirectX::XMFLOAT4X4 globalTransform{ 1, 0, 0, 0,
-									   0, 1, 0, 0,
-									   0, 0, 1, 0,
-									   0, 0, 0, 1 }; 
-	};
-	std::vector<Node> nodes;
 
 	struct BufferView
 	{
@@ -124,6 +104,90 @@ private :
 	std::vector<Material> materials;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> materialResourceView;
 
+	struct Texture
+	{
+		std::string name;
+		int source{ -1 };
+	};
+	std::vector<Texture> textures;
+	struct Image
+	{
+		std::string name;
+		int width{ -1 };
+		int height{ -1 };
+		int component{ -1 };
+		int bits{ -1 };
+		int pixelType{ -1 };
+		int bufferView{ -1 };
+		std::string mimeType;
+		std::string uri;
+		bool asIs{ false };
+	};
+	std::vector<Image> images;
+	std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> textureResourceViews;
+
+public:
+
+	struct Node
+	{
+		std::string name;
+		int skin{ -1 };
+		int mesh{ -1 };
+
+		std::vector<int> children;
+
+		DirectX::XMFLOAT4 rotation{ 0, 0, 0, 1 };
+		DirectX::XMFLOAT3 scale{ 1, 1, 1 };
+		DirectX::XMFLOAT3 translation{ 0, 0, 0 };
+
+		DirectX::XMFLOAT4X4 globalTransform{ 1, 0, 0, 0,
+									   0, 1, 0, 0,
+									   0, 0, 1, 0,
+									   0, 0, 0, 1 };
+	};
+	std::vector<Node> nodes;
+
+	struct Skin
+	{
+		std::vector<DirectX::XMFLOAT4X4> inverseBindMatrices;
+		std::vector<int> joints;
+	};
+	std::vector<Skin> skins;
+
+	struct Animation
+	{
+		std::string name;
+		float duration{ 0 };
+		struct Channel
+		{
+			int sampler{ -1 };
+			int targetNode{ -1 };
+			std::string targetPath;
+		};
+		std::vector<Channel> channels;
+
+		struct Sampler
+		{
+			int input{ -1 };
+			int output{ -1 };
+			std::string interpolation;
+		};
+		std::vector<Sampler> samplers;
+		//sampler input
+		std::unordered_map<int, std::vector<float>> timelines;
+		//sampler output
+		std::unordered_map<int, std::vector<DirectX::XMFLOAT3>> scales;
+		std::unordered_map<int, std::vector<DirectX::XMFLOAT4>> rotation;
+		std::unordered_map<int, std::vector<DirectX::XMFLOAT3>> translations;
+	};
+	std::vector<Animation> animations;
+
+	void Animate(size_t animationIndex, float time, std::vector<Node>& animatedNodes);
+
+	void Render(const DirectX::XMFLOAT4X4 world, const std::vector<Node>& animatedNodes = {});
+
+private:
+
 	void FetchNodes(const tinygltf::Model& gltfModel);
 
 	void CumulateTransform(std::vector<Node>& nodes);
@@ -133,6 +197,10 @@ private :
 	void FetchMesh(const tinygltf::Model& gltfModel);
 
 	void FetchMaterial(const tinygltf::Model& gltfModel);
+
+	void FetchTexture(const tinygltf::Model& gltfModel);
+
+	void FetchAnimation(const tinygltf::Model& gltfModel);
 
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;	
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
@@ -147,4 +215,11 @@ private :
 		int pad;
 	};
 	Microsoft::WRL::ComPtr<ID3D11Buffer> primitiveConstBuffer;
+
+	static const size_t PRIMITIVE_MAX_JOINTS = 512;
+	struct PrimitiveJointConsts
+	{
+		DirectX::XMFLOAT4X4 matrices[PRIMITIVE_MAX_JOINTS];
+	};
+	Microsoft::WRL::ComPtr<ID3D11Buffer> primitiveJointCBuffer;
 };	

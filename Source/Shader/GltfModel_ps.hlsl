@@ -40,6 +40,15 @@ struct MaterialConstants
 };
 StructuredBuffer<MaterialConstants> materials : register(t0);
 
+#define BASECOLOR_TEXTURE 0
+#define METALLIC_ROUGHNESS_TEXTURE 1
+#define NORMAL_TEXTURE 2
+#define EMISSIVE_TEXTURE 3
+#define OCCLUSION_TEXTURE 4
+Texture2D<float4> materialTextures[5] : register(t1);   
+
+// SamplerStates are already defined in Common.hlsli, so we can just use them here.
+
 float4 main(VS_OUT pin) : SV_TARGET
 {
     MaterialConstants m = materials[material];
@@ -48,6 +57,6 @@ float4 main(VS_OUT pin) : SV_TARGET
     float3 L = normalize(-light_direction.xyz);
     
     float3 color = max(0, dot(N, L)) * m.pbrMetallicRoughness.basecolorFactor.rgb;
-
+    
     return float4(color, 1);
 }

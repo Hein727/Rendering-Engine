@@ -90,3 +90,19 @@ void releaseTextureCache()
 {
 	textureCache.clear();
 }
+
+HRESULT loadTextureFromMemory(ID3D11Device* device, const void* data, size_t size, ID3D11ShaderResourceView** srv)
+{
+	HRESULT hr{ S_OK };
+	ComPtr<ID3D11Resource> resource;
+
+	hr = CreateWICTextureFromMemory(device, reinterpret_cast<const uint8_t*>(data), size, resource.GetAddressOf(), srv);
+
+	if (hr != S_OK)
+	{
+		hr = CreateWICTextureFromMemory(device, reinterpret_cast<const uint8_t*>(data), size, resource.GetAddressOf(), srv);
+		_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+	}
+
+	return hr;
+}
