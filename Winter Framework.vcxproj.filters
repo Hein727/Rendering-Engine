@@ -13,6 +13,9 @@
     <Filter Include="Source\Imgui">
       <UniqueIdentifier>{f2a7d8e0-d211-493b-b4db-34d4ad431031}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\LevelEditor">
+      <UniqueIdentifier>{4a467282-df08-4e35-94a3-386b32035d38}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\Main.cpp">
@@ -26,9 +29,6 @@
     </ClCompile>
     <ClCompile Include="Source\System\Sprite.cpp">
       <Filter>Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\SceneManager.cpp">
-      <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\System\SpriteBatch.cpp">
       <Filter>Source\System</Filter>
@@ -66,9 +66,6 @@
     <ClCompile Include="Imgui\imgui_impl_win32.cpp">
       <Filter>Source\Imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Source\System\CameraControl.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
     <ClCompile Include="Source\System\Static_Mesh.cpp">
       <Filter>Source\System</Filter>
     </ClCompile>
@@ -87,6 +84,15 @@
     <ClCompile Include="Source\System\GltfModel.cpp">
       <Filter>Source\System</Filter>
     </ClCompile>
+    <ClCompile Include="Source\System\SceneManager.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\LevelEditor\MouseControl.cpp">
+      <Filter>Source\LevelEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\LevelEditor\CameraControl.cpp">
+      <Filter>Source\LevelEditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\Framework.h">
@@ -103,12 +109,6 @@
     </ClInclude>
     <ClInclude Include="Source\System\Sprite.h">
       <Filter>Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Scene.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\SceneManager.h">
-      <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\TestScene.h">
       <Filter>Source</Filter>
@@ -149,9 +149,6 @@
     <ClInclude Include="Imgui\imgui_impl_win32.h">
       <Filter>Source\Imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Source\System\CameraControl.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
     <ClInclude Include="Source\System\Static_Mesh.h">
       <Filter>Source\System</Filter>
     </ClInclude>
@@ -169,6 +166,18 @@
     </ClInclude>
     <ClInclude Include="Source\System\GltfModel.h">
       <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\Scene.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\SceneManager.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\LevelEditor\MouseControl.h">
+      <Filter>Source\LevelEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\LevelEditor\CameraControl.h">
+      <Filter>Source\LevelEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -191,6 +200,12 @@
       <Filter>Source\Shader</Filter>
     </None>
     <None Include="Source\Shader\GltfModel.hlsli">
+      <Filter>Source\Shader</Filter>
+    </None>
+    <None Include="Source\Shader\BidirectionalReflectanceDistributionFunction.hlsli">
+      <Filter>Source\Shader</Filter>
+    </None>
+    <None Include="Source\Shader\ImageBasedLighting.hlsli">
       <Filter>Source\Shader</Filter>
     </None>
   </ItemGroup>

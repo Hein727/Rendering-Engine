@@ -1,4 +1,5 @@
 #include "GltfModel.hlsli"
+#include "Common.hlsli"
 
 VS_OUT main(VS_IN vin)
 {

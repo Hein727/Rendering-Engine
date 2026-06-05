@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scene.h"
+#include "System/Scene.h"
 #include <vector>
 #include <memory>
 #include <DirectXMath.h>
@@ -27,4 +27,6 @@ private :
 	DirectX::XMFLOAT4 color{ 1, 1, 1, 1 };
 
 	std::unique_ptr<GltfModel> gltfModels[8];
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvs[8];
 };

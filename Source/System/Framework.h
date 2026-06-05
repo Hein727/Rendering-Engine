@@ -12,7 +12,7 @@
 
 #include "Timer.h"
 #include "Misc.h"
-#include "CameraControl.h"
+#include "../Source/LevelEditor/CameraControl.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #define APPLICATION_NAME L"Winter Project"

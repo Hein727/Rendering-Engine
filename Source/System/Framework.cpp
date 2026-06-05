@@ -1,6 +1,6 @@
 #include "Framework.h"
 #include "Graphics.h"
-#include "../SceneManager.h"
+#include "SceneManager.h"
 #include "../TestScene.h"
 
 framework::framework(HWND hwnd) : hwnd(hwnd)

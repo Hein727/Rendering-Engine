@@ -1,6 +1,6 @@
 #include "Graphics.h"
 #include "Misc.h"
-#include "CameraControl.h"
+#include "../Source/LevelEditor/CameraControl.h"
 
 graphics::graphics()
 {
