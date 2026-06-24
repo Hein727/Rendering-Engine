@@ -1,6 +1,5 @@
 #include "Static_Mesh.h"
 #include "Misc.h"
-#include "Graphics.h"
 #include "Texture.h"
 #include "Shader.h"
 #include <vector>
@@ -9,9 +8,9 @@
 
 using namespace DirectX;
 
-StaticMesh::StaticMesh(const wchar_t* obj_filename)
+StaticMesh::StaticMesh(GameContext& gameContext, const wchar_t* obj_filename) : gameContext(gameContext)
 {
-	auto device = graphics::getInstance().GetDevice();
+	auto device = gameContext.graphics.GetDevice();
 
 	// variables to hold vertex and index positions and normals
 	std::vector<vertex> vertices;
@@ -247,7 +246,7 @@ StaticMesh::StaticMesh(const wchar_t* obj_filename)
 // don't make other buffers here 
 void StaticMesh::createComBuffers(vertex* vertices, size_t vertex_count, uint32_t* indices, size_t index_count)
 {
-	auto device = graphics::getInstance().GetDevice();
+	auto device = gameContext.graphics.GetDevice();
 
 	HRESULT hr{ S_OK };
 
@@ -278,7 +277,7 @@ void StaticMesh::createComBuffers(vertex* vertices, size_t vertex_count, uint32_
 
 void StaticMesh::render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4& material_color)
 {
-	auto context = graphics::getInstance().GetDeviceContext();
+	auto context = gameContext.graphics.GetDeviceContext();
 
 	// set vertex and index buffer
 	// set the primitive topology

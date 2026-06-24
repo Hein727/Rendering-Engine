@@ -1,12 +1,11 @@
 #include "Framebuffer.h"
-#include "Graphics.h"
 #include "Misc.h"
 
-Framebuffer::Framebuffer(uint32_t width, uint32_t height)
+Framebuffer::Framebuffer(GameContext& gameContext, uint32_t width, uint32_t height) : gameContext(gameContext)
 {
 	HRESULT hr{ S_OK };
 
-	const auto& device = graphics::getInstance().GetDevice();
+	const auto& device = gameContext.graphics.GetDevice();
 
 	// Creating back buffer texture
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> buffer;
@@ -72,7 +71,7 @@ Framebuffer::Framebuffer(uint32_t width, uint32_t height)
 void Framebuffer::Clear(float r, float g, float b, float a, float depth)
 {
 	// Clearing render target and depth stencil view
-	const auto& context = graphics::getInstance().GetDeviceContext();
+	const auto& context = gameContext.graphics.GetDeviceContext();
 	float color[4] = { r, g, b, a };
 	context->ClearRenderTargetView(renderTargetView.Get(), color);
 	context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH, depth, 0);
@@ -81,7 +80,7 @@ void Framebuffer::Clear(float r, float g, float b, float a, float depth)
 void Framebuffer::Activate()
 {
 	// Setting viewport, render target view and depth stencil view
-	const auto& context = graphics::getInstance().GetDeviceContext();
+	const auto& context = gameContext.graphics.GetDeviceContext();
 	viewport_count = D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE;
 	context->RSGetViewports(&viewport_count, cached_viewports);
 	context->OMGetRenderTargets(1, cached_render_target_view.GetAddressOf(), cached_depth_stencil_view.GetAddressOf());
@@ -93,7 +92,7 @@ void Framebuffer::Activate()
 void Framebuffer::Deactivate()
 {
 	// Restoring previous viewport, render target view and depth stencil view
-	const auto& context = graphics::getInstance().GetDeviceContext();
+	const auto& context = gameContext.graphics.GetDeviceContext();
 	context->RSSetViewports(viewport_count, cached_viewports);
 	context->OMSetRenderTargets(1, cached_render_target_view.GetAddressOf(), cached_depth_stencil_view.Get());
 }

@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "Geometric_Primitive.h"
+#include "GameContext.h"	
 
 class StaticMesh
 {
@@ -60,11 +60,13 @@ private:
 	std::vector<material> materials;
 
 public :
-	StaticMesh(const wchar_t* obj_filename);
+	StaticMesh(GameContext& gameContext, const wchar_t* obj_filename);
 	virtual ~StaticMesh() = default;
 
 	void render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4& material_color);
 
 protected :
 	void createComBuffers(vertex* vertices, size_t vertex_count, uint32_t* indices, size_t index_count);
+
+	GameContext& gameContext;
 };

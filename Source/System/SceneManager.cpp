@@ -35,6 +35,7 @@ void SceneManager::Render(float deltaTime)
 
 void SceneManager::ChangeScene(std::unique_ptr<Scene> new_scene)
 {
+
 	if (!currentScene)
 	{
 		currentScene = std::move(new_scene);
@@ -43,4 +44,14 @@ void SceneManager::ChangeScene(std::unique_ptr<Scene> new_scene)
 	}
 
 	nextScene = std::move(new_scene);
+}
+
+void SceneManager::HandleInput(std::string input)
+{
+	if (input.empty()) return;
+
+	if (currentScene != nullptr)
+	{
+		currentScene->HandleInput(input);
+	}
 }

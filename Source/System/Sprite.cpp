@@ -1,6 +1,5 @@
 #include "Sprite.h"
 #include "Misc.h"
-#include "Graphics.h"
 #include "Texture.h"
 #include "Shader.h"
 #include <sstream>
@@ -22,9 +21,9 @@ inline auto rotate(float& x, float& y, float cx, float cy, float angle)
 	y += cy;
 }
 
-Sprite::Sprite(const wchar_t* filename)
+Sprite::Sprite(GameContext& gameContext, const wchar_t* filename) : gameContext(gameContext)
 {
-	auto device = graphics::getInstance().GetDevice();
+	auto device = gameContext.graphics.GetDevice();
 
 	HRESULT hr{ S_OK };
 
@@ -91,7 +90,7 @@ Sprite::Sprite(const wchar_t* filename)
 
 void Sprite::Render(float dx, float dy, float dw, float dh, float r, float g, float b, float a, float angle, float sx, float sy, float sw, float sh)
 {
-	auto context = graphics::getInstance().GetDeviceContext();
+	auto context = gameContext.graphics.GetDeviceContext();
 
 	D3D11_VIEWPORT viewport{};
 	UINT num_viewports{ 1 };

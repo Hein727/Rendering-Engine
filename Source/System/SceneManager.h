@@ -2,26 +2,22 @@
 #include "Scene.h"
 #include <d3d11.h>
 #include <memory>
+#include <string>
 
 class SceneManager
 {
-private:
-	SceneManager() {};
-
 public :
-	static SceneManager& GetInstance()
-	{
-		static SceneManager instance;
-		return instance;
-	}
+	SceneManager() = default;
 
-	~SceneManager() {};
+	~SceneManager() = default;
 
 	void Update(float deltaTime);
 	
 	void Render(float deltaTime);
 
 	void ChangeScene(std::unique_ptr<Scene> new_scene);
+
+	void HandleInput(std::string input);
 	
 private :
 	std::unique_ptr<Scene> currentScene = nullptr;

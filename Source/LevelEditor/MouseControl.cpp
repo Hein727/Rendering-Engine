@@ -10,27 +10,25 @@ void MouseControl::Update(float elapsedTime)
 	static bool oldLeftClick = false;
 	static bool oldRightClick = false;
 
-	leftClick = currentLeftClick && !oldLeftClick; // 前フレームではクリックされていなかったが、現在はクリックされている場合
+	leftClick = currentLeftClick && !oldLeftClick; 
 
-	rightClick = currentRightClick && !oldRightClick; // 前フレームではクリックされていなかったが、現在はクリックされている場合
+	rightClick = currentRightClick && !oldRightClick; 
 
-	leftHold = currentLeftClick; // 現在クリックされているかどうか
+	leftHold = currentLeftClick;
 
-	rightHold = currentRightClick; // 現在クリックされているかどうか
+	rightHold = currentRightClick;
 
 	oldLeftClick = currentLeftClick;
 	oldRightClick = currentRightClick;
 }
 
-DirectX::XMFLOAT3 MouseControl::GetMouseWorldPos()
+DirectX::XMFLOAT3 MouseControl::GetMouseWorldPos() // raycasted mouse position in world coordinates
 {
-	DirectX::XMFLOAT2 mousePos; // マウスのスクリーン座標	
+	DirectX::XMFLOAT2 mousePos;
 
-	POINT cursorPos = camera_controls::instance().get_cursor_position();	
+	POINT cursorPos = cameraControls.get_cursor_position();
 	mousePos.x = static_cast<float>(cursorPos.x);
 	mousePos.y = static_cast<float>(cursorPos.y);
-
-	// スクリーン座標をワールド座標に変換
 
 	float ndcX = (2.0f * mousePos.x) / SCREEN_WIDTH - 1.0f;
 	float ndcY = 1.0f - (2.0f * mousePos.y) / SCREEN_HEIGHT;
@@ -38,37 +36,25 @@ DirectX::XMFLOAT3 MouseControl::GetMouseWorldPos()
 	DirectX::XMVECTOR nearClip = DirectX::XMVectorSet(ndcX, ndcY, 0.0, 1.0);
 	DirectX::XMVECTOR farClip = DirectX::XMVectorSet(ndcX, ndcY, 1.0, 1.0);
 	
-	DirectX::XMFLOAT4X4 V = camera_controls::instance().get_view();
-	DirectX::XMFLOAT4X4 P = camera_controls::instance().get_projection();
+	DirectX::XMFLOAT4X4 V = cameraControls.get_view();
+	DirectX::XMFLOAT4X4 P = cameraControls.get_projection();
 
 	DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&V);
 	DirectX::XMMATRIX projection = DirectX::XMLoadFloat4x4(&P);
 
 	DirectX::XMMATRIX invViewProj = DirectX::XMMatrixInverse(nullptr, DirectX::XMMatrixMultiply(view, projection));
 
-	DirectX::XMVECTOR nearWorld = DirectX::XMVector4Transform(nearClip, invViewProj);
-	DirectX::XMVECTOR farWorld = DirectX::XMVector4Transform(farClip, invViewProj);	
+	DirectX::XMVECTOR nearWorld = DirectX::XMVector3TransformCoord(nearClip, invViewProj);
+	DirectX::XMVECTOR farWorld = DirectX::XMVector3TransformCoord(farClip, invViewProj);	
 
-	// ワールド座標を正規化
-	{
-		using namespace DirectX;
-		nearWorld /= DirectX::XMVectorGetW(nearWorld);
-		farWorld /= DirectX::XMVectorGetW(farWorld);
-	}
-
-	DirectX::XMVECTOR origin = nearWorld;
+	DirectX::XMFLOAT3 cameraPos = cameraControls.get_position();
+	DirectX::XMVECTOR origin = DirectX::XMLoadFloat3(&cameraPos);
 	DirectX::XMVECTOR dir = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(farWorld, nearWorld));
 
-	DirectX::XMVECTOR RayEnd = DirectX::XMVectorAdd(origin, DirectX::XMVectorScale(dir, 1000.0f)); // 適当な距離で終点を設定
+	DirectX::XMVECTOR RayEnd = DirectX::XMVectorAdd(origin, DirectX::XMVectorScale(dir, 100.0f)); // 適当な距離で終点を設定
 
 	DirectX::XMFLOAT3 rayEnd;
 	DirectX::XMStoreFloat3(&rayEnd, RayEnd);
 
-	bool intersect = false;
-
-	if (intersect)
-	{
-		return DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); // 仮の値
-	}
 	return rayEnd;
 };

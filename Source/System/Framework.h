@@ -6,16 +6,19 @@
 #include <vector>
 #include <memory>
 #include <imgui.h>
+#include <algorithm>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 #include <imgui_internal.h>	
 
 #include "Timer.h"
 #include "Misc.h"
-#include "../Source/LevelEditor/CameraControl.h"
+#include "GameContext.h"
+#include "SceneManager.h"
+#include "AssetManager.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-#define APPLICATION_NAME L"Winter Project"
+#define APPLICATION_NAME L"Graduation Project"
 
 class framework
 {
@@ -82,7 +85,7 @@ public :
 				PostMessage(hwnd, WM_CLOSE, 0, 0);
 			}
 			break;
-			
+
 		case WM_ENTERSIZEMOVE:
 			tictoc.stop();
 			break;
@@ -94,9 +97,27 @@ public :
 		case WM_MOUSEWHEEL:
 		{
 			short delta = GET_WHEEL_DELTA_WPARAM(wparam);
-			camera_controls::instance().setWheel(delta);
+			gameContext.input.cameraControls.setWheel(delta);
 			break;
 		}
+
+		case WM_DROPFILES:
+		{
+			HDROP hDrop = (HDROP)wparam;
+
+			char filePath[MAX_PATH];	
+
+			DragQueryFileA(hDrop, 0, filePath, MAX_PATH);
+
+			std::string path = filePath;	
+
+			std::replace(path.begin(), path.end(), '\\', '/');	
+
+			sceneManager.HandleInput(path);
+
+			DragFinish(hDrop);
+		}
+		break;
 
 		default:
 			return DefWindowProc(hwnd, msg, wparam, lparam);
@@ -128,4 +149,10 @@ private :
 			counts_per_second += 1.0f;
 		}
 	}
+
+	GameContext gameContext;
+
+	SceneManager sceneManager;
+
+	AssetManager assetManager;
 };

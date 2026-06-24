@@ -1,12 +1,11 @@
 #include "Fullscreen_Quad.h"
 #include "Shader.h"
 #include "Misc.h"
-#include "Graphics.h"
 
-Fullscreen_Quad::Fullscreen_Quad()
+Fullscreen_Quad::Fullscreen_Quad(GameContext& gameContext) : gameContext(gameContext)
 {
 	//Creating shaders
-	const auto& device = graphics::getInstance().GetDevice();
+	const auto& device = gameContext.graphics.GetDevice();
 
 	createVsFromCso(device, "Shader\\Fullscreen_Quad_vs.cso", embedded_vertex_shader.GetAddressOf(), nullptr, nullptr, 0);
 	createPsFromCso(device, "Shader\\Fullscreen_Quad_ps.cso", embedded_pixel_shader.GetAddressOf());
@@ -31,7 +30,7 @@ Fullscreen_Quad::Fullscreen_Quad()
 
 void Fullscreen_Quad::blit(ID3D11ShaderResourceView** srv, uint32_t start_slot, uint32_t num_views, ID3D11PixelShader* replaced_pixel_shader)
 {
-	const auto& context = graphics::getInstance().GetDeviceContext();
+	const auto& context = gameContext.graphics.GetDeviceContext();
 
 	//Clear the buffers, Change the topology and reset input layout
 	context->IASetVertexBuffers(0, 0, nullptr, nullptr, nullptr);

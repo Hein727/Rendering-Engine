@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 #include <wrl/client.h>
 #include <vector>
+#include "GameContext.h"
 
 class SpriteBatch
 {
@@ -25,9 +26,11 @@ private:
 	const size_t maxVertices;
 	std::vector<Vertex> vertices;
 
+	GameContext& gameContext;
+
 public:
 
-	SpriteBatch(const wchar_t* filename, size_t max_sprites);
+	SpriteBatch(GameContext& gameContext, const wchar_t* filename, size_t max_sprites);
 	~SpriteBatch() = default;
 
 	void Begin();

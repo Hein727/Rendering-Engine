@@ -4,29 +4,33 @@
 #include <vector>
 #include <memory>
 #include <DirectXMath.h>
-#include "System/GltfModel.h"
+#include "System/SceneManager.h"
+#include "System/GameObject.h"
+#include "System/AssetManager.h"
+#include "LevelEditor/LevelEditorBridge.h"
 
 class TestScene : public Scene
 {
 public:
 
-	TestScene() {};
-	~TestScene() {};
+	TestScene(GameContext& gameContext, SceneManager& sceneManager, AssetManager& assetManager);
+	~TestScene() = default;
 
 	void Init() override;
 	void Update(float deltaTime) override;
 	void Render(float deltaTime) override;
 	void Uninit() override;
 	void DebugUI() override;
+	void HandleInput(std::string input) override;	
 
-private :
-
-	DirectX::XMFLOAT3 scale = { 0.1f, 0.1f, 0.1f };
-	DirectX::XMFLOAT3 rotation = { 0.0f, 0.0f, 0.0f };
-	DirectX::XMFLOAT3 translation = { 0.0f, 0.0f, 0.0f };	
-	DirectX::XMFLOAT4 color{ 1, 1, 1, 1 };
-
-	std::unique_ptr<GltfModel> gltfModels[8];
+private:
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvs[8];
+
+	std::unique_ptr<GameObject> testObject;
+
+	GameContext* gameContext = nullptr;
+	SceneManager* sceneManager = nullptr;
+	
+	std::unique_ptr<LevelEditorBridge> levelEditorBridge;	
 };

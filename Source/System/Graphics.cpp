@@ -1,6 +1,7 @@
 #include "Graphics.h"
 #include "Misc.h"
 #include "../Source/LevelEditor/CameraControl.h"
+#include "GameContext.h"
 
 graphics::graphics()
 {
@@ -304,7 +305,7 @@ void graphics::initialize(HWND hwnd)
 }
 
 //Call at the beginning of every frame for rendering
-void graphics::renderingBegin()
+void graphics::renderingBegin(camera_controls& cam)
 {
 	// Clear the back buffer and depth stencil view
 	HRESULT hr{ S_OK };
@@ -334,7 +335,7 @@ void graphics::renderingBegin()
 	float  aspect_ratio = viewport.Width / viewport.Height;	
 	DirectX::XMMATRIX P{ DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(45.0f), aspect_ratio, 0.1f, 100.0f) };
 
-	DirectX::XMFLOAT4X4 view = camera_controls::instance().get_view();
+	DirectX::XMFLOAT4X4 view = cam.get_view();
 
 	DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&view);
 
@@ -342,7 +343,7 @@ void graphics::renderingBegin()
 	SceneConstants scene_constants{};
 	DirectX::XMStoreFloat4x4(&scene_constants.view_projection, V * P);
 	scene_constants.light_direction = { 0, 0, 1, 0 };
-	DirectX::XMFLOAT3 camera_position = camera_controls::instance().get_position();
+	DirectX::XMFLOAT3 camera_position = cam.get_position();
 	scene_constants.camera_position = { camera_position.x, camera_position.y, camera_position.z, 0.0f };
 	deviceContext->UpdateSubresource(sceneConstantBuffer[0].Get(), 0, NULL, &scene_constants, 0, 0);
 	deviceContext->VSSetConstantBuffers(0, 1, sceneConstantBuffer[0].GetAddressOf());

@@ -1,6 +1,5 @@
 #include "SpriteBatch.h"
 #include "Misc.h"
-#include "Graphics.h"
 #include "Texture.h"
 #include "Shader.h"
 #include <sstream>
@@ -22,9 +21,9 @@ inline auto rotate(float& x, float& y, float cx, float cy, float angle)
 	y += cy;
 }
 
-SpriteBatch::SpriteBatch(const wchar_t* filename, size_t max_sprites) : maxVertices(max_sprites * 6)
+SpriteBatch::SpriteBatch(GameContext& gameContext, const wchar_t* filename, size_t max_sprites) : maxVertices(max_sprites * 6), gameContext(gameContext)
 {
-	auto device = graphics::getInstance().GetDevice();
+	auto device = gameContext.graphics.GetDevice();
 
 	HRESULT hr{ S_OK };
 
@@ -70,7 +69,7 @@ SpriteBatch::SpriteBatch(const wchar_t* filename, size_t max_sprites) : maxVerti
 void SpriteBatch::Begin()
 {
 	vertices.clear();
-	auto context = graphics::getInstance().GetDeviceContext();
+	auto context = gameContext.graphics.GetDeviceContext();
 
 	context->VSSetShader(vertexShader.Get(), nullptr, 0);	
 	context->PSSetShader(pixelShader.Get(), nullptr, 0);
@@ -93,7 +92,7 @@ void SpriteBatch::Begin()
 
 void SpriteBatch::Render(float dx, float dy, float dw, float dh, float r, float g, float b, float a, float angle, float sx, float sy, float sw, float sh)
 {
-	auto context = graphics::getInstance().GetDeviceContext();
+	auto context = gameContext.graphics.GetDeviceContext();
 
 	D3D11_VIEWPORT viewport{};
 	UINT num_viewports{ 1 };
@@ -154,7 +153,7 @@ void SpriteBatch::Render(float dx, float dy, float dw, float dh, float r, float 
 void SpriteBatch::End()
 {
 	// Update vertex buffer
-	auto context = graphics::getInstance().GetDeviceContext();
+	auto context = gameContext.graphics.GetDeviceContext();
 	HRESULT hr{ S_OK };
 	D3D11_MAPPED_SUBRESOURCE mappedResource{};
 	hr = context->Map(vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);

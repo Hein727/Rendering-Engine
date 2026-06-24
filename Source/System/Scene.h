@@ -1,5 +1,6 @@
 #pragma once
 #include <d3d11.h>
+#include <string>
 
 class Scene
 {
@@ -11,5 +12,7 @@ public :
 	virtual void Update(float deltaTime) = 0;	
 	virtual void Render(float deltaTime) = 0;
 	virtual void Uninit() = 0;
-	virtual void DebugUI() = 0; // Renders Imgui for debugging purposes
+	virtual void DebugUI() = 0;
+	virtual void HandleInput(std::string input) = 0;
+
 };

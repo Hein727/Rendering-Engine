@@ -11,9 +11,9 @@ bool null_load_image_data(tinygltf::Image*, const int, std::string*, std::string
 	return true;
 }
 
-GltfModel::GltfModel(const std::string& filename) : filename(filename)
+GltfModel::GltfModel(GameContext& gameContext, const std::string& filename) : filename(filename), gameContext(gameContext)
 {
-	auto device = graphics::getInstance().GetDevice();
+	auto device = gameContext.graphics.GetDevice();
 
 	tinygltf::TinyGLTF tinyGltf;
 	tinyGltf.SetImageLoader(null_load_image_data, nullptr);	
@@ -80,6 +80,8 @@ GltfModel::GltfModel(const std::string& filename) : filename(filename)
 
 void GltfModel::FetchNodes(const tinygltf::Model& gltfModel)
 {
+	DirectX::XMFLOAT3 min{ -FLT_MAX, -FLT_MAX, -FLT_MAX }, max{ FLT_MAX, FLT_MAX, FLT_MAX };
+
 	for (std::vector<tinygltf::Node>::const_reference gltfNode : gltfModel.nodes)
 	{
 		Node& node{ nodes.emplace_back() };
@@ -127,9 +129,11 @@ void GltfModel::FetchNodes(const tinygltf::Model& gltfModel)
 				node.translation.x = static_cast<float>(gltfNode.translation.at(0));
 				node.translation.y = static_cast<float>(gltfNode.translation.at(1));
 				node.translation.z = static_cast<float>(gltfNode.translation.at(2));
+			
 			}
 		}
 	}
+
 	CumulateTransform(nodes);
 }
 
@@ -228,7 +232,7 @@ void GltfModel::FetchMesh(const tinygltf::Model& gltfModel)
 {
 	HRESULT hr;
 	
-	auto device = graphics::getInstance().GetDevice();
+	auto device = gameContext.graphics.GetDevice();
 
 	size_t gltfBufferCount = gltfModel.buffers.size();
 	buffers.resize(gltfBufferCount);
@@ -286,6 +290,34 @@ void GltfModel::FetchMesh(const tinygltf::Model& gltfModel)
 
 				primitive.vertexBufferViews.emplace(std::make_pair(gltfAttribute.first, vertexBufferView));
 			}
+
+
+			//	AABB implementation 
+			auto& positionVertexBufferView = primitive.vertexBufferViews.at("POSITION");
+
+			const auto& positionAccessor = gltfModel.accessors.at(gltfPrimitive.attributes.at("POSITION"));
+			const auto& positionBufferView = gltfModel.bufferViews.at(positionAccessor.bufferView);
+			const auto& positionBuffer = gltfModel.buffers.at(positionBufferView.buffer);
+
+			const float* positionData = reinterpret_cast<const float*>(positionBuffer.data.data() + positionBufferView.byteOffset + positionAccessor.byteOffset);
+			DirectX::XMFLOAT3 min{ FLT_MAX, FLT_MAX, FLT_MAX }, max{ -FLT_MAX, -FLT_MAX, -FLT_MAX };
+
+			for (int i = 0; i < positionAccessor.count; ++i)
+			{
+				float x = positionData[i * 3];
+				float y = positionData[i * 3 + 1];
+				float z = positionData[i * 3 + 2];
+
+				min.x = std::min(min.x, x);
+				min.y = std::min(min.y, y);
+				min.z = std::min(min.z, z);
+				max.x = std::max(max.x, x);
+				max.y = std::max(max.y, y);
+				max.z = std::max(max.z, z);
+			}
+
+			aabb = std::make_unique<AABB>(gameContext, min, max);
+
 		}
 	}
 }
@@ -345,7 +377,7 @@ void GltfModel::FetchMaterial(const tinygltf::Model& gltfModel)
 	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	D3D11_SUBRESOURCE_DATA subresourceData{};
 	subresourceData.pSysMem = materialData.data();
-	auto device = graphics::getInstance().GetDevice();
+	auto device = gameContext.graphics.GetDevice();
 	hr = device->CreateBuffer(&bufferDesc, &subresourceData, materialBuffer.GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -362,7 +394,7 @@ void GltfModel::Render(const DirectX::XMFLOAT4X4 world, const std::vector<Node>&
 
 	const std::vector<Node>& nodes{ animatedNodes.size() > 0 ? animatedNodes : GltfModel::nodes };
 	
-	auto context = graphics::getInstance().GetDeviceContext();
+	auto context = gameContext.graphics.GetDeviceContext();
 
 	context->VSSetShader(vertexShader.Get(), nullptr, 0);
 	context->PSSetShader(pixelShader.Get(), nullptr, 0);
@@ -493,7 +525,7 @@ void GltfModel::Render(const DirectX::XMFLOAT4X4 world, const std::vector<Node>&
 
 void GltfModel::FetchTexture(const tinygltf::Model& gltfModel)
 {
-	auto device = graphics::getInstance().GetDevice();
+	auto device = gameContext.graphics.GetDevice();
 
 	HRESULT hr{ S_OK };
 	for (const tinygltf::Texture& gltfTexture : gltfModel.textures)

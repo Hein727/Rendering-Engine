@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 #include <wrl/client.h>
 #include <string>
+#include "GameContext.h"	
 
 class Sprite
 {
@@ -22,9 +23,11 @@ private:
 		DirectX::XMFLOAT2 texcoord;
 	};
 
+	GameContext& gameContext;
+
 public :
 	
-	Sprite(const wchar_t* filename);
+	Sprite(GameContext& gameContext, const wchar_t* filename);
 	~Sprite() = default;
 
 	void Render(float dx, float dy, float dw, float dh, float r, float g, float b, float a, float angle,

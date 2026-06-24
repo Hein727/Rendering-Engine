@@ -16,6 +16,9 @@
     <Filter Include="Source\LevelEditor">
       <UniqueIdentifier>{4a467282-df08-4e35-94a3-386b32035d38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\HitCheck">
+      <UniqueIdentifier>{36ea1383-9dbd-4e51-9920-19f6877953ae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\Main.cpp">
@@ -69,9 +72,6 @@
     <ClCompile Include="Source\System\Static_Mesh.cpp">
       <Filter>Source\System</Filter>
     </ClCompile>
-    <ClCompile Include="Source\System\Bounding_Box.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
     <ClCompile Include="Source\System\Skinned_Mesh.cpp">
       <Filter>Source\System</Filter>
     </ClCompile>
@@ -92,6 +92,27 @@
     </ClCompile>
     <ClCompile Include="Source\LevelEditor\CameraControl.cpp">
       <Filter>Source\LevelEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\HitCheck\AABB.cpp">
+      <Filter>Source\HitCheck</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\GameObject.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\HitCheck\CollisionManager.cpp">
+      <Filter>Source\HitCheck</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\AssetManager.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\LevelEditor\LevelEditorBridge.cpp">
+      <Filter>Source\LevelEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\LevelEditor\Grid.cpp">
+      <Filter>Source\LevelEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\LineRenderer.cpp">
+      <Filter>Source\System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -152,9 +173,6 @@
     <ClInclude Include="Source\System\Static_Mesh.h">
       <Filter>Source\System</Filter>
     </ClInclude>
-    <ClInclude Include="Source\System\Bounding_Box.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
     <ClInclude Include="Source\System\Skinned_Mesh.h">
       <Filter>Source\System</Filter>
     </ClInclude>
@@ -178,6 +196,36 @@
     </ClInclude>
     <ClInclude Include="Source\LevelEditor\CameraControl.h">
       <Filter>Source\LevelEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\HitCheck\AABB.h">
+      <Filter>Source\HitCheck</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\LevelEditor\LevelEditorBridge.h">
+      <Filter>Source\LevelEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\GameContext.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\GameObject.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\Input.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\HitCheck\CollisionManager.h">
+      <Filter>Source\HitCheck</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\OnCollisionFuncs.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\AssetManager.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\LevelEditor\Grid.h">
+      <Filter>Source\LevelEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\LineRenderer.h">
+      <Filter>Source\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -206,6 +254,9 @@
       <Filter>Source\Shader</Filter>
     </None>
     <None Include="Source\Shader\ImageBasedLighting.hlsli">
+      <Filter>Source\Shader</Filter>
+    </None>
+    <None Include="Source\Shader\LineRenderer.hlsli">
       <Filter>Source\Shader</Filter>
     </None>
   </ItemGroup>
@@ -250,6 +301,12 @@
       <Filter>Source\Shader</Filter>
     </FxCompile>
     <FxCompile Include="Source\Shader\GltfModel_ps.hlsl">
+      <Filter>Source\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\LineRenderer_vs.hlsl">
+      <Filter>Source\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\LineRenderer_ps.hlsl">
       <Filter>Source\Shader</Filter>
     </FxCompile>
   </ItemGroup>

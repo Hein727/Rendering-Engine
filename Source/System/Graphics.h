@@ -2,7 +2,8 @@
 
 #include <d3d11.h>
 #include <wrl/client.h> 
-#include <DirectXMath.h>	
+#include <DirectXMath.h>
+#include "../LevelEditor/CameraControl.h"
 
 #define FULLSCREEN false
 #define SCREEN_WIDTH 1280
@@ -11,12 +12,7 @@
 class graphics
 {
 public:
-    static graphics& getInstance()
-    {
-        static graphics instance;
-        return instance;
-	}
-
+	graphics();
     ~graphics() = default;
     void initialize(HWND hwnd);
     void uninitialize();
@@ -97,12 +93,11 @@ public:
 	// Prevent copying
 	graphics(const graphics&) = delete;
 	graphics& operator=(const graphics&) = delete;
-	void renderingBegin();
+	void renderingBegin(camera_controls& cam);
 	void renderingEnd();	
 
 
 private:
-    graphics();
 
     Microsoft::WRL::ComPtr<ID3D11Device> device;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> deviceContext;

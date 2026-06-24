@@ -1,6 +1,5 @@
 #include "Skinned_Mesh.h"
 #include "Misc.h"
-#include "Graphics.h"
 #include "Shader.h"
 #include "Texture.h"
 #include <filesystem>
@@ -79,7 +78,7 @@ void Fetch_Bone_Influences(const FbxMesh* fbx_mesh, std::vector<Bone_Influences_
 	}
 }
 
-Skinned_Mesh::Skinned_Mesh(const char* fbx_filename, bool triangulate)
+Skinned_Mesh::Skinned_Mesh(GameContext& gameContext, const char* fbx_filename, bool triangulate) : gameContext(gameContext)
 {
 	std::filesystem::path cereal_filename(fbx_filename);
 	cereal_filename.replace_extension("cereal");
@@ -95,7 +94,7 @@ Skinned_Mesh::Skinned_Mesh(const char* fbx_filename, bool triangulate)
 	}
 
 	// Calling in device from graphics
-	auto device = graphics::getInstance().GetDevice();
+	auto device = gameContext.graphics.GetDevice();
 	
 	// Create FbxManager 
 	FbxManager* fbx_manager{ FbxManager::Create()};
@@ -310,7 +309,7 @@ void Skinned_Mesh::Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes)
 
 void Skinned_Mesh::Create_com_object(const char* fbx_filename)
 {
-	auto device = graphics::getInstance().GetDevice();
+	auto device = gameContext.graphics.GetDevice();
 
 	// Create vertex buffer and index buffer for each mesh
 	for (auto& mesh : meshes)
@@ -387,7 +386,7 @@ void Skinned_Mesh::Create_com_object(const char* fbx_filename)
 
 void Skinned_Mesh::Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4& material_color, const Animation::Keyframe* keyframe)
 {
-	auto context = graphics::getInstance().GetDeviceContext();
+	auto context = gameContext.graphics.GetDeviceContext();
 	for (const auto& mesh : meshes)
 	{
 		// Set IA, VS, PS stages

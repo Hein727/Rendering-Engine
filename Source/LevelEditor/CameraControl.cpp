@@ -1,12 +1,6 @@
 #include "CameraControl.h"
 #include <d3d11.h>
 
-camera_controls::camera_controls()
-{
-
-}
-
-
 void camera_controls::Update(HWND hwnd, float elapsedTime, ID3D11DeviceContext* dc)
 {
 	POINT point;
@@ -26,7 +20,6 @@ void camera_controls::Update(HWND hwnd, float elapsedTime, ID3D11DeviceContext* 
 	float moveY = (cursor_position.y - old_cursor.y) * 0.5f * elapsedTime;
 	if (::GetAsyncKeyState(VK_LMENU) & 0x8000)
 	{
-
 		if (::GetAsyncKeyState(VK_LBUTTON) & 0x8000)
 		{
 			rotateY += moveX * 0.5f;
@@ -72,6 +65,22 @@ void camera_controls::Update(HWND hwnd, float elapsedTime, ID3D11DeviceContext* 
 			distance -= static_cast<float>(wheel) * distance * 0.001f;
 			wheel = 0;
 		}
+		/*if (::GetAsyncKeyState('W') & 0x8000)
+		{
+			position.z += 1.0f * elapsedTime;
+		}
+		if (::GetAsyncKeyState('S') & 0x8000)
+		{
+			position.z -= 1.0f * elapsedTime;
+		}
+		if (::GetAsyncKeyState('A') & 0x8000)
+		{
+			position.x += 1.0f * elapsedTime;
+		}
+		if (::GetAsyncKeyState('D') & 0x8000)
+		{
+			position.x -= 1.0f * elapsedTime;
+		}*/
 	}
 	float sx = ::sinf(rotateX), cx = ::cosf(rotateX);
 	float sy = ::sinf(rotateY), cy = ::cosf(rotateY);

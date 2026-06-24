@@ -1,14 +1,25 @@
 #include "TestScene.h"
-#include "System/Graphics.h"
 #include "System/Shader.h"
+#include "System/GameContext.h"
 #include "System/Texture.h"
+#include "LevelEditor/MouseControl.h"
 #include <imgui.h>
+
+TestScene::TestScene(GameContext& gameContext, SceneManager& sceneManager, AssetManager& assetManager) :
+	gameContext(&gameContext), sceneManager(&sceneManager)
+{
+	testObject = std::make_unique<GameObject>(gameContext, assetManager);
+
+#ifdef _DEBUG
+
+	levelEditorBridge = std::make_unique<LevelEditorBridge>(gameContext, assetManager, *testObject);
+
+#endif
+}
 
 void TestScene::Init()
 {
-	gltfModels[0] = std::make_unique<GltfModel>("Data\\glTF-Sample-Models-main\\2.0\\DamagedHelmet\\glTF\\DamagedHelmet.gltf");
-
-	auto device = graphics::getInstance().GetDevice();
+	auto device = gameContext->graphics.GetDevice();
 
 	D3D11_TEXTURE2D_DESC desc{};
 	desc.MipLevels = 0;
@@ -21,48 +32,67 @@ void TestScene::Init()
 
 void TestScene::Update(float deltaTime)
 {
-	
+	testObject->Update(deltaTime);
+
+#ifdef _DEBUG
+
+	levelEditorBridge->Update(deltaTime);
+
+#endif
 }
 
 void TestScene::Render(float deltaTime)
 {	
-	auto context = graphics::getInstance().GetDeviceContext();
+	auto context = gameContext->graphics.GetDeviceContext();
 
 	context->PSSetShaderResources(32, 1, srvs[0].GetAddressOf());
 	context->PSSetShaderResources(33, 1, srvs[1].GetAddressOf());
 	context->PSSetShaderResources(34, 1, srvs[2].GetAddressOf());
 	context->PSSetShaderResources(35, 1, srvs[3].GetAddressOf());
 
-	DirectX::XMVECTOR S = DirectX::XMLoadFloat3(&scale);
-	DirectX::XMVECTOR R = DirectX::XMLoadFloat3(&rotation);
-	DirectX::XMVECTOR T = DirectX::XMLoadFloat3(&translation);
-	DirectX::XMMATRIX W = DirectX::XMMatrixScalingFromVector(S) * DirectX::XMMatrixRotationRollPitchYawFromVector(R) * DirectX::XMMatrixTranslationFromVector(T);
-	DirectX::XMFLOAT4X4 world;
-	DirectX::XMStoreFloat4x4(&world, W);
+	//static std::vector<GltfModel::Node> animatedNodes{ gltfModels[0]->nodes };
+	//static float time{ 0 };
+	//gltfModels[0]->Animate(0, time += deltaTime, animatedNodes);
+	///*if (gltfModels[0]->animations.at(0).duration < time)
+	//{
+	//	time = 0;
+	//}*/
+	//gltfModels[0]->Render(world[0], animatedNodes);
 
-	static std::vector<GltfModel::Node> animatedNodes{ gltfModels[0]->nodes };
-	static float time{ 0 };
-	gltfModels[0]->Animate(0, time += deltaTime, animatedNodes);
-	/*if (gltfModels[0]->animations.at(0).duration < time)
-	{
-		time = 0;
-	}*/
-	gltfModels[0]->Render(world, animatedNodes);
+	//if (gltfModels[0]->useAABB)
+	//{
+	//	gltfModels[0]->aabb->Render(deltaTime);
+	//}
+
+	testObject->Render(deltaTime);
+
+#ifdef _DEBUG
+
+	levelEditorBridge->Render(deltaTime);
+
+#endif
 }
 
 void TestScene::Uninit()
 {
-
+	
 }	
 
 void TestScene::DebugUI()
 {
-	ImGui::Begin("Test Scene");
-	ImGui::SliderFloat3("Scale", &scale.x, 0.1f, 10.0f);
-	ImGui::SliderFloat3("Rotation", &rotation.x, 0.0f, DirectX::XM_2PI);
-	ImGui::SliderFloat3("Translation", &translation.x, -10.0f, 10.0f);
-	ImGui::End();
+	testObject->DebugUI();
 
+#ifdef _DEBUG
+
+	levelEditorBridge->DebugUI();
+
+#endif
 }
 
+void TestScene::HandleInput(std::string input)
+{
+	if (input.empty()) return;
+	
+	testObject->HandleInput(input);
+}
 

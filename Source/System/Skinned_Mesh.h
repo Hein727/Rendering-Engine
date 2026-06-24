@@ -10,7 +10,8 @@
 #include <cereal/types/vector.hpp>
 #include <cereal/types/memory.hpp>
 #include <cereal/types/set.hpp>
-#include <cereal/types/unordered_map.hpp>	
+#include <cereal/types/unordered_map.hpp>
+#include "GameContext.h"
 
 namespace DirectX
 {
@@ -311,8 +312,10 @@ private :
 
 public :
 
-	Skinned_Mesh(const char* fbx_filename, bool triangulate = false);
+	Skinned_Mesh(GameContext& gameContext, const char* fbx_filename, bool triangulate = false);
 	virtual ~Skinned_Mesh() = default;
+
+private :
 
 	// Fetch meshes from the FBX scene
 	void Fetch_meshes(FbxScene* fbx_scene, std::vector<Mesh>& meshes);
@@ -328,6 +331,13 @@ public :
 	void Fetch_Animation(FbxScene* fbx_scene, std::vector<Animation>& animations,
 		float sampling_rate = 0.0f/*If this value is 0, the animation data will be sampled at the default frame rate.*/);
 
+public :
+
+	// Render the skinned mesh
+	void Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4& material_color, const Animation::Keyframe* keyframe);
+
+	std::vector<Animation> animations; // it's animation clips ffs
+
 	// Used for updating animation keyframe data
 	void Update_Animation(Animation::Keyframe& keyframe);
 
@@ -338,20 +348,17 @@ public :
 	// Blends two animation keyframes together based on the specified blending factor. The resulting blended keyframe is stored in 'resulting_keyframe'. 
 	// The blending factor should be in the range [0, 1], where 0 corresponds to the first keyframe and 1 corresponds to the second keyframe.	
 	void Blend_Animation(const Animation::Keyframe* keyframes[2], float factor, Animation::Keyframe& resulting_keyframe);
-	
+
 	// Create COM objects for rendering
 	void Create_com_object(const char* fbx_filename);
-
-	// Render the skinned mesh
-	void Render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4& material_color, const Animation::Keyframe* keyframe);
-
-	std::vector<Animation> animations; // it's animation clips ffs
 
 
 protected:
 
 	// Hold the scene data here
 	scene scene_view;
+
+	GameContext& gameContext;
 };
 
 struct Bone_Influence

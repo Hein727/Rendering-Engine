@@ -3,11 +3,12 @@
 #include <wrl.h>
 #include <cstdint>
 #include <memory>
+#include "GameContext.h"
 
 class Fullscreen_Quad
 {
 public:
-	Fullscreen_Quad();
+	Fullscreen_Quad(GameContext& gameContext);
 	virtual ~Fullscreen_Quad() = default;
 	float threshold = 0.8f;
 	float gs = 0.5f;
@@ -33,6 +34,8 @@ private:
 		float dummy;
 	};
 	Microsoft::WRL::ComPtr<ID3D11Buffer> blurConstantBuffer;
+
+	GameContext& gameContext;
 
 public:
 	void blit(ID3D11ShaderResourceView** srv, uint32_t start_slot, uint32_t num_views, ID3D11PixelShader* replaced_pixel_shader = nullptr);

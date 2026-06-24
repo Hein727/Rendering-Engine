@@ -2,11 +2,10 @@
 #include "Misc.h"
 #include "Texture.h"
 #include "Shader.h"
-#include "Graphics.h"
 
-Geometric_Primitive::Geometric_Primitive()
+Geometric_Primitive::Geometric_Primitive(GameContext& gameContext) : gameContext(gameContext)
 {
-	auto device = graphics::getInstance().GetDevice();
+	auto device = gameContext.graphics.GetDevice();
 
 	vertex vertices[24]{};
 
@@ -147,7 +146,7 @@ Geometric_Primitive::Geometric_Primitive()
 // don't make other buffers here 
 void Geometric_Primitive::createComBuffers(vertex* vertices, size_t vertex_count, uint32_t* indices, size_t index_count)
 {
-	auto device = graphics::getInstance().GetDevice();
+	auto device = gameContext.graphics.GetDevice();
 
 	HRESULT hr{ S_OK };
 
@@ -178,7 +177,7 @@ void Geometric_Primitive::createComBuffers(vertex* vertices, size_t vertex_count
 
 void Geometric_Primitive::render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4& material_color)
 {
-	auto context = graphics::getInstance().GetDeviceContext();
+	auto context = gameContext.graphics.GetDeviceContext();
 
 	// set vertex and index buffer
 	// set the primitive topology

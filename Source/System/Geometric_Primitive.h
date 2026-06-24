@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 #include <d3d11.h>
 #include <wrl.h>
+#include "GameContext.h"	
 
 class Geometric_Primitive
 {
@@ -29,9 +30,11 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixel_shader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> input_layout;
 
+	GameContext& gameContext;
+
 public:
 
-	Geometric_Primitive();
+	Geometric_Primitive(GameContext& gameContext);
 	~Geometric_Primitive() = default;
 
 	void render(const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT4& material_color = {1, 1, 1, 1});

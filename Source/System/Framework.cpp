@@ -1,6 +1,4 @@
 #include "Framework.h"
-#include "Graphics.h"
-#include "SceneManager.h"
 #include "../TestScene.h"
 
 framework::framework(HWND hwnd) : hwnd(hwnd)
@@ -11,7 +9,7 @@ framework::framework(HWND hwnd) : hwnd(hwnd)
 bool framework::initialized()
 {
 	// graphics initialize
-	graphics& graph = graphics::getInstance();
+	graphics& graph = gameContext.graphics;
 
 	graph.initialize(hwnd);
 
@@ -28,41 +26,48 @@ bool framework::initialized()
 	ImGui_ImplDX11_Init(graph.GetDevice(), graph.GetDeviceContext());
 
 	// scene manager initialize(the first scene to load)
-	SceneManager::GetInstance().ChangeScene(std::make_unique<TestScene>());
+	sceneManager.ChangeScene(std::make_unique<TestScene>(gameContext, sceneManager, assetManager));
 
 	return true;
 }
 
 void framework::update(float delta_time)
 {
-	auto context = graphics::getInstance().GetDeviceContext();
+	auto context = gameContext.graphics.GetDeviceContext();
+
+
 	// imgui new frame
 #ifdef _DEBUG
+
+	// Call the fucking level editor bridge here
+
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 #endif
 
 	// update scene
-	SceneManager::GetInstance().Update(delta_time);
+	sceneManager.Update(delta_time);
 
-	camera_controls::instance().Update(hwnd, delta_time, context);
+	gameContext.input.cameraControls.Update(hwnd, delta_time, context);
+
+	gameContext.input.mouseControl.Update(delta_time);
 }
 
 void framework::render(float delta_time)
 {
-	auto context = graphics::getInstance().GetDeviceContext();
+	auto context = gameContext.graphics.GetDeviceContext();
 	ID3D11RenderTargetView* null_rtv[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT]{};
 	context->OMSetRenderTargets(D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, null_rtv, nullptr);
 	ID3D11ShaderResourceView* null_srv[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]{};
 	context->VSGetShaderResources(0, _countof(null_srv), null_srv);
 	context->PSSetShaderResources(0, _countof(null_srv), null_srv);
 
-	graphics& graph = graphics::getInstance();
+	graphics& graph = gameContext.graphics;
 	
-	graph.renderingBegin();
+	graph.renderingBegin(gameContext.input.cameraControls);
 
-	SceneManager::GetInstance().Render(delta_time);
+	sceneManager.Render(delta_time);
 
 #ifdef _DEBUG
 
@@ -80,12 +85,11 @@ bool framework::uninitialized()
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
-	graphics::getInstance().uninitialize();
+	gameContext.graphics.uninitialize();
 
 	return true;
 }
 
 framework::~framework()
 {
-
 }

@@ -7,14 +7,19 @@
 #define TINYGLTF_NO_STB_IMAGE
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 #include "../tinygltf-release/tiny_gltf.h"
-#include "Graphics.h"
+#include "../HitCheck/AABB.h"
+#include <memory>
 
 class GltfModel
 {
 	std::string	filename;
 public :
-	GltfModel(const std::string& filename);
+	GltfModel(GameContext& gameContext, const std::string& filename);
 	virtual ~GltfModel() = default;
+
+protected :
+
+	GameContext& gameContext;
 
 private :
 
@@ -185,6 +190,10 @@ public:
 	void Animate(size_t animationIndex, float time, std::vector<Node>& animatedNodes);
 
 	void Render(const DirectX::XMFLOAT4X4 world, const std::vector<Node>& animatedNodes = {});
+
+	//Copy of hitbox 
+	std::unique_ptr<AABB> aabb;
+	bool useAABB = false;
 
 private:
 

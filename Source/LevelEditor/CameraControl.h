@@ -6,12 +6,8 @@
 class camera_controls
 {
 public:
-	static camera_controls& instance()
-	{
-		static camera_controls instance;
-		return instance;
-	}
-
+	camera_controls() = default;
+	~camera_controls() = default;
 	void Update(HWND hwnd, float elapsedTime, ID3D11DeviceContext* dc);
 	void setWheel(float wheel) { this->wheel = wheel; }	
 	DirectX::XMFLOAT4X4 get_view() const& { return view; }
@@ -20,8 +16,6 @@ public:
 	DirectX::XMFLOAT3 get_position() const { return position; }
 
 private :
-	camera_controls();
-	~camera_controls() {};
 	void Update_transform();
 
 	DirectX::XMFLOAT3 position = { 0, 10, -10 };

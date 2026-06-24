@@ -1,5 +1,6 @@
 #pragma once
 #include <DirectXMath.h>
+#include "CameraControl.h"
 
 // Mouse control functions for the level editor 
 // マウスコントロール関数（レベルエディタ用）
@@ -7,15 +8,8 @@
 
 class MouseControl
 {
-private:
-	static MouseControl& GetInstance()
-	{
-		static MouseControl instance;
-		return instance;
-	}
-	MouseControl() = default;
-
-public:
+public :
+	MouseControl(camera_controls& cameraControls) : cameraControls(cameraControls) {};
 	~MouseControl() = default;
 	void Update(float elapsedTime);
 
@@ -24,6 +18,7 @@ private:
 	bool rightClick = false;
 	bool leftHold = false;
 	bool rightHold = false;	
+	camera_controls& cameraControls;
 
 public :
 	DirectX::XMFLOAT3 GetMouseWorldPos();

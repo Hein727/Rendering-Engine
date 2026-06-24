@@ -1,5 +1,4 @@
 #include <time.h>
-
 #include "Framework.h"
 #include "Graphics.h"
 
@@ -44,6 +43,10 @@ int WINAPI WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev_instance, _I
 		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top,
 		NULL, NULL, instance, nullptr);
 	ShowWindow(hwnd, cmd_show);
+
+#ifdef _DEBUG
+	DragAcceptFiles(hwnd, TRUE);
+#endif
 
 	framework framework(hwnd);
 	SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&framework));

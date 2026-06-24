@@ -103,7 +103,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>.\DirectXTK-main\Inc;Imgui;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7\include;.\cereal-master\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -127,7 +127,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>Imgui;.\DirectXTK-main\Inc;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7\include;.\cereal-master\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
@@ -153,15 +153,21 @@
     <ClCompile Include="Imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="Imgui\imgui_tables.cpp" />
     <ClCompile Include="Imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Source\HitCheck\AABB.cpp" />
+    <ClCompile Include="Source\HitCheck\CollisionManager.cpp" />
     <ClCompile Include="Source\LevelEditor\CameraControl.cpp" />
+    <ClCompile Include="Source\LevelEditor\Grid.cpp" />
+    <ClCompile Include="Source\LevelEditor\LevelEditorBridge.cpp" />
     <ClCompile Include="Source\LevelEditor\MouseControl.cpp" />
-    <ClCompile Include="Source\System\Bounding_Box.cpp" />
+    <ClCompile Include="Source\System\AssetManager.cpp" />
     <ClCompile Include="Source\System\Framebuffer.cpp" />
     <ClCompile Include="Source\System\Framework.cpp" />
     <ClCompile Include="Source\System\Fullscreen_Quad.cpp" />
+    <ClCompile Include="Source\System\GameObject.cpp" />
     <ClCompile Include="Source\System\Geometeric_Primitive.cpp" />
     <ClCompile Include="Source\System\GltfModel.cpp" />
     <ClCompile Include="Source\System\Graphics.cpp" />
+    <ClCompile Include="Source\System\LineRenderer.cpp" />
     <ClCompile Include="Source\System\Main.cpp" />
     <ClCompile Include="Source\System\SceneManager.cpp" />
     <ClCompile Include="Source\System\Shader.cpp" />
@@ -181,15 +187,24 @@
     <ClInclude Include="Imgui\imstb_rectpack.h" />
     <ClInclude Include="Imgui\imstb_textedit.h" />
     <ClInclude Include="Imgui\imstb_truetype.h" />
+    <ClInclude Include="Source\HitCheck\AABB.h" />
+    <ClInclude Include="Source\HitCheck\CollisionManager.h" />
     <ClInclude Include="Source\LevelEditor\CameraControl.h" />
+    <ClInclude Include="Source\LevelEditor\Grid.h" />
+    <ClInclude Include="Source\LevelEditor\LevelEditorBridge.h" />
     <ClInclude Include="Source\LevelEditor\MouseControl.h" />
-    <ClInclude Include="Source\System\Bounding_Box.h" />
+    <ClInclude Include="Source\OnCollisionFuncs.h" />
+    <ClInclude Include="Source\System\AssetManager.h" />
     <ClInclude Include="Source\System\Framebuffer.h" />
     <ClInclude Include="Source\System\Framework.h" />
     <ClInclude Include="Source\System\Fullscreen_Quad.h" />
+    <ClInclude Include="Source\System\GameContext.h" />
+    <ClInclude Include="Source\System\GameObject.h" />
     <ClInclude Include="Source\System\Geometric_Primitive.h" />
     <ClInclude Include="Source\System\GltfModel.h" />
     <ClInclude Include="Source\System\Graphics.h" />
+    <ClInclude Include="Source\System\Input.h" />
+    <ClInclude Include="Source\System\LineRenderer.h" />
     <ClInclude Include="Source\System\Misc.h" />
     <ClInclude Include="Source\System\Scene.h" />
     <ClInclude Include="Source\System\SceneManager.h" />
@@ -209,6 +224,7 @@
     <None Include="Source\Shader\Geometric_Primitive.hlsli" />
     <None Include="Source\Shader\GltfModel.hlsli" />
     <None Include="Source\Shader\ImageBasedLighting.hlsli" />
+    <None Include="Source\Shader\LineRenderer.hlsli" />
     <None Include="Source\Shader\Skinned_Mesh.hlsli" />
     <None Include="Source\Shader\Sprite.hlsli" />
     <None Include="Source\Shader\Static_Mesh.hlsli" />
@@ -249,6 +265,18 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Source\Shader\GltfModel_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\LineRenderer_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\LineRenderer_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
