@@ -16,7 +16,7 @@ public:
 
 	void DrawGrid(int subdivisions, float scale);
 
-	void render();
+	void Render();
 
 private:
 
@@ -36,4 +36,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> input_layout;
 
 	GameContext& gameContext;
+
+	// Useful for snapping things into place on the grid
+	std::vector<DirectX::XMFLOAT3> gridCenterPoints;
+
+	DirectX::XMFLOAT3 prevCellOrigin{ 0, 0, 0 };
+	DirectX::XMFLOAT3 currentCellOrigin;
 };

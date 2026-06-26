@@ -12,7 +12,7 @@ public:
 	void setWheel(float wheel) { this->wheel = wheel; }	
 	DirectX::XMFLOAT4X4 get_view() const& { return view; }
 	DirectX::XMFLOAT4X4 get_projection() const& { return projection; }
-	POINT get_cursor_position() const { return cursor_position; }
+	POINT get_cursor_position() const { return new_cursor; }	
 	DirectX::XMFLOAT3 get_position() const { return position; }
 
 private :
@@ -23,9 +23,10 @@ private :
 	DirectX::XMFLOAT3 up = { 0, 1, 0 };
 	DirectX::XMFLOAT4X4 view;
 	DirectX::XMFLOAT4X4 projection;
-	POINT cursor_position{ 0, 0 };
 	float rotateX{ 0.0f };
 	float rotateY{ DirectX::XMConvertToRadians(180.0f) };
 	float distance{ 10.0f };
 	float wheel{ 0.0f };
+	POINT new_cursor{ 0, 0 };
+	UINT screenW, screenH;
 };

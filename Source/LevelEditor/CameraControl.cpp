@@ -8,16 +8,16 @@ void camera_controls::Update(HWND hwnd, float elapsedTime, ID3D11DeviceContext* 
 	::GetCursorPos(&point);
 	::ScreenToClient(hwnd, &point);
 	::GetClientRect(hwnd, &rc);
-	UINT screenW = rc.right - rc.left;
-	UINT screenH = rc.bottom - rc.top;
+	screenW = rc.right - rc.left;
+	screenH = rc.bottom - rc.top;
 	POINT old_cursor;
-	old_cursor.x = cursor_position.x;
-	old_cursor.y = cursor_position.y;
-	cursor_position.x = (LONG)(point.x / static_cast<float>(1280) * static_cast<float>(screenW));
-	cursor_position.y = (LONG)(point.y / static_cast<float>(720) * static_cast<float>(screenH));
+	old_cursor.x = new_cursor.x;
+	old_cursor.y = new_cursor.y;
+	new_cursor.x = point.x;
+	new_cursor.y = point.y;
 
-	float moveX = (cursor_position.x - old_cursor.x) * 0.5f * elapsedTime;
-	float moveY = (cursor_position.y - old_cursor.y) * 0.5f * elapsedTime;
+	float moveX = (new_cursor.x - old_cursor.x) * 0.5f * elapsedTime;
+	float moveY = (new_cursor.y - old_cursor.y) * 0.5f * elapsedTime;
 	if (::GetAsyncKeyState(VK_LMENU) & 0x8000)
 	{
 		if (::GetAsyncKeyState(VK_LBUTTON) & 0x8000)
@@ -65,22 +65,6 @@ void camera_controls::Update(HWND hwnd, float elapsedTime, ID3D11DeviceContext* 
 			distance -= static_cast<float>(wheel) * distance * 0.001f;
 			wheel = 0;
 		}
-		/*if (::GetAsyncKeyState('W') & 0x8000)
-		{
-			position.z += 1.0f * elapsedTime;
-		}
-		if (::GetAsyncKeyState('S') & 0x8000)
-		{
-			position.z -= 1.0f * elapsedTime;
-		}
-		if (::GetAsyncKeyState('A') & 0x8000)
-		{
-			position.x += 1.0f * elapsedTime;
-		}
-		if (::GetAsyncKeyState('D') & 0x8000)
-		{
-			position.x -= 1.0f * elapsedTime;
-		}*/
 	}
 	float sx = ::sinf(rotateX), cx = ::cosf(rotateX);
 	float sy = ::sinf(rotateY), cy = ::cosf(rotateY);
@@ -91,7 +75,7 @@ void camera_controls::Update(HWND hwnd, float elapsedTime, ID3D11DeviceContext* 
 	DirectX::XMVECTOR Eye = DirectX::XMVectorSubtract(Focus, Front);
 	DirectX::XMStoreFloat3(&position, Eye);
 	Update_transform();
-	
+
 	DirectX::XMMATRIX P;
 	{
 		D3D11_VIEWPORT viewport;

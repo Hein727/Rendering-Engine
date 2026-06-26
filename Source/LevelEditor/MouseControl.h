@@ -21,7 +21,7 @@ private:
 	camera_controls& cameraControls;
 
 public :
-	DirectX::XMFLOAT3 GetMouseWorldPos();
+	DirectX::XMFLOAT3 GetMouseWorldPos(DirectX::XMMATRIX M = DirectX::XMMatrixIdentity()) const;
 	bool GetMouseLeftClick() { return leftClick; }
 	bool GetMouseRightClick() { return rightClick; }
 	bool GetMouseLeftHold() { return leftHold; }

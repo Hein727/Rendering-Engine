@@ -22,39 +22,35 @@ void MouseControl::Update(float elapsedTime)
 	oldRightClick = currentRightClick;
 }
 
-DirectX::XMFLOAT3 MouseControl::GetMouseWorldPos() // raycasted mouse position in world coordinates
+DirectX::XMFLOAT3 MouseControl::GetMouseWorldPos(DirectX::XMMATRIX M)const // raycasted mouse position in world coordinates
 {
-	DirectX::XMFLOAT2 mousePos;
-
 	POINT cursorPos = cameraControls.get_cursor_position();
-	mousePos.x = static_cast<float>(cursorPos.x);
-	mousePos.y = static_cast<float>(cursorPos.y);
+	DirectX::XMVECTOR CursorV = DirectX::XMVectorSet(static_cast<float>(cursorPos.x), static_cast<float>(cursorPos.y), 0.0f, 1.0f);
+	float viewportX = 0.0f;
+	float viewportY = 0.0f;
+	float viewportWidth = static_cast<float>(SCREEN_WIDTH);
+	float viewportHeight = static_cast<float>(SCREEN_HEIGHT);
+	float viewportMinZ = 0.0f;
+	float viewportMaxZ = 1.0f;
+	DirectX::XMFLOAT4X4 p = cameraControls.get_projection();
+	DirectX::XMFLOAT4X4 v = cameraControls.get_view();
+	DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&p);
+	DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&v);
+	DirectX::XMVECTOR Near = DirectX::XMVector3Unproject(CursorV, viewportX, viewportY, viewportWidth, viewportHeight, viewportMinZ, viewportMaxZ, P, V, M);
+	CursorV = DirectX::XMVectorSet(static_cast<float>(cursorPos.x), static_cast<float>(cursorPos.y), 1.0f, 1.0f);
+	DirectX::XMVECTOR Far = DirectX::XMVector3Unproject(CursorV, viewportX, viewportY, viewportWidth, viewportHeight, viewportMinZ, viewportMaxZ, P, V, M);
+	DirectX::XMVECTOR Direction = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(Far, Near));
 
-	float ndcX = (2.0f * mousePos.x) / SCREEN_WIDTH - 1.0f;
-	float ndcY = 1.0f - (2.0f * mousePos.y) / SCREEN_HEIGHT;
+	float nearY = DirectX::XMVectorGetY(Near);
+	float directionY = DirectX::XMVectorGetY(Direction);
 
-	DirectX::XMVECTOR nearClip = DirectX::XMVectorSet(ndcX, ndcY, 0.0, 1.0);
-	DirectX::XMVECTOR farClip = DirectX::XMVectorSet(ndcX, ndcY, 1.0, 1.0);
-	
-	DirectX::XMFLOAT4X4 V = cameraControls.get_view();
-	DirectX::XMFLOAT4X4 P = cameraControls.get_projection();
+	DirectX::XMFLOAT3 cursorWorldPos{ 0, 0, 0 };
 
-	DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&V);
-	DirectX::XMMATRIX projection = DirectX::XMLoadFloat4x4(&P);
-
-	DirectX::XMMATRIX invViewProj = DirectX::XMMatrixInverse(nullptr, DirectX::XMMatrixMultiply(view, projection));
-
-	DirectX::XMVECTOR nearWorld = DirectX::XMVector3TransformCoord(nearClip, invViewProj);
-	DirectX::XMVECTOR farWorld = DirectX::XMVector3TransformCoord(farClip, invViewProj);	
-
-	DirectX::XMFLOAT3 cameraPos = cameraControls.get_position();
-	DirectX::XMVECTOR origin = DirectX::XMLoadFloat3(&cameraPos);
-	DirectX::XMVECTOR dir = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(farWorld, nearWorld));
-
-	DirectX::XMVECTOR RayEnd = DirectX::XMVectorAdd(origin, DirectX::XMVectorScale(dir, 100.0f)); // “K“–‚È‹——£‚ÅI“_‚ðÝ’è
-
-	DirectX::XMFLOAT3 rayEnd;
-	DirectX::XMStoreFloat3(&rayEnd, RayEnd);
-
-	return rayEnd;
+	if (fabs(directionY) > 0.00001f)
+	{
+		float t = -nearY / directionY;
+		DirectX::XMVECTOR hitPos = DirectX::XMVectorAdd(Near, DirectX::XMVectorScale(Direction, t));
+		DirectX::XMStoreFloat3(&cursorWorldPos, hitPos);
+	}
+	return cursorWorldPos;
 };

@@ -556,7 +556,7 @@ void GltfModel::FetchTexture(const tinygltf::Model& gltfModel)
 			const BYTE* data = buffer.data.data() + gltfBufferView.byteOffset;
 
 			ID3D11ShaderResourceView* trv{};
-			loadTextureFromMemory(device , data, static_cast<size_t>(gltfBufferView.byteLength), &trv);
+			hr = loadTextureFromMemory(device , data, static_cast<size_t>(gltfBufferView.byteLength), &trv);
 			if (hr == S_OK)
 			{
 				textureResourceViews.emplace_back().Attach(trv);
@@ -567,11 +567,19 @@ void GltfModel::FetchTexture(const tinygltf::Model& gltfModel)
 			const std::filesystem::path path(filename);
 			ID3D11ShaderResourceView* srv{};
 			D3D11_TEXTURE2D_DESC textureDesc{};
-			std::wstring filename
+			std::wstring gltfImageUri = std::wstring(gltfImage.uri.begin(), gltfImage.uri.end());
+			std::wstring name;
+			if (std::filesystem::path(gltfImageUri).is_absolute())
 			{
-				path.parent_path().concat(L"/").wstring() + std::wstring(gltfImage.uri.begin(), gltfImage.uri.end()) 
-			};
-			hr = loadTextureFromFile(device, filename.c_str(), &srv, &textureDesc);
+				name = { gltfImageUri };
+			}
+			else
+			{
+				name = path.parent_path().concat(L"/").concat(gltfImageUri);
+			}
+			
+
+			hr = loadTextureFromFile(device, name.c_str(), &srv, &textureDesc);
 			
 			if (hr == S_OK)
 			{
@@ -738,7 +746,7 @@ void GltfModel::Animate(size_t animationIndex, float time, std::vector<Node>& an
 			else if (channel.targetPath == "rotation")
 			{
 				const vector<XMFLOAT4>& rotations{ animation.rotation.at(sampler.output) };
-				XMStoreFloat4(&animatedNodes.at(channel.targetNode).rotation,
+				DirectX::XMStoreFloat4(&animatedNodes.at(channel.targetNode).rotation,
 					XMQuaternionSlerp(XMLoadFloat4(&rotations.at(keyframeIndex)), XMLoadFloat4(&rotations.at(keyframeIndex + 1)), interpolationFactor));
 			}
 			else if(channel.targetPath == "translation")

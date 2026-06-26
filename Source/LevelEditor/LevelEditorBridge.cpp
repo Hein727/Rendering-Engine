@@ -16,48 +16,44 @@ void LevelEditorBridge::Render(float elapsedTime)
 
 void LevelEditorBridge::DebugUI()
 {
+	ImGui::Begin("Level Editor");
+	ImGui::Text("This is the level editor bridge.");
+	ImGui::Text("PS: only use gltf models ffs");
+	if (ImGui::CollapsingHeader("Model Loader"))
 	{
-		ImGui::Begin("Level Editor");
-		ImGui::Text("This is the level editor bridge.");
-		ImGui::Text("PS: only use gltf models ffs");
-		if (ImGui::CollapsingHeader("Model Loader"))
+		std::list<std::string> modelNames = assetManager.GetAllModelNames();
+		if (ImGui::BeginListBox("Loaded Models"))
 		{
-			std::list<std::string> modelNames = assetManager.GetAllModelNames();
-			if (ImGui::BeginListBox("Loaded Models"))
+			for (const auto& name : modelNames)
 			{
-				for (const auto& name : modelNames)
+				if (ImGui::Selectable(name.c_str()))
 				{
-					if (ImGui::Selectable(name.c_str()))
-					{
-						selectedModelName = name;
-					}
-				}
-				ImGui::EndListBox();
-			}
-		}
-		
-		if(ImGui::CollapsingHeader("Model Placement"))
-		{
-			ImGui::Text("Selected Model: %s", selectedModelName.c_str());
-
-			ImGui::Checkbox("Placing Model", &placingModel);
-
-			if (placingModel)
-			{
-				if (gameContext.input.mouseControl.GetMouseLeftClick() && !ImGui::IsWindowHovered())
-				{
-					currentGameObject.PlaceModel(selectedModelName);
+					selectedModelName = name;
 				}
 			}
+			ImGui::EndListBox();
 		}
+	}
+	ImGui::Text("Selected Model: %s", selectedModelName.c_str());
 
-		if (ImGui::Button("Save Game State"))
+	ImGui::Checkbox("Placing Model", &placingModel);
+
+	if (ImGui::Button("Save Game State"))
+	{
+		currentGameObject.SaveGameState();
+	}
+
+	ImGui::Text("IT DOESN'T AUTOSAVE");
+
+	ImGui::End();
+
+	auto io = ImGui::GetIO();
+
+	if (!io.WantCaptureMouse && placingModel)
+	{
+		if (gameContext.input.mouseControl.GetMouseLeftClick())
 		{
-			currentGameObject.SaveGameState();
+			currentGameObject.PlaceModel(selectedModelName);
 		}
-
-		ImGui::Text("IT DOESN'T AUTOSAVE");
-
-		ImGui::End();
 	}
 }	

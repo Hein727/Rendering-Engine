@@ -1,5 +1,6 @@
 #include "LineRenderer.h"
-#include "Shader.h"	
+#include "Shader.h"
+#include <cmath>
 
 LineRenderer::LineRenderer(GameContext& gameContext) : gameContext(gameContext)
 {
@@ -33,6 +34,16 @@ void LineRenderer::AddVertex(const DirectX::XMFLOAT3& position, const DirectX::X
 
 void LineRenderer::DrawGrid(int subdivisions, float scale)
 {
+	DirectX::XMFLOAT3 oldCamPos = gameContext.input.cameraControls.get_position();
+
+	currentCellOrigin = DirectX::XMFLOAT3(static_cast<int>(std::floor(oldCamPos.x / scale) * scale), 0, static_cast<int>(std::floor(oldCamPos.z / scale) * scale));
+	DirectX::XMVECTOR cellOriginV = DirectX::XMLoadFloat3(&currentCellOrigin);
+
+	if(prevCellOrigin.x == currentCellOrigin.x && prevCellOrigin.z == currentCellOrigin.z)
+	{
+		return;
+	}
+
 	int numLines = (subdivisions + 1) * 2;
 	int vertexCount = numLines * 2;
 
@@ -51,12 +62,12 @@ void LineRenderer::DrawGrid(int subdivisions, float scale)
 	for (int i = 0; i <= subdivisions; i++)
 	{
 		V = DirectX::XMVectorSet(s, 0, corner, 0);
-		P = DirectX::XMVector3TransformCoord(V, M);
+		P = DirectX::XMVectorAdd(DirectX::XMVector3TransformCoord(V, M), cellOriginV);
 		DirectX::XMStoreFloat3(&position, P);
 		AddVertex(position, white);
 
 		V = DirectX::XMVectorSet(s, 0, -corner, 0);
-		P = DirectX::XMVector3TransformCoord(V, M);
+		P = DirectX::XMVectorAdd(DirectX::XMVector3TransformCoord(V, M), cellOriginV);
 		DirectX::XMStoreFloat3(&position, P);
 		AddVertex(position, white);
 
@@ -67,59 +78,33 @@ void LineRenderer::DrawGrid(int subdivisions, float scale)
 	for (int i = 0; i <= subdivisions; i++)
 	{
 		V = DirectX::XMVectorSet(corner, 0, s, 0);
-		P = DirectX::XMVector3TransformCoord(V, M);
+		P = DirectX::XMVectorAdd(DirectX::XMVector3TransformCoord(V, M), cellOriginV);
 		DirectX::XMStoreFloat3(&position, P);
 		AddVertex(position, white);
 
 		V = DirectX::XMVectorSet(-corner, 0, s, 0);
-		P = DirectX::XMVector3TransformCoord(V, M);
+		P = DirectX::XMVectorAdd(DirectX::XMVector3TransformCoord(V, M), cellOriginV);
 		DirectX::XMStoreFloat3(&position, P);
 		AddVertex(position, white);
 
 		s += step;
 	}
 
+	gridCenterPoints.clear();
+	for (int z = 0; z < subdivisions; ++z)
 	{
-		const DirectX::XMFLOAT4 red = DirectX::XMFLOAT4(1, 0, 0, 1);
-		V = DirectX::XMVectorSet(0, 0, 0, 0);
-		P = DirectX::XMVector3TransformCoord(V, M);
-		DirectX::XMStoreFloat3(&position, P);
-		AddVertex(position, red);
+		for (int x = 0; x < subdivisions; ++x)
+		{
+			float centerX = currentCellOrigin.x + x * scale + scale * 0.5f;
+			float centerZ = currentCellOrigin.z + z * scale + scale * 0.5f;
 
-		V = DirectX::XMVectorSet(corner, 0, 0, 0);
-		P = DirectX::XMVector3TransformCoord(V, M);
-		DirectX::XMStoreFloat3(&position, P);
-		AddVertex(position, red);
+			gridCenterPoints.emplace_back(centerX, 0.0f, centerZ);
+		}
 	}
 
-	{
-		const DirectX::XMFLOAT4 green = DirectX::XMFLOAT4(0, 1, 0, 1);
-		V = DirectX::XMVectorSet(0, 0, 0, 0);
-		P = DirectX::XMVector3TransformCoord(V, M);
-		DirectX::XMStoreFloat3(&position, P);
-		AddVertex(position, green);
-
-		V = DirectX::XMVectorSet(0, corner, 0, 0);
-		P = DirectX::XMVector3TransformCoord(V, M);
-		DirectX::XMStoreFloat3(&position, P);
-		AddVertex(position, green);
-	}
-
-	{
-		const DirectX::XMFLOAT4 blue = DirectX::XMFLOAT4(0, 0, 1, 1);
-		V = DirectX::XMVectorSet(0, 0, 0, 0);
-		P = DirectX::XMVector3TransformCoord(V, M);
-		DirectX::XMStoreFloat3(&position, P);
-		AddVertex(position, blue);
-
-		V = DirectX::XMVectorSet(0, 0, corner, 0);
-		P = DirectX::XMVector3TransformCoord(V, M);
-		DirectX::XMStoreFloat3(&position, P);
-		AddVertex(position, blue);
-	}
 }
 
-void LineRenderer::render()
+void LineRenderer::Render()
 {
 	const auto& dc = gameContext.graphics.GetDeviceContext();
 

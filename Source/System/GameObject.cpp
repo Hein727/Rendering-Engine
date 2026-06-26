@@ -20,12 +20,20 @@ GameObject::GameObject(GameContext& gameContext, AssetManager& assetManager)
 	{
 		std::ifstream ifs(cereal_filename, std::ios::binary);
 		cereal::BinaryInputArchive deserialization(ifs);
-		deserialization(dataInfos, datas, modelFilePaths);
+		deserialization(modelFilePaths, dataInfos, datas);
+
+		for (auto& [fileName, filePath] : modelFilePaths)
+		{
+			assetManager.loadModel(gameContext,
+				filePath);
+		}
 
 		for (auto& [id, index] : dataInfos)
 		{
 			if(modelFilePaths.empty())
 				break;
+
+			datas.resize(dataInfos.size());
 
 			std::string ID = id;
 			ID = ID.substr(0, ID.find_last_of('_'));
@@ -34,24 +42,20 @@ GameObject::GameObject(GameContext& gameContext, AssetManager& assetManager)
 
 			if (!model)
 			{
-				auto filePath = modelFilePaths.find(ID)->second;	
+				model = assetManager.GetModel(
+					ID);
 
-				if (!filePath.empty())
+				if (model)
 				{
-					assetManager.loadModel(gameContext,
-						filePath);
-
-					model=assetManager.GetModel(
-						ID);
-
-					if (model)
-					{
-						datas[index].model = model;
-					}
-					changeInData = true;	
+					datas[index].model = model;
 				}
 			}
+			else
+			{
+				datas[index].model = model;
+			}
 		}
+		changeInData = true;
 	}
 }
 
@@ -94,7 +98,6 @@ void GameObject::PlaceModel(const std::string ID)
 
 		dataInfos.emplace(newID, index);
 
-		// To update the menu display 
 		changeInData = true;
 	}
 }
@@ -181,7 +184,7 @@ void GameObject::SaveGameState(bool isRuntimeSave)
 	name = name + ".cereal";	
 	std::ofstream ofs(name , std::ios::binary);
 	cereal::BinaryOutputArchive serialization(ofs);
-	serialization(dataInfos, datas, modelFilePaths);
+	serialization(modelFilePaths, dataInfos, datas);
 }
 
 void GameObject::DeleteDataByID(const std::string& ID)
@@ -206,6 +209,7 @@ void GameObject::HandleInput(std::string input)
 	{
 		if(filePath.first == modelName)
 		{
+			assetManager.loadModel(gameContext, input);
 			return;
 		}
 	}	

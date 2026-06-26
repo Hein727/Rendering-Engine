@@ -96,8 +96,6 @@ HRESULT loadTextureFromMemory(ID3D11Device* device, const void* data, size_t siz
 	HRESULT hr{ S_OK };
 	ComPtr<ID3D11Resource> resource;
 
-	hr = CreateWICTextureFromMemory(device, reinterpret_cast<const uint8_t*>(data), size, resource.GetAddressOf(), srv);
-
 	if (hr != S_OK)
 	{
 		hr = CreateWICTextureFromMemory(device, reinterpret_cast<const uint8_t*>(data), size, resource.GetAddressOf(), srv);

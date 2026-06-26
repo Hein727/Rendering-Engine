@@ -39,8 +39,6 @@ void framework::update(float delta_time)
 	// imgui new frame
 #ifdef _DEBUG
 
-	// Call the fucking level editor bridge here
-
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
