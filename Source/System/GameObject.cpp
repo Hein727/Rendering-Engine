@@ -6,15 +6,16 @@
 #include <fstream>
 #include <sstream>
 
-GameObject::GameObject(GameContext& gameContext, AssetManager& assetManager)
+GameObject::GameObject(GameContext& gameContext, AssetManager& assetManager, const char* fileName)
 	: gameContext(gameContext), assetManager(assetManager)
 {
-	std::filesystem::path cereal_filename(runtimeSaveFile);
+	saveFileName = fileName;
+	std::filesystem::path cereal_filename(runTimeSaveFilePath + saveFileName);
 	cereal_filename.replace_extension("cereal");
 
 	if (!std::filesystem::exists(cereal_filename))
 	{
-		cereal_filename = defaultSaveFile;
+		cereal_filename = editedSaveFilePath + saveFileName;
 		cereal_filename.replace_extension("cereal");
 	}
 
@@ -190,7 +191,6 @@ void GameObject::DebugUI()
 		selectedData = &datas[index];
 	}
 	
-
 	if (gameContext.input.mouseControl.GetMouseRightClick() && !(::GetAsyncKeyState(VK_LMENU) & 0x8000))
 	{
 		selectedDataIndex = -1;
@@ -290,7 +290,7 @@ void GameObject::DebugUI()
 
 void GameObject::SaveGameState(bool isRuntimeSave)
 {
-	std::string name = isRuntimeSave ? runtimeSaveFile : defaultSaveFile;
+	std::string name = isRuntimeSave ? runTimeSaveFilePath + saveFileName : editedSaveFilePath + saveFileName;
 	name = name + ".cereal";	
 	std::ofstream ofs(name , std::ios::binary);
 	cereal::BinaryOutputArchive serialization(ofs);

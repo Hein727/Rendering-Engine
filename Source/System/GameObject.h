@@ -12,8 +12,8 @@
 #include <memory>
 #include <unordered_map>
 
-constexpr char defaultSaveFile[] = "editedScene"; // original save without player's influence
-constexpr char runtimeSaveFile[] = "runtimeScene"; // runtime save with player's influence
+constexpr char editedSaveFilePath[] = { "Data\\Saves\\Edited\\" };
+constexpr char runTimeSaveFilePath[] = { "Data\\Saves\\Runtime\\" };
 
 namespace DirectX
 {
@@ -108,7 +108,7 @@ struct ModelData
 class GameObject
 {
 public:
-	GameObject(GameContext& gameContext, AssetManager& assetManager);
+	GameObject(GameContext& gameContext, AssetManager& assetManager, const char* fileName);
 	virtual ~GameObject() = default;
 
 	void PlaceModel(const std::string ID, Grid& grid);
@@ -130,7 +130,6 @@ public:
 	}
 
 	void DeleteDataByID(const std::string& ID);
-
 protected:
 	GameContext& gameContext;
 	AssetManager& assetManager;
@@ -145,6 +144,8 @@ protected:
 	bool changeInData = false;
 	std::vector<std::string> container;
 	DirectX::XMFLOAT3 location;
+
+	std::string saveFileName = " ";
 
 public:
 

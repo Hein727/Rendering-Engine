@@ -8,7 +8,7 @@
 BattleScene::BattleScene(GameContext& gameContext, SceneManager& sceneManager, AssetManager& assetManager) :
 	gameContext(&gameContext), sceneManager(&sceneManager)
 {
-	battleObject = std::make_unique<GameObject>(gameContext, assetManager);
+	battleObject = std::make_unique<GameObject>(gameContext, assetManager, battleSceneSaveFileName);
 
 	collisionManager = std::make_unique<CollisionManager>(gameContext, battleObject->GetDatas());
 

@@ -10,6 +10,8 @@
 #include "LevelEditor/LevelEditorBridge.h"
 #include "HitCheck/CollisionManager.h"	
 
+constexpr const char* battleSceneSaveFileName = "BattleScene";	
+
 class BattleScene : public Scene
 {
 public:

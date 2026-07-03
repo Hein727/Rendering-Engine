@@ -8,7 +8,7 @@
 TestScene::TestScene(GameContext& gameContext, SceneManager& sceneManager, AssetManager& assetManager) :
 	gameContext(&gameContext), sceneManager(&sceneManager)
 {
-	testObject = std::make_unique<GameObject>(gameContext, assetManager);
+	testObject = std::make_unique<GameObject>(gameContext, assetManager, testSceneSaveFileName);
 
 	collisionManager = std::make_unique<CollisionManager>(gameContext,testObject->GetDatas());
 
