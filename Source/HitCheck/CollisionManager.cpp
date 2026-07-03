@@ -1,30 +1,28 @@
 #include "CollisionManager.h"
+#include <DirectXCollision.h>
 
-void CollisionManager::Update(float deltaTime)
+void CollisionManager::CheckCursorWithModel()
 {
-	for (auto& [id, modelData1] : modelDatas)
+	gameContext.input.mouseControl.UpdateMouseRay(gameContext.graphics);
+
+	using namespace DirectX;
+
+	XMFLOAT3 origin = gameContext.input.mouseControl.GetMouseOrigin();
+	XMVECTOR Origin = XMLoadFloat3(&origin);	
+	XMFLOAT3 dir = gameContext.input.mouseControl.GetMouseDir();
+	XMVECTOR Dir = XMLoadFloat3(&dir);	
+	float distance = 10.0f; // Set a maximum distance for the ray
+
+	for (auto& data : datas)
 	{
-		if (!modelData1.hasCollider)
-			continue;
+		if (XMVector3Equal(Origin, Dir)) break;
 
-		for (auto& [otherID, modelData2] : modelDatas)
+		if (data.aabb)
 		{
-			if (id == otherID)
-				continue;
-
-			if (!modelData2.hasCollider)
-				continue;
-
-			if (!collisionMatrix[(int)modelData1.layer][(int)modelData2.layer])
-				continue;
-
-			auto model1 = modelData1.model.lock();
-			auto model2 = modelData2.model.lock();
-
-			if (model1 || model2)
+			if(data.aabb->GetCollider().Intersects(Origin, Dir, distance))
 			{
-				modelData1.OnCollisionWith(otherID);
-				modelData2.OnCollisionWith(id);
+				data.AABBvsCursor();
+				break;
 			}
 		}
 	}

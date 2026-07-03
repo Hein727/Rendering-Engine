@@ -16,11 +16,11 @@ void camera_controls::Update(HWND hwnd, float elapsedTime, ID3D11DeviceContext* 
 	new_cursor.x = point.x;
 	new_cursor.y = point.y;
 
-	float moveX = (new_cursor.x - old_cursor.x) * 0.5f * elapsedTime;
-	float moveY = (new_cursor.y - old_cursor.y) * 0.5f * elapsedTime;
+	float moveX = (new_cursor.x - old_cursor.x) * 0.01f;
+	float moveY = (new_cursor.y - old_cursor.y) * 0.01f;
 	if (::GetAsyncKeyState(VK_LMENU) & 0x8000)
 	{
-		if (::GetAsyncKeyState(VK_LBUTTON) & 0x8000)
+		if (::GetAsyncKeyState(VK_RBUTTON) & 0x8000)
 		{
 			rotateY += moveX * 0.5f;
 			if (rotateY > DirectX::XM_PI)
@@ -49,7 +49,7 @@ void camera_controls::Update(HWND hwnd, float elapsedTime, ID3D11DeviceContext* 
 			DirectX::XMFLOAT4X4 W;
 			DirectX::XMStoreFloat4x4(&W, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&view)));
 
-			float s = distance * 0.1f;
+			float s = distance * 0.75f;
 			float x = moveX * s;
 			float y = moveY * s;
 			focus.x -= W._11 * x;
@@ -82,7 +82,7 @@ void camera_controls::Update(HWND hwnd, float elapsedTime, ID3D11DeviceContext* 
 		UINT num_viewports{ 1 };
 		dc->RSGetViewports(&num_viewports, &viewport);
 		float aspect{ viewport.Width / viewport.Height };
-		P = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(30.0f), aspect, 0.1f, 1000.0f);
+		P = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(30.0f), aspect, 0.1f, 100000.0f);
 		DirectX::XMStoreFloat4x4(&projection, P);
 	}
 }

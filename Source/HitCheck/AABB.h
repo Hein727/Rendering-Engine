@@ -8,7 +8,8 @@
 class AABB// Axis-Aligned Bounding Box 
 {
 public:
-	AABB(GameContext& gameContext, DirectX::XMFLOAT3& min, DirectX::XMFLOAT3& max);
+	AABB(GameContext& gameContext);
+	void SetMinMax(DirectX::XMFLOAT3& min, DirectX::XMFLOAT3& max);
 	void Update(DirectX::XMFLOAT3& pos, DirectX::XMFLOAT3& scale, float uniformScaling = 1.0f);
 	void Render(float elapsedTime);
 	~AABB() = default;

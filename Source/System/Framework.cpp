@@ -1,5 +1,7 @@
 #include "Framework.h"
 #include "../TestScene.h"
+#include "../BattleScene.h"
+#include "../Imgui/src/ImGuizmo.h"
 
 framework::framework(HWND hwnd) : hwnd(hwnd)
 {
@@ -26,7 +28,8 @@ bool framework::initialized()
 	ImGui_ImplDX11_Init(graph.GetDevice(), graph.GetDeviceContext());
 
 	// scene manager initialize(the first scene to load)
-	sceneManager.ChangeScene(std::make_unique<TestScene>(gameContext, sceneManager, assetManager));
+	//sceneManager.ChangeScene(std::make_unique<TestScene>(gameContext, sceneManager, assetManager));
+	sceneManager.ChangeScene(std::make_unique<BattleScene>(gameContext, sceneManager, assetManager));
 
 	return true;
 }
@@ -42,6 +45,7 @@ void framework::update(float delta_time)
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+	ImGuizmo::BeginFrame();
 #endif
 
 	// update scene
@@ -49,7 +53,16 @@ void framework::update(float delta_time)
 
 	gameContext.input.cameraControls.Update(hwnd, delta_time, context);
 
+#if _DEBUG
+
 	gameContext.input.mouseControl.Update(delta_time);
+
+	if (gameContext.input.mouseControl.GetMouseLeftClick())
+	{
+		gameContext.input.mouseControl.UpdateMouseRay(gameContext.graphics);
+	}
+
+#endif
 }
 
 void framework::render(float delta_time)

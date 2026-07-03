@@ -10,10 +10,10 @@ public:
 	~camera_controls() = default;
 	void Update(HWND hwnd, float elapsedTime, ID3D11DeviceContext* dc);
 	void setWheel(float wheel) { this->wheel = wheel; }	
-	DirectX::XMFLOAT4X4 get_view() const& { return view; }
-	DirectX::XMFLOAT4X4 get_projection() const& { return projection; }
-	POINT get_cursor_position() const { return new_cursor; }	
-	DirectX::XMFLOAT3 get_position() const { return position; }
+	DirectX::XMFLOAT4X4& get_view() { return view; }
+	DirectX::XMFLOAT4X4& get_projection() { return projection; }
+	POINT& get_cursor_position() { return new_cursor; }	
+	DirectX::XMFLOAT3& get_position() { return position; }
 
 private :
 	void Update_transform();

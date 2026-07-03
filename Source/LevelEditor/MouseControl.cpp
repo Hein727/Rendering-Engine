@@ -1,9 +1,11 @@
 #include "MouseControl.h"
 #include "CameraControl.h"
 #include "../System/Graphics.h"
+#include "imgui.h"
 
 void MouseControl::Update(float elapsedTime)
 {
+
 	bool currentLeftClick = (::GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
 	bool currentRightClick = (::GetAsyncKeyState(VK_RBUTTON) & 0x8000) != 0;
 
@@ -22,35 +24,50 @@ void MouseControl::Update(float elapsedTime)
 	oldRightClick = currentRightClick;
 }
 
-DirectX::XMFLOAT3 MouseControl::GetMouseWorldPos(DirectX::XMMATRIX M)const // raycasted mouse position in world coordinates
+void MouseControl::UpdateMouseRay(graphics& graphics)
 {
+	using namespace DirectX;
+
+	D3D11_VIEWPORT viewport{};
+	UINT numViewports = 1;
+	auto dc = graphics.GetDeviceContext();
+
+	dc->RSGetViewports(&numViewports, &viewport);
+
 	POINT cursorPos = cameraControls.get_cursor_position();
-	DirectX::XMVECTOR CursorV = DirectX::XMVectorSet(static_cast<float>(cursorPos.x), static_cast<float>(cursorPos.y), 0.0f, 1.0f);
-	float viewportX = 0.0f;
-	float viewportY = 0.0f;
-	float viewportWidth = static_cast<float>(SCREEN_WIDTH);
-	float viewportHeight = static_cast<float>(SCREEN_HEIGHT);
-	float viewportMinZ = 0.0f;
-	float viewportMaxZ = 1.0f;
-	DirectX::XMFLOAT4X4 p = cameraControls.get_projection();
-	DirectX::XMFLOAT4X4 v = cameraControls.get_view();
-	DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&p);
-	DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&v);
-	DirectX::XMVECTOR Near = DirectX::XMVector3Unproject(CursorV, viewportX, viewportY, viewportWidth, viewportHeight, viewportMinZ, viewportMaxZ, P, V, M);
-	CursorV = DirectX::XMVectorSet(static_cast<float>(cursorPos.x), static_cast<float>(cursorPos.y), 1.0f, 1.0f);
-	DirectX::XMVECTOR Far = DirectX::XMVector3Unproject(CursorV, viewportX, viewportY, viewportWidth, viewportHeight, viewportMinZ, viewportMaxZ, P, V, M);
-	DirectX::XMVECTOR Direction = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(Far, Near));
+	XMVECTOR CursorNear = XMVectorSet(static_cast<float>(cursorPos.x), static_cast<float>(cursorPos.y), 0.0f, 1.0f);
+	float viewportX = viewport.TopLeftX;
+	float viewportY = viewport.TopLeftY;
+	float viewportWidth = viewport.Width;
+	float viewportHeight = viewport.Height;
+	float viewportMinZ = viewport.MinDepth;
+	float viewportMaxZ = viewport.MaxDepth;
+	XMMATRIX M = XMMatrixIdentity();
+	XMFLOAT4X4 p = cameraControls.get_projection();
+	XMFLOAT4X4 v = cameraControls.get_view();
+	XMMATRIX P = XMLoadFloat4x4(&p);
+	XMMATRIX V = XMLoadFloat4x4(&v);
+	XMVECTOR Near = XMVector3Unproject(CursorNear, viewportX, viewportY, viewportWidth, viewportHeight, viewportMinZ, viewportMaxZ, P, V, M);
+	XMVECTOR CursorFar = XMVectorSet(static_cast<float>(cursorPos.x), static_cast<float>(cursorPos.y), 1.0f, 1.0f);
+	XMVECTOR World = XMVector3Unproject(CursorFar, viewportX, viewportY, viewportWidth, viewportHeight, viewportMinZ, viewportMaxZ, P, V, M);
+	XMVECTOR Direction = XMVector3Normalize(XMVectorSubtract(World, Near));
 
-	float nearY = DirectX::XMVectorGetY(Near);
-	float directionY = DirectX::XMVectorGetY(Direction);
+	origin = XMFLOAT3(XMVectorGetX(Near), XMVectorGetY(Near), XMVectorGetZ(Near));
+	dir = DirectX::XMFLOAT3(XMVectorGetX(Direction), XMVectorGetY(Direction), XMVectorGetZ(Direction));
+}
 
-	DirectX::XMFLOAT3 cursorWorldPos{ 0, 0, 0 };
+DirectX::XMFLOAT3 MouseControl::GetRayHitOnPlane(float planeY)
+{
+	float originY = origin.y;
+	float dirY = dir.y;
 
-	if (fabs(directionY) > 0.00001f)
-	{
-		float t = -nearY / directionY;
-		DirectX::XMVECTOR hitPos = DirectX::XMVectorAdd(Near, DirectX::XMVectorScale(Direction, t));
-		DirectX::XMStoreFloat3(&cursorWorldPos, hitPos);
-	}
-	return cursorWorldPos;
-};
+	if(fabs(dir.y) < FLT_EPSILON)
+		return DirectX::XMFLOAT3(0, planeY, 0);
+
+	float t = (planeY - originY) / dirY;
+	
+	if(t < 0.0f)
+		return DirectX::XMFLOAT3(0, planeY, 0);
+
+	return DirectX::XMFLOAT3(origin.x + dir.x * t, planeY, origin.z + dir.z * t);
+}

@@ -1,6 +1,7 @@
 #pragma once
 #include "GltfModel.h"
-#include "GameContext.h"	
+#include "GameContext.h"
+#include "../HitCheck/AABB.h"
 #include <string>
 #include <unordered_map>
 #include <list>
@@ -14,6 +15,7 @@ public :
 	//void loadSprite(const std::string& spriteName);
 	//void loadAudio(const std::string& audioName);
 
+	std::shared_ptr<GltfModel> GetModel(GameContext& gameContext, const std::string& ID, std::unique_ptr<AABB>& aabb) const;
 	std::shared_ptr<GltfModel> GetModel(const std::string& ID) const;
 	//void GetTexture(const std::string& textureName);	
 	//void GetSprite(const std::string& spriteName);

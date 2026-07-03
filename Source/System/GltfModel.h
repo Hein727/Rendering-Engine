@@ -191,9 +191,8 @@ public:
 
 	void Render(const DirectX::XMFLOAT4X4 world, const std::vector<Node>& animatedNodes = {});
 
-	//Copy of hitbox 
-	std::unique_ptr<AABB> aabb;
-	bool useAABB = false;
+	DirectX::XMFLOAT3 minPos{ FLT_MAX, FLT_MAX, FLT_MAX };
+	DirectX::XMFLOAT3 maxPos{ -FLT_MAX, -FLT_MAX, -FLT_MAX };
 
 private:
 

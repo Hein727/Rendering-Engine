@@ -16,6 +16,7 @@ public :
 	~Grid() = default;
 	void Update(float elapsedTime);
 	void Render(float elapsedTime);
+	DirectX::XMFLOAT3 GetCurrentCellLocation() const;
 
 private :
 

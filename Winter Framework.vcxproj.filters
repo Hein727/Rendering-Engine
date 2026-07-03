@@ -19,6 +19,9 @@
     <Filter Include="Source\HitCheck">
       <UniqueIdentifier>{36ea1383-9dbd-4e51-9920-19f6877953ae}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Imgui\src">
+      <UniqueIdentifier>{5f4758f9-2c97-42bf-b991-bcad381a0b64}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\Main.cpp">
@@ -113,6 +116,27 @@
     </ClCompile>
     <ClCompile Include="Source\System\LineRenderer.cpp">
       <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui\src\GraphEditor.cpp">
+      <Filter>Source\Imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui\src\ImCurveEdit.cpp">
+      <Filter>Source\Imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui\src\ImGradient.cpp">
+      <Filter>Source\Imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui\src\ImGuizmo.cpp">
+      <Filter>Source\Imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui\src\ImSequencer.cpp">
+      <Filter>Source\Imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui\src\ImVectorEditor.cpp">
+      <Filter>Source\Imgui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\BattleScene.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -226,6 +250,33 @@
     </ClInclude>
     <ClInclude Include="Source\System\LineRenderer.h">
       <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\src\GraphEditor.h">
+      <Filter>Source\Imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\src\ImCurveEdit.h">
+      <Filter>Source\Imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\src\ImGradient.h">
+      <Filter>Source\Imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\src\ImGuizmo.h">
+      <Filter>Source\Imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\src\ImLightRig.h">
+      <Filter>Source\Imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\src\ImSequencer.h">
+      <Filter>Source\Imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\src\ImVectorEditor.h">
+      <Filter>Source\Imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\src\ImZoomSlider.h">
+      <Filter>Source\Imgui\src</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\BattleScene.h">
+      <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

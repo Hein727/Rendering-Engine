@@ -2,6 +2,7 @@
 #include "GltfModel.h"
 #include "SceneManager.h"
 #include "AssetManager.h"
+#include "../LevelEditor/Grid.h"
 #include <DirectXMath.h>
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/vector.hpp>
@@ -74,6 +75,7 @@ struct ModelData
 	DirectX::XMFLOAT3 scale;
 	DirectX::XMFLOAT3 rotation;
 	Layer layer = Layer::DEFAULT;
+	std::unique_ptr<AABB> aabb;
 	bool hasCollider = false;
 	DirectX::XMFLOAT4X4 world = {
 		1, 0, 0, 0,
@@ -82,13 +84,19 @@ struct ModelData
 		0, 0, 0, 1
 	};
 	std::weak_ptr<GltfModel> model;
-	std::vector<std::string> collidingWithIDs;
+	bool selected = false;
 
-	// for testing 
+	ModelData() = default;
+	ModelData(const ModelData&) = delete;            // can't copy
+	ModelData& operator=(const ModelData&) = delete; // can't copy assign
+	ModelData(ModelData&&) = default;                // can move
+	ModelData& operator=(ModelData&&) = default;     // can move assign
 
-	bool isColliding = false;
-
-	virtual void OnCollisionWith(const std::string& otherID) {};
+	virtual ~ModelData() = default; 
+	virtual void AABBvsCursor() 
+	{
+		selected = true;
+	};
 
 	template<class T> 	
 	void serialize(T& archive)
@@ -103,7 +111,7 @@ public:
 	GameObject(GameContext& gameContext, AssetManager& assetManager);
 	virtual ~GameObject() = default;
 
-	void PlaceModel(const std::string ID);
+	void PlaceModel(const std::string ID, Grid& grid);
 	void Update(float deltaTime);
 	void Render(float deltaTime);
 	void DebugUI();	
@@ -136,5 +144,9 @@ protected:
 
 	bool changeInData = false;
 	std::vector<std::string> container;
+	DirectX::XMFLOAT3 location;
 
+public:
+
+	std::vector<ModelData>& GetDatas() { return datas; }
 };

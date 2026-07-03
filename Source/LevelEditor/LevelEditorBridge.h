@@ -21,6 +21,7 @@ public:
 	void Update(float elapsedTime);
 	void Render(float elapsedTime);
 	void DebugUI();
+	bool GetPlacingModel() const { return placingModel; }	
 
 protected:
 	GameContext& gameContext;

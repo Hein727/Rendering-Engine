@@ -10,6 +10,8 @@ TestScene::TestScene(GameContext& gameContext, SceneManager& sceneManager, Asset
 {
 	testObject = std::make_unique<GameObject>(gameContext, assetManager);
 
+	collisionManager = std::make_unique<CollisionManager>(gameContext,testObject->GetDatas());
+
 #ifdef _DEBUG
 
 	levelEditorBridge = std::make_unique<LevelEditorBridge>(gameContext, assetManager, *testObject);
@@ -69,6 +71,7 @@ void TestScene::Render(float deltaTime)
 #ifdef _DEBUG
 
 	levelEditorBridge->Render(deltaTime);
+	
 
 #endif
 }
@@ -85,6 +88,15 @@ void TestScene::DebugUI()
 #ifdef _DEBUG
 
 	levelEditorBridge->DebugUI();
+	auto& io = ImGui::GetIO();
+
+	if (!io.WantCaptureMouse && !levelEditorBridge->GetPlacingModel())
+	{
+		if (gameContext->input.mouseControl.GetMouseLeftClick())
+		{
+			collisionManager->CheckCursorWithModel();
+		}
+	}
 
 #endif
 }

@@ -14,6 +14,8 @@ public:
 
 	void AddVertex(const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT4& color);
 
+	DirectX::XMFLOAT3& GetCurrentCellOrigin() { return currentCellOrigin; }
+
 	void DrawGrid(int subdivisions, float scale);
 
 	void Render();
@@ -37,9 +39,6 @@ private:
 
 	GameContext& gameContext;
 
-	// Useful for snapping things into place on the grid
-	std::vector<DirectX::XMFLOAT3> gridCenterPoints;
-
 	DirectX::XMFLOAT3 prevCellOrigin{ 0, 0, 0 };
-	DirectX::XMFLOAT3 currentCellOrigin;
+	DirectX::XMFLOAT3 currentCellOrigin{ 0, 0, 0 };
 };

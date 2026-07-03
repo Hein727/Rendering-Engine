@@ -308,15 +308,13 @@ void GltfModel::FetchMesh(const tinygltf::Model& gltfModel)
 				float y = positionData[i * 3 + 1];
 				float z = positionData[i * 3 + 2];
 
-				min.x = std::min(min.x, x);
-				min.y = std::min(min.y, y);
-				min.z = std::min(min.z, z);
-				max.x = std::max(max.x, x);
-				max.y = std::max(max.y, y);
-				max.z = std::max(max.z, z);
+				minPos.x = std::min(minPos.x, x);
+				minPos.y = std::min(minPos.y, y);
+				minPos.z = std::min(minPos.z, z);
+				maxPos.x = std::max(maxPos.x, x);
+				maxPos.y = std::max(maxPos.y, y);
+				maxPos.z = std::max(maxPos.z, z);
 			}
-
-			aabb = std::make_unique<AABB>(gameContext, min, max);
 
 		}
 	}

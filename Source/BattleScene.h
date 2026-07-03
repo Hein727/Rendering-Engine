@@ -10,29 +10,27 @@
 #include "LevelEditor/LevelEditorBridge.h"
 #include "HitCheck/CollisionManager.h"	
 
-class TestScene : public Scene
+class BattleScene : public Scene
 {
 public:
 
-	TestScene(GameContext& gameContext, SceneManager& sceneManager, AssetManager& assetManager);
-	~TestScene() = default;
+	BattleScene(GameContext& gameContext, SceneManager& sceneManager, AssetManager& assetManager);
+	~BattleScene() = default;
 
 	void Init() override;
 	void Update(float deltaTime) override;
 	void Render(float deltaTime) override;
 	void Uninit() override;
 	void DebugUI() override;
-	void HandleInput(std::string input) override;	
+	void HandleInput(std::string input) override;
 
 private:
 
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srvs[8];
-
-	std::unique_ptr<GameObject> testObject;
+	std::unique_ptr<GameObject> battleObject;
 
 	GameContext* gameContext = nullptr;
 	SceneManager* sceneManager = nullptr;
-	
+
 	std::unique_ptr<LevelEditorBridge> levelEditorBridge;
 
 	std::unique_ptr<CollisionManager> collisionManager;

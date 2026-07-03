@@ -10,12 +10,14 @@
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 #include <imgui_internal.h>	
+#include <filesystem>
 
 #include "Timer.h"
 #include "Misc.h"
 #include "GameContext.h"
 #include "SceneManager.h"
 #include "AssetManager.h"
+#include "../HitCheck/CollisionManager.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #define APPLICATION_NAME L"Graduation Project"
@@ -27,7 +29,7 @@ public :
 
 	framework(HWND hwnd);
 	~framework();
-		
+
 	int run()
 	{
 		MSG msg{};
@@ -109,11 +111,19 @@ public :
 
 			DragQueryFileA(hDrop, 0, filePath, MAX_PATH);
 
-			std::string path = filePath;	
+			std::filesystem::path obj(filePath);	
 
-			std::replace(path.begin(), path.end(), '\\', '/');	
+			if (obj.extension() != ".gltf" || obj.extension() == ".glb")
+			{
+				DragFinish(hDrop);
+				break;
+			}
 
-			sceneManager.HandleInput(path);
+			std::string location = filePath;	
+
+			std::replace(location.begin(), location.end(), '\\', '/');
+
+			sceneManager.HandleInput(location);
 
 			DragFinish(hDrop);
 		}

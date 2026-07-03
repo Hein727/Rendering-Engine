@@ -1,6 +1,12 @@
 #include "AABB.h"
 
-AABB::AABB(GameContext& gameContext, DirectX::XMFLOAT3& min, DirectX::XMFLOAT3& max) : gameContext(gameContext)
+AABB::AABB(GameContext& gameContext) : gameContext(gameContext)
+{
+
+	boxMesh = std::make_unique<StaticMesh>(gameContext, L"./Data/cube.obj");
+}
+
+void AABB::SetMinMax(DirectX::XMFLOAT3& min, DirectX::XMFLOAT3& max)
 {
 	model = std::make_unique<Box>();
 	model->min = min;
@@ -11,8 +17,6 @@ AABB::AABB(GameContext& gameContext, DirectX::XMFLOAT3& min, DirectX::XMFLOAT3& 
 	renderBoundingBox = true;
 
 #endif
-
-	boxMesh = std::make_unique<StaticMesh>(gameContext, L"./Data/cube.obj");
 }
 
 void AABB::Update(DirectX::XMFLOAT3& pos, DirectX::XMFLOAT3& scale, float uniformScaling)

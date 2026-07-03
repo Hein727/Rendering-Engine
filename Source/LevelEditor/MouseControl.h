@@ -1,10 +1,7 @@
 #pragma once
 #include <DirectXMath.h>
 #include "CameraControl.h"
-
-// Mouse control functions for the level editor 
-// マウスコントロール関数（レベルエディタ用）
-
+#include "../System/Graphics.h"
 
 class MouseControl
 {
@@ -13,6 +10,10 @@ public :
 	~MouseControl() = default;
 	void Update(float elapsedTime);
 
+	// PS Call this before using ray hit functions
+	void UpdateMouseRay(graphics& graphics);
+	DirectX::XMFLOAT3 GetRayHitOnPlane(float planeY);
+
 private:
 	bool leftClick = false;
 	bool rightClick = false;
@@ -20,10 +21,14 @@ private:
 	bool rightHold = false;	
 	camera_controls& cameraControls;
 
+	DirectX::XMFLOAT3 origin{ 0,0,0 };
+	DirectX::XMFLOAT3 dir{ 0,0,0 };
+
 public :
-	DirectX::XMFLOAT3 GetMouseWorldPos(DirectX::XMMATRIX M = DirectX::XMMatrixIdentity()) const;
 	bool GetMouseLeftClick() { return leftClick; }
 	bool GetMouseRightClick() { return rightClick; }
 	bool GetMouseLeftHold() { return leftHold; }
 	bool GetMouseRightHold() { return rightHold; }
+	DirectX::XMFLOAT3 GetMouseOrigin() { return origin; }
+	DirectX::XMFLOAT3 GetMouseDir() { return dir; }
 };

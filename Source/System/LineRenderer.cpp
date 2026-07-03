@@ -90,18 +90,6 @@ void LineRenderer::DrawGrid(int subdivisions, float scale)
 		s += step;
 	}
 
-	gridCenterPoints.clear();
-	for (int z = 0; z < subdivisions; ++z)
-	{
-		for (int x = 0; x < subdivisions; ++x)
-		{
-			float centerX = currentCellOrigin.x + x * scale + scale * 0.5f;
-			float centerZ = currentCellOrigin.z + z * scale + scale * 0.5f;
-
-			gridCenterPoints.emplace_back(centerX, 0.0f, centerZ);
-		}
-	}
-
 }
 
 void LineRenderer::Render()

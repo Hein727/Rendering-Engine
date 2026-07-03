@@ -19,6 +19,8 @@ void LevelEditorBridge::DebugUI()
 	ImGui::Begin("Level Editor");
 	ImGui::Text("This is the level editor bridge.");
 	ImGui::Text("PS: only use gltf models ffs");
+	POINT cursor = gameContext.input.cameraControls.get_cursor_position();
+	ImGui::Text("Cursor Position: (%f, %f)", static_cast<float>(cursor.x), static_cast<float>(cursor.y));
 	if (ImGui::CollapsingHeader("Model Loader"))
 	{
 		std::list<std::string> modelNames = assetManager.GetAllModelNames();
@@ -53,7 +55,7 @@ void LevelEditorBridge::DebugUI()
 	{
 		if (gameContext.input.mouseControl.GetMouseLeftClick())
 		{
-			currentGameObject.PlaceModel(selectedModelName);
+			currentGameObject.PlaceModel(selectedModelName, *grid);
 		}
 	}
 }	
