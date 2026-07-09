@@ -1,16 +1,20 @@
 #include "TestScene.h"
-#include "System/Shader.h"
+#include "RenderingComponents/Shader.h"
 #include "System/GameContext.h"
-#include "System/Texture.h"
+#include "RenderingComponents/Texture.h"
 #include "LevelEditor/MouseControl.h"
+#include "RenderingComponents/ShadingSetup.h"
+#include "System/SceneIO.h"
 #include <imgui.h>
 
 TestScene::TestScene(GameContext& gameContext, SceneManager& sceneManager, AssetManager& assetManager) :
-	gameContext(&gameContext), sceneManager(&sceneManager)
+	gameContext(&gameContext), sceneManager(&sceneManager), assetManager(&assetManager)
 {
-	testObject = std::make_unique<GameObject>(gameContext, assetManager, testSceneSaveFileName);
+	testObject = std::make_unique<GameObject>();
 
-	collisionManager = std::make_unique<CollisionManager>(gameContext,testObject->GetDatas());
+	testObject->Init(gameContext, assetManager);
+
+	collisionManager = std::make_unique<CollisionManager>(gameContext, testObject->GetDatas());
 
 #ifdef _DEBUG
 
@@ -23,13 +27,20 @@ void TestScene::Init()
 {
 	auto device = gameContext->graphics.GetDevice();
 
+	// Setting up sun
+	lightConstants.directionalLights.direction = { 0.3f, -1.0f, 0.2f, 0.0f };
+	lightConstants.directionalLights.color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	SetupConstantBuffer(*gameContext, lightConstantBuffer, lightConstants);
+
 	D3D11_TEXTURE2D_DESC desc{};
 	desc.MipLevels = 0;
 	desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-	loadTextureFromFile(device, L"Data/environments/test texture/skybox.dds", srvs[0].GetAddressOf(), &desc);
-	loadTextureFromFile(device, L"Data/environments/test texture/diffuse_iem.dds", srvs[1].GetAddressOf(), &desc);
-	loadTextureFromFile(device, L"Data/environments/test texture/specular_pmrem.dds", srvs[2].GetAddressOf(), &desc);
-	loadTextureFromFile(device, L"Data/environments/test texture/lut_ggx.dds", srvs[3].GetAddressOf(), &desc);
+	//already deleted the textures if in need download new environment textures 
+	//loadTextureFromFile(device, L"Data/environments/test texture/skybox.dds", srvs[0].GetAddressOf(), &desc);
+	//loadTextureFromFile(device, L"Data/environments/test texture/diffuse_iem.dds", srvs[1].GetAddressOf(), &desc);
+	//loadTextureFromFile(device, L"Data/environments/test texture/specular_pmrem.dds", srvs[2].GetAddressOf(), &desc);
+	//loadTextureFromFile(device, L"Data/environments/test texture/lut_ggx.dds", srvs[3].GetAddressOf(), &desc);
 }
 
 void TestScene::Update(float deltaTime)
@@ -45,12 +56,15 @@ void TestScene::Update(float deltaTime)
 
 void TestScene::Render(float deltaTime)
 {	
-	auto context = gameContext->graphics.GetDeviceContext();
+	//auto context = gameContext->graphics.GetDeviceContext();
 
-	context->PSSetShaderResources(32, 1, srvs[0].GetAddressOf());
+	/*context->PSSetShaderResources(32, 1, srvs[0].GetAddressOf());
 	context->PSSetShaderResources(33, 1, srvs[1].GetAddressOf());
 	context->PSSetShaderResources(34, 1, srvs[2].GetAddressOf());
-	context->PSSetShaderResources(35, 1, srvs[3].GetAddressOf());
+	context->PSSetShaderResources(35, 1, srvs[3].GetAddressOf());*/
+
+	int lightShaderSlot = 13;
+	UpdateConstantBuffer(*gameContext, lightConstantBuffer, lightConstants, lightShaderSlot);
 
 	//static std::vector<GltfModel::Node> animatedNodes{ gltfModels[0]->nodes };
 	//static float time{ 0 };
@@ -98,7 +112,29 @@ void TestScene::DebugUI()
 		}
 	}
 
+	ImGui::Begin(testSceneSaveFileName);
+	if (ImGui::CollapsingHeader("lights"))
+	{
+		ImGui::ColorEdit3("ambientColor", &lightConstants.ambientColor.x);
+		ImGui::DragFloat4("directionalLights.direction", &lightConstants.directionalLights.direction.x, 0.01f, -1.0f, 1.0f);
+		ImGui::ColorEdit3("directionalLights.color", &lightConstants.directionalLights.color.x);
+	}
+	if (ImGui::CollapsingHeader("Scene Save/Load"))
+	{
+		if (ImGui::Button("Save Scene"))
+		{
+			SaveScene();
+		}
+		if (ImGui::Button("Load Scene"))
+		{
+			LoadScene();
+		}
+	}
+	ImGui::End();
+
 #endif
+
+	
 }
 
 void TestScene::HandleInput(std::string input)
@@ -106,5 +142,26 @@ void TestScene::HandleInput(std::string input)
 	if (input.empty()) return;
 	
 	testObject->HandleInput(input);
+}
+
+void TestScene::SaveScene()
+{
+#if _DEBUG
+	SaveSceneData(testSceneSaveFileName, *this, false);
+#else
+	SaveSceneData(testSceneSaveFileName, *this, true);	
+#endif
+}
+
+void TestScene::LoadScene()
+{
+#if _DEBUG
+	LoadSceneData(testSceneSaveFileName, *this, false);
+#else
+	LoadSceneData(testSceneSaveFileName, *this, true);
+#endif
+	testObject->RestoreRuntimeData(*gameContext, *assetManager);
+
+	collisionManager->UpdateDatas(testObject->GetDatas());
 }
 

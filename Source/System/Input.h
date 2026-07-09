@@ -1,7 +1,7 @@
 #pragma once
 #include "../LevelEditor/CameraControl.h"
 #include "../LevelEditor/MouseControl.h"
-#include "Graphics.h"	
+#include "../RenderingComponents/Graphics.h"	
 
 class Input
 {

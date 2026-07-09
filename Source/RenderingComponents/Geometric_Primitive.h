@@ -3,7 +3,7 @@
 #include <DirectXMath.h>
 #include <d3d11.h>
 #include <wrl.h>
-#include "GameContext.h"	
+#include "../System/GameContext.h"	
 
 class Geometric_Primitive
 {

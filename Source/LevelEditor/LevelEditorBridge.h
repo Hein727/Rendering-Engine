@@ -12,10 +12,11 @@
 class LevelEditorBridge
 {
 public:
-	LevelEditorBridge(GameContext& gameContext, AssetManager& assetManager, GameObject& gameObject) : gameContext(gameContext), assetManager(assetManager), currentGameObject(gameObject) 
+	LevelEditorBridge(GameContext& gameContext, AssetManager& assetManager, GameObject& gameObject) : gameContext(gameContext), assetManager(assetManager), currentGameObject(&gameObject) 
 	{
 		grid = std::make_unique<Grid>(gameContext);
 	};
+
 	~LevelEditorBridge() = default;
 
 	void Update(float elapsedTime);
@@ -26,7 +27,7 @@ public:
 protected:
 	GameContext& gameContext;
 	AssetManager& assetManager;
-	GameObject& currentGameObject;	
+	GameObject* currentGameObject = nullptr;	
 	bool placingModel = false;
 
 	std::list<std::string> loadedModelNames;

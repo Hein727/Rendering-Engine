@@ -11,7 +11,7 @@
 #include <cereal/types/memory.hpp>
 #include <cereal/types/set.hpp>
 #include <cereal/types/unordered_map.hpp>
-#include "GameContext.h"
+#include "../System/GameContext.h"
 
 namespace DirectX
 {

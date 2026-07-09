@@ -1,7 +1,7 @@
 #pragma once
 #include "../System/GameContext.h"
-#include "../System/Geometric_Primitive.h"
-#include "../System/LineRenderer.h"
+#include "../RenderingComponents/Geometric_Primitive.h"
+#include "../RenderingComponents/LineRenderer.h"
 #include <unordered_map>
 #include <memory>
 #include <DirectXMath.h>

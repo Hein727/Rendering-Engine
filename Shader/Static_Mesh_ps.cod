@@ -8,8 +8,56 @@
 // {
 //
 //   row_major float4x4 view_projection;// Offset:    0 Size:    64 [unused]
-//   float4 light_direction;            // Offset:   64 Size:    16
-//   float4 camera_position;            // Offset:   80 Size:    16
+//   float4 camera_position;            // Offset:   64 Size:    16
+//
+// }
+//
+// cbuffer LIGHT_CONSTANTS
+// {
+//
+//   float4 ambientColor;               // Offset:    0 Size:    16 [unused]
+//   uint4 lightCount;                  // Offset:   16 Size:    16 [unused]
+//   
+//   struct DirectionalLight
+//   {
+//       
+//       float4 directional;            // Offset:   32
+//       float4 color;                  // Offset:   48
+//
+//   } directionalLight;                // Offset:   32 Size:    32
+//   
+//   struct PointLight
+//   {
+//       
+//       float4 position;               // Offset:   64
+//       float4 color;                  // Offset:   80
+//       float range;                   // Offset:   96
+//       float3 padding;                // Offset:  100
+//
+//   } pointLight[8];                   // Offset:   64 Size:   384 [unused]
+//   
+//   struct SpotLight
+//   {
+//       
+//       float4 position;               // Offset:  448
+//       float4 direction;              // Offset:  464
+//       float4 color;                  // Offset:  480
+//       float range;                   // Offset:  496
+//       float innerCone;               // Offset:  500
+//       float outerCone;               // Offset:  504
+//       float3 padding;                // Offset:  512
+//
+//   } spotLight[8];                    // Offset:  448 Size:   636 [unused]
+//   
+//   struct HemisphereLight
+//   {
+//       
+//       float4 skyColor;               // Offset: 1088
+//       float4 groundColor;            // Offset: 1104
+//       float weight;                  // Offset: 1120
+//       float3 padding;                // Offset: 1124
+//
+//   } hemisphereLight[8];              // Offset: 1088 Size:   384 [unused]
 //
 // }
 //
@@ -23,6 +71,7 @@
 // color_map                         texture  float4          2d             t0      1 
 // normal_map                        texture  float4          2d             t1      1 
 // SCENE_CONSTANTS                   cbuffer      NA          NA            cb0      1 
+// LIGHT_CONSTANTS                   cbuffer      NA          NA           cb13      1 
 //
 //
 //
@@ -45,7 +94,8 @@
 //
 ps_5_0
 dcl_globalFlags refactoringAllowed | skipOptimization
-dcl_constantbuffer CB0[6], immediateIndexed
+dcl_constantbuffer CB0[5], immediateIndexed
+dcl_constantbuffer CB13[3], immediateIndexed
 dcl_sampler s0, mode_default
 dcl_sampler s2, mode_default
 dcl_resource_texture2d (float,float,float,float) t0
@@ -118,7 +168,7 @@ rsq r1.w, r1.w
 mul r1.xyz, r1.wwww, r1.xyzx  // r1.x <- N.x; r1.y <- N.y; r1.z <- N.z
 
 #line 22
-mov r2.xyz, -cb0[4].xyzx
+mov r2.xyz, -cb13[2].xyzx
 dp3 r1.w, r2.xyzx, r2.xyzx
 rsq r1.w, r1.w
 mul r2.xyz, r1.wwww, r2.xyzx  // r2.x <- L.x; r2.y <- L.y; r2.z <- L.z
@@ -131,7 +181,7 @@ mul r3.xyz, r0.xyzx, r1.wwww  // r3.x <- diffuse.x; r3.y <- diffuse.y; r3.z <- d
 
 #line 25
 mov r4.xyz, -v3.xyzx
-add r4.xyz, r4.xyzx, cb0[5].xyzx
+add r4.xyz, r4.xyzx, cb0[4].xyzx
 dp3 r1.w, r4.xyzx, r4.xyzx
 rsq r1.w, r1.w
 mul r4.xyz, r1.wwww, r4.xyzx  // r4.x <- V.x; r4.y <- V.y; r4.z <- V.z

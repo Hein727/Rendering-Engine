@@ -1,7 +1,7 @@
 #pragma once
 #include <DirectXMath.h>
 #include "CameraControl.h"
-#include "../System/Graphics.h"
+#include "../RenderingComponents/Graphics.h"
 
 class MouseControl
 {

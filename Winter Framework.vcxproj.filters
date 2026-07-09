@@ -22,6 +22,9 @@
     <Filter Include="Source\Imgui\src">
       <UniqueIdentifier>{5f4758f9-2c97-42bf-b991-bcad381a0b64}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\RenderingComponents">
+      <UniqueIdentifier>{ddcfb0f6-ebe2-4702-8727-965481f1a0b8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\Main.cpp">
@@ -30,26 +33,8 @@
     <ClCompile Include="Source\System\Framework.cpp">
       <Filter>Source\System</Filter>
     </ClCompile>
-    <ClCompile Include="Source\System\Graphics.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\Sprite.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\SpriteBatch.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
     <ClCompile Include="Source\TestScene.cpp">
       <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\Texture.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\Shader.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\Geometeric_Primitive.cpp">
-      <Filter>Source\System</Filter>
     </ClCompile>
     <ClCompile Include="Imgui\imgui_draw.cpp">
       <Filter>Source\Imgui</Filter>
@@ -71,21 +56,6 @@
     </ClCompile>
     <ClCompile Include="Imgui\imgui_impl_win32.cpp">
       <Filter>Source\Imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\Static_Mesh.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\Skinned_Mesh.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\Framebuffer.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\Fullscreen_Quad.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\GltfModel.cpp">
-      <Filter>Source\System</Filter>
     </ClCompile>
     <ClCompile Include="Source\System\SceneManager.cpp">
       <Filter>Source\System</Filter>
@@ -114,9 +84,6 @@
     <ClCompile Include="Source\LevelEditor\Grid.cpp">
       <Filter>Source\LevelEditor</Filter>
     </ClCompile>
-    <ClCompile Include="Source\System\LineRenderer.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
     <ClCompile Include="Imgui\src\GraphEditor.cpp">
       <Filter>Source\Imgui\src</Filter>
     </ClCompile>
@@ -138,6 +105,45 @@
     <ClCompile Include="Source\BattleScene.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\Framebuffer.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\Fullscreen_Quad.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\Geometeric_Primitive.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\GltfModel.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\Graphics.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\LineRenderer.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\Shader.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\ShadingSetup.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\Skinned_Mesh.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\Sprite.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\SpriteBatch.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\Static_Mesh.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\Texture.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\Framework.h">
@@ -149,26 +155,8 @@
     <ClInclude Include="Source\System\Misc.h">
       <Filter>Source\System</Filter>
     </ClInclude>
-    <ClInclude Include="Source\System\Graphics.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\Sprite.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
     <ClInclude Include="Source\TestScene.h">
       <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\SpriteBatch.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\Texture.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\Shader.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\Geometric_Primitive.h">
-      <Filter>Source\System</Filter>
     </ClInclude>
     <ClInclude Include="Imgui\imgui_impl_dx11.h">
       <Filter>Source\Imgui</Filter>
@@ -193,21 +181,6 @@
     </ClInclude>
     <ClInclude Include="Imgui\imgui_impl_win32.h">
       <Filter>Source\Imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\Static_Mesh.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\Skinned_Mesh.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\Framebuffer.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\Fullscreen_Quad.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\GltfModel.h">
-      <Filter>Source\System</Filter>
     </ClInclude>
     <ClInclude Include="Source\System\Scene.h">
       <Filter>Source\System</Filter>
@@ -248,9 +221,6 @@
     <ClInclude Include="Source\LevelEditor\Grid.h">
       <Filter>Source\LevelEditor</Filter>
     </ClInclude>
-    <ClInclude Include="Source\System\LineRenderer.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
     <ClInclude Include="Imgui\src\GraphEditor.h">
       <Filter>Source\Imgui\src</Filter>
     </ClInclude>
@@ -277,6 +247,54 @@
     </ClInclude>
     <ClInclude Include="Source\BattleScene.h">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\Serializer.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\SceneIO.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\Framebuffer.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\Fullscreen_Quad.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\Geometric_Primitive.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\GltfModel.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\Graphics.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\LineRenderer.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\Shader.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\ShadingSetup.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\Skinned_Mesh.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\Sprite.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\SpriteBatch.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\Static_Mesh.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\Texture.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\Lights.h">
+      <Filter>Source\RenderingComponents</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -308,6 +326,12 @@
       <Filter>Source\Shader</Filter>
     </None>
     <None Include="Source\Shader\LineRenderer.hlsli">
+      <Filter>Source\Shader</Filter>
+    </None>
+    <None Include="Source\Shader\Lights.hlsli">
+      <Filter>Source\Shader</Filter>
+    </None>
+    <None Include="Source\Shader\ShaderingFunctions.hlsli">
       <Filter>Source\Shader</Filter>
     </None>
   </ItemGroup>

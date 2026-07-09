@@ -28,8 +28,8 @@ bool framework::initialized()
 	ImGui_ImplDX11_Init(graph.GetDevice(), graph.GetDeviceContext());
 
 	// scene manager initialize(the first scene to load)
-	//sceneManager.ChangeScene(std::make_unique<TestScene>(gameContext, sceneManager, assetManager));
-	sceneManager.ChangeScene(std::make_unique<BattleScene>(gameContext, sceneManager, assetManager));
+	sceneManager.ChangeScene(std::make_unique<TestScene>(gameContext, sceneManager, assetManager));
+	//sceneManager.ChangeScene(std::make_unique<BattleScene>(gameContext, sceneManager, assetManager));
 
 	return true;
 }

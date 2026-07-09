@@ -11,9 +11,12 @@ void CollisionManager::CheckCursorWithModel()
 	XMVECTOR Origin = XMLoadFloat3(&origin);	
 	XMFLOAT3 dir = gameContext.input.mouseControl.GetMouseDir();
 	XMVECTOR Dir = XMLoadFloat3(&dir);	
-	float distance = 10.0f; // Set a maximum distance for the ray
+	float distance = 10.0f;
 
-	for (auto& data : datas)
+	if (datas->empty())
+		return;
+
+	for (auto& data : *datas)
 	{
 		if (XMVector3Equal(Origin, Dir)) break;
 

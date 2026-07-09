@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "GameContext.h"	
+#include "../System/GameContext.h"	
 
 class StaticMesh
 {

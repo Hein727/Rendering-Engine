@@ -11,8 +11,20 @@ SamplerState sampler_states[7] : register(s0);
 cbuffer SCENE_CONSTANTS : register(b0)
 {
     row_major float4x4 view_projection;
-    float4 light_direction;
     float4 camera_position;
 }
 
-// DO NOT USE b0 TO ASSIGN ANOTHER CBUFFER! It will conflict with SCENE_CONSTANTS!
+#include "Lights.hlsli"
+#define MAX_DATA 8
+
+cbuffer LIGHT_CONSTANTS : register(b13) 
+{
+    float4 ambientColor;
+    uint4 lightCount;
+    DirectionalLight directionalLight;
+    PointLight pointLight[MAX_DATA];
+    SpotLight spotLight[MAX_DATA];
+    HemisphereLight hemisphereLight[MAX_DATA];
+}
+
+// DO NOT USE b0 or b13 TO ASSIGN ANOTHER CBUFFER! It will conflict with SCENE_CONSTANTS!

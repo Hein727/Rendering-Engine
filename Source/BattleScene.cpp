@@ -1,14 +1,17 @@
 #include "BattleScene.h"
-#include "System/Shader.h"
+#include "RenderingComponents/Shader.h"
 #include "System/GameContext.h"
-#include "System/Texture.h"
+#include "RenderingComponents/Texture.h"
 #include "LevelEditor/MouseControl.h"
+#include "System/SceneIO.h"
 #include <imgui.h>
 
 BattleScene::BattleScene(GameContext& gameContext, SceneManager& sceneManager, AssetManager& assetManager) :
 	gameContext(&gameContext), sceneManager(&sceneManager)
 {
-	battleObject = std::make_unique<GameObject>(gameContext, assetManager, battleSceneSaveFileName);
+	battleObject = std::make_unique<GameObject>();
+
+	battleObject->Init(gameContext, assetManager);
 
 	collisionManager = std::make_unique<CollisionManager>(gameContext, battleObject->GetDatas());
 
@@ -71,6 +74,17 @@ void BattleScene::DebugUI()
 		}
 	}
 
+	ImGui::Begin(saveFileName);
+	if(ImGui::Button("Save Scene"))
+	{
+		SaveScene();
+	}
+	if(ImGui::Button("Load Scene"))
+	{
+		LoadScene();
+	}
+	ImGui::End();
+
 #endif
 }
 
@@ -79,5 +93,23 @@ void BattleScene::HandleInput(std::string input)
 	if (input.empty()) return;
 
 	battleObject->HandleInput(input);
+}
+
+void BattleScene::SaveScene()
+{
+#if _DEBUG
+	SaveSceneData(saveFileName, *this, false);
+#else
+	SaveSceneData(saveFileName, *this, true);
+#endif
+}
+
+void BattleScene::LoadScene()
+{
+#if _DEBUG
+	LoadSceneData(saveFileName, *this, false);
+#else
+	LoadSceneData(saveFileName, *this, true);
+#endif
 }
 

@@ -1,6 +1,6 @@
 #include <time.h>
 #include "Framework.h"
-#include "Graphics.h"
+#include "../RenderingComponents/Graphics.h"
 
 
 // Window procedure for handling messages

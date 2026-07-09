@@ -1,5 +1,5 @@
 #include "Texture.h"
-#include "Misc.h"
+#include "../System/Misc.h"
 #include <memory>
 #include <filesystem>
 #include <DDSTextureLoader.h>

@@ -10,8 +10,6 @@
 #include "LevelEditor/LevelEditorBridge.h"
 #include "HitCheck/CollisionManager.h"	
 
-constexpr const char* battleSceneSaveFileName = "BattleScene";	
-
 class BattleScene : public Scene
 {
 public:
@@ -25,6 +23,16 @@ public:
 	void Uninit() override;
 	void DebugUI() override;
 	void HandleInput(std::string input) override;
+	void SaveScene();
+	void LoadScene();
+
+	std::string GetFileName() { return saveFileName; }
+
+	template<class T>
+	void serialize(T& archive)
+	{
+		archive(battleObject, lightConstants);
+	}
 
 private:
 
@@ -36,4 +44,6 @@ private:
 	std::unique_ptr<LevelEditorBridge> levelEditorBridge;
 
 	std::unique_ptr<CollisionManager> collisionManager;
+
+	static constexpr const char* saveFileName = "BattleScene";
 };

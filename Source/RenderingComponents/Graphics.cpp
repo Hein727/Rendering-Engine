@@ -1,7 +1,7 @@
 #include "Graphics.h"
-#include "Misc.h"
+#include "../System/Misc.h"
 #include "../Source/LevelEditor/CameraControl.h"
-#include "GameContext.h"
+#include "../System/GameContext.h"
 
 graphics::graphics()
 {
@@ -342,7 +342,6 @@ void graphics::renderingBegin(camera_controls& cam)
 	// Set up the scene constants buffer
 	SceneConstants scene_constants{};
 	DirectX::XMStoreFloat4x4(&scene_constants.view_projection, V * P);
-	scene_constants.light_direction = { 0, 0, 1, 0 };
 	DirectX::XMFLOAT3 camera_position = cam.get_position();
 	scene_constants.camera_position = { camera_position.x, camera_position.y, camera_position.z, 0.0f };
 	deviceContext->UpdateSubresource(sceneConstantBuffer[0].Get(), 0, NULL, &scene_constants, 0, 0);
@@ -350,6 +349,13 @@ void graphics::renderingBegin(camera_controls& cam)
 	deviceContext->PSSetConstantBuffers(0, 1, sceneConstantBuffer[0].GetAddressOf());
 
 	deviceContext->RSSetState(rasterizerStates[RasterizerState::FS_ON_CB_OFF_CW_OFF].Get());
+}
+
+void graphics::render()
+{
+	// For skybox and environment map rendering
+
+
 }
 
 //Call at the end of every frame for rendering

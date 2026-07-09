@@ -21,5 +21,5 @@ public :
 	
 private :
 	std::unique_ptr<Scene> currentScene = nullptr;
-	std::unique_ptr<Scene> nextScene = nullptr;
+	std::unique_ptr<Scene> nextScene = nullptr;	
 };

@@ -8,9 +8,8 @@
 #include "System/GameObject.h"
 #include "System/AssetManager.h"
 #include "LevelEditor/LevelEditorBridge.h"
-#include "HitCheck/CollisionManager.h"	
-
-constexpr const char* testSceneSaveFileName = "TestScene";
+#include "HitCheck/CollisionManager.h"
+#include "System/Serializer.h"	
 
 class TestScene : public Scene
 {
@@ -25,6 +24,15 @@ public:
 	void Uninit() override;
 	void DebugUI() override;
 	void HandleInput(std::string input) override;	
+	std::string GetFileName() { return testSceneSaveFileName; }
+	void SaveScene();
+	void LoadScene();
+
+	template<class T>
+	void serialize(T& archive)
+	{
+		archive(*testObject, lightConstants);
+	}
 
 private:
 
@@ -34,8 +42,10 @@ private:
 
 	GameContext* gameContext = nullptr;
 	SceneManager* sceneManager = nullptr;
+	AssetManager* assetManager = nullptr;
 	
 	std::unique_ptr<LevelEditorBridge> levelEditorBridge;
 
 	std::unique_ptr<CollisionManager> collisionManager;
+	static constexpr const char* testSceneSaveFileName = "TestScene";
 };

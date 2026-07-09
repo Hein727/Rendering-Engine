@@ -1,7 +1,7 @@
 #include "GltfModel.h"
 #define TINYGLTF_IMPLEMENTATION
 #include "../tinygltf-release/tiny_gltf.h"
-#include "Misc.h"
+#include "../System/Misc.h"
 #include <stack>
 #include "Shader.h"
 #include "Texture.h"

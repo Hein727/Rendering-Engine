@@ -1,5 +1,6 @@
 #include "GltfModel.hlsli"
 #include "BidirectionalReflectanceDistributionFunction.hlsli"
+#include "ShaderingFunctions.hlsli"
 
 struct TextureInfo
 {
@@ -123,31 +124,63 @@ float4 main(VS_OUT pin) : SV_TARGET
     float3 diffuse = 0;
     float3 specular = 0;
     
-    // Loop for each light source
-    float3 L = normalize(-light_direction.xyz);
-    float3 Li = float3(1.0, 1.0, 1.0);
-    const float NoL = max(0.0, dot(N, L));
-    const float NoV = max(0.0, dot(N, V));
-    if(NoL > 0.0 || NoV > 0.0)
+    float4 color = (float4) 0;
     {
-        const float3 R = reflect(-L, N);
-        const float3 H = normalize(L + V);
+        float3 ambient = ambientColor.rgb * ambientColor.a;
         
-        const float NoH = max(0.0, dot(N, H));
-        const float HoV = max(0.0, dot(H, V));
+        float3 directionalDiuffse = 0, directionalSpecular = 0;
+        {
+            float3 L = normalize(directionalLight.directional.xyz);
+            float3 LC = directionalLight.color.rgb * directionalLight.color.a;
+            directionalDiuffse = CalcLambert(N, L, LC, 1);
+            directionalSpecular = CalcPhongSpecular(N, V, L, LC, 1);
+        }
         
-        diffuse += Li * NoL * BrdfLambertian(f0, f90, CDiff, HoV);
-        specular += Li * NoL * BrdfSpecularGgx(f0, f90, alphaRoughness, HoV, NoL, NoV, NoH);
+        float3 pointDiffuse = 0, pointSpecular = 0;
+        for (int i = 0; i < MAX_DATA; ++i)
+        {
+            if (i >= lightCount.y)
+                break;
+            
+            float3 L = pin.w_position.xyz - pointLight[i].position.xyz;
+            float len = length(L);
+            if(len >= pointLight[i].range)
+                continue;
+            float attenuateLength = saturate(1.0f - len / pointLight[i].range);
+            float attenuation = attenuateLength * attenuateLength;
+            L /= len;
+            float3 LC = pointLight[i].color.rgb * pointLight[i].color.a;
+            pointDiffuse += CalcLambert(N, L, LC, 1) * attenuation;
+            pointSpecular += CalcPhongSpecular(N, V, L, LC, 1) * attenuation; 
+        }
+        
+        float3 spotDiffuse = 0, spotSpecular = 0;
+        for (int j = 0; j < 8; ++j)
+        {
+            if(j >= lightCount.z)
+                break;
+            
+            float3 L = pin.w_position.xyz - spotLight[j].position.xyz;
+            float len = length(L);
+            if(len >= spotLight[j].range)
+                continue;
+            float attenuateLength = saturate(1.0f - len / spotLight[j].range);
+            float attenuation = attenuateLength * attenuateLength;
+            L /= len;
+            float3 spotDir = normalize(spotLight[j].direction.xyz);
+            float angle = dot(spotDir, L);
+            float area = spotLight[j].innerCone - spotLight[j].outerCone;
+            attenuation *= saturate(1.0f - (spotLight[j].innerCone - angle) / area);
+            float3 LC = spotLight[j].color.rgb * spotLight[j].color.a;
+            spotDiffuse += CalcLambert(N, L, LC, 1) * attenuation;
+            spotSpecular += CalcPhongSpecular(N, V, L, LC, 1) * attenuation;
+        }
+
+        color.a = baseColorFactor.a;
+        color.rgb += baseColorFactor.rgb * (ambient + directionalDiuffse + pointDiffuse + spotDiffuse);
+        color.rgb += directionalSpecular + spotSpecular + pointSpecular;
     }
     
-    diffuse += IblRadianceLambertian(N, V, roughnessFactor, CDiff, f0);
-    specular += IblRadianceGGX(N, V, roughnessFactor, f0);
-    
-    float3 emissive = emissiveFactor;
-    diffuse = lerp(diffuse, diffuse * occlusionFactor, occlusionStrength);
-    specular = lerp(specular, specular * occlusionFactor, occlusionStrength);
-    
-    float3 Lo = diffuse + specular + emissive;
-    
-    return float4(Lo, baseColorFactor.a);
+    color.rgb += emissiveFactor;
+    return color;
 }

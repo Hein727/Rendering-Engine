@@ -40,11 +40,6 @@ void LevelEditorBridge::DebugUI()
 
 	ImGui::Checkbox("Placing Model", &placingModel);
 
-	if (ImGui::Button("Save Game State"))
-	{
-		currentGameObject.SaveGameState();
-	}
-
 	ImGui::Text("IT DOESN'T AUTOSAVE");
 
 	ImGui::End();
@@ -55,7 +50,7 @@ void LevelEditorBridge::DebugUI()
 	{
 		if (gameContext.input.mouseControl.GetMouseLeftClick())
 		{
-			currentGameObject.PlaceModel(selectedModelName, *grid);
+			currentGameObject->PlaceModel(selectedModelName, *grid);
 		}
 	}
 }	

@@ -1,5 +1,5 @@
 #include "Framebuffer.h"
-#include "Misc.h"
+#include "../System/Misc.h"
 
 Framebuffer::Framebuffer(GameContext& gameContext, uint32_t width, uint32_t height) : gameContext(gameContext)
 {

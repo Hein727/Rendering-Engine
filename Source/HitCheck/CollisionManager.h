@@ -6,7 +6,7 @@
 class CollisionManager
 {
 public:
-	CollisionManager(GameContext& gameContext, std::vector<ModelData>& datas) : gameContext(gameContext), datas(datas)
+	CollisionManager(GameContext& gameContext, std::vector<ModelData>& datas) : gameContext(gameContext), datas(&datas)
 	{
 		for(int i = 0; i < (int)Layer::LAYER_COUNT; ++i)
 		{
@@ -26,11 +26,16 @@ public:
 
 	void CheckCursorWithModel();
 
+	void UpdateDatas(std::vector<ModelData>& datas)
+	{
+		this->datas = &datas;
+	}
+
 private :
 
 	bool collisionMatrix[(int)Layer::LAYER_COUNT][(int)Layer::LAYER_COUNT];
 
-	std::vector<ModelData>& datas;
-
 	GameContext& gameContext;
+
+	std::vector<ModelData>* datas = nullptr;
 };

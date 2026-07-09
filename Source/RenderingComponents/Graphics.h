@@ -3,7 +3,9 @@
 #include <d3d11.h>
 #include <wrl/client.h> 
 #include <DirectXMath.h>
+#include <memory>
 #include "../LevelEditor/CameraControl.h"
+#include "../RenderingComponents/Lights.h"
 
 #define FULLSCREEN false
 #define SCREEN_WIDTH 1280
@@ -69,11 +71,14 @@ public:
 	struct SceneConstants
 	{
 		DirectX::XMFLOAT4X4 view_projection;
-		DirectX::XMFLOAT4 light_direction;
 		DirectX::XMFLOAT4 camera_position;
 	};
 	Microsoft::WRL::ComPtr<ID3D11Buffer> sceneConstantBuffer[8];
-	
+
+	struct SkyMapConstants
+	{
+		DirectX::XMFLOAT4X4 inverse_view_projection;
+	};
 
 	// Accessors
 	ID3D11Device* GetDevice() const { return device.Get(); }
@@ -94,7 +99,8 @@ public:
 	graphics(const graphics&) = delete;
 	graphics& operator=(const graphics&) = delete;
 	void renderingBegin(camera_controls& cam);
-	void renderingEnd();	
+	void render();
+	void renderingEnd();
 
 
 private:
@@ -108,4 +114,14 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11BlendState> blendStates[4];
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerStates[8];
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerStates[7];
+
+	// Skymap resources
+	Microsoft::WRL::ComPtr<ID3D11Buffer> skyMapConstantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> skyMapVertexShader;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> skyMapPixelShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> skyMapInputLayout;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> skyMapDepthStencilView;
+	D3D11_TEXTURE2D_DESC skyMapTextureDesc;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> skyMapShaderResourceView;
+	//std::unique_ptr<Sprite> skyMapSprite;
 };

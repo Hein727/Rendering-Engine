@@ -2,66 +2,58 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "../Imgui/src/ImGuizmo.h"
+#include "Scene.h"
 #include <filesystem>
 #include <fstream>
 #include <sstream>
 
-GameObject::GameObject(GameContext& gameContext, AssetManager& assetManager, const char* fileName)
-	: gameContext(gameContext), assetManager(assetManager)
+void GameObject::Init(GameContext& gameContext, AssetManager& assetManager)
 {
-	saveFileName = fileName;
-	std::filesystem::path cereal_filename(runTimeSaveFilePath + saveFileName);
-	cereal_filename.replace_extension("cereal");
+	this->gameContext = &gameContext;
+	this->assetManager = &assetManager;
+}
 
-	if (!std::filesystem::exists(cereal_filename))
+void GameObject::RestoreRuntimeData(GameContext& gameContext, AssetManager& assetManager)
+{
+	this->gameContext = &gameContext;
+	this->assetManager = &assetManager;
+
+	for (auto& [fileName, filePath] : modelFilePaths)
 	{
-		cereal_filename = editedSaveFilePath + saveFileName;
-		cereal_filename.replace_extension("cereal");
+		assetManager.loadModel(gameContext,
+			filePath);
 	}
 
-	if (std::filesystem::exists(cereal_filename))
+	for (auto& [id, index] : dataInfos)
 	{
-		std::ifstream ifs(cereal_filename, std::ios::binary);
-		cereal::BinaryInputArchive deserialization(ifs);
-		deserialization(modelFilePaths, dataInfos, datas);
+		if (modelFilePaths.empty())
+			break;
 
-		for (auto& [fileName, filePath] : modelFilePaths)
+		datas.resize(dataInfos.size());
+
+		std::string ID = id;
+		ID = ID.substr(0, ID.find_last_of('_'));
+
+		auto& data = datas[index];
+		data.aabb = std::make_unique<AABB>(gameContext);
+
+		auto model = assetManager.GetModel(gameContext, ID, data.aabb);
+
+		if (!model)
 		{
-			assetManager.loadModel(gameContext,
-				filePath);
-		}
+			model = assetManager.GetModel(gameContext, ID, data.aabb);
 
-		for (auto& [id, index] : dataInfos)
-		{
-			if(modelFilePaths.empty())
-				break;
-
-			datas.resize(dataInfos.size());
-
-			std::string ID = id;
-			ID = ID.substr(0, ID.find_last_of('_'));
-
-			auto& data = datas[index];
-			data.aabb = std::make_unique<AABB>(gameContext);	
-
-			auto model = assetManager.GetModel(gameContext, ID, data.aabb);
-
-			if (!model)
-			{
-				model = assetManager.GetModel(gameContext, ID, data.aabb);
-
-				if (model)
-				{
-					data.model = model;
-				}
-			}
-			else
+			if (model)
 			{
 				data.model = model;
 			}
 		}
-		changeInData = true;
+		else
+		{
+			data.model = model;
+		}
 	}
+	changeInData = true;
 }
 
 void GameObject::LoadModelFromFile(const std::string& filePath)
@@ -69,9 +61,9 @@ void GameObject::LoadModelFromFile(const std::string& filePath)
 	std::filesystem::path path(filePath);
 	std::string modelName;
 	modelName = path.filename().string().c_str();	
-	if (assetManager.GetModel(modelName) == nullptr)
+	if (assetManager->GetModel(modelName) == nullptr)
 	{
-		assetManager.loadModel(gameContext, filePath);
+		assetManager->loadModel(*gameContext, filePath); // C³: *gameContext
 	}
 }
 
@@ -79,13 +71,7 @@ void GameObject::PlaceModel(const std::string ID, Grid& grid)
 {
 	ModelData modelData;
 	DirectX::XMMATRIX M = DirectX::XMMatrixIdentity();
-	/*if (dataInfos.contains("ExampleStage"))
-	{
-		int i = dataInfos.find("ExampleStage")->second;
-		auto& data = datas[i];
-		M = DirectX::XMLoadFloat4x4(&data.world);
-	}*/
-	modelData.aabb = std::make_unique<AABB>(gameContext);	
+	modelData.aabb = std::make_unique<AABB>(*gameContext);	
 	location = grid.GetCurrentCellLocation();
 	DirectX::XMFLOAT3 translation = location;
 	modelData.translation = translation;
@@ -99,11 +85,11 @@ void GameObject::PlaceModel(const std::string ID, Grid& grid)
 	};
 	modelData.hasCollider = true;
 
-	auto it = assetManager.GetModel(gameContext, ID, modelData.aabb);
+	auto it = assetManager->GetModel(*gameContext, ID, modelData.aabb);
 
 	if (it != nullptr)
 	{
-		auto model = assetManager.GetModel(gameContext, ID, modelData.aabb);
+		auto model = assetManager->GetModel(*gameContext, ID, modelData.aabb);
 		modelData.model = model;
 		std::string newID = ID;
 		int count = 1;
@@ -141,8 +127,11 @@ void GameObject::Render(float deltaTime)
 {
 	for (auto& data : datas)
 	{
-		data.model.lock()->Render(data.world);
-		if (data.aabb->renderBoundingBox)
+		if (auto modelPtr = data.model.lock())
+		{
+			modelPtr->Render(data.world);
+		}
+		if (data.aabb && data.aabb->renderBoundingBox)
 		{
 			data.aabb->Render(deltaTime);
 		}
@@ -191,7 +180,7 @@ void GameObject::DebugUI()
 		selectedData = &datas[index];
 	}
 	
-	if (gameContext.input.mouseControl.GetMouseRightClick() && !(::GetAsyncKeyState(VK_LMENU) & 0x8000))
+	if (gameContext->input.mouseControl.GetMouseRightClick() && !(::GetAsyncKeyState(VK_LMENU) & 0x8000))
 	{
 		selectedDataIndex = -1;
 	}
@@ -243,8 +232,8 @@ void GameObject::DebugUI()
 		if (::GetAsyncKeyState('R') & 0x8000)
 			currentGizmoOperation = ImGuizmo::SCALE;
 
-		auto& view = gameContext.input.cameraControls.get_view();
-		auto& projection = gameContext.input.cameraControls.get_projection();
+		auto& view = gameContext->input.cameraControls.get_view();
+		auto& projection = gameContext->input.cameraControls.get_projection();
 
 		DirectX::XMMATRIX Proj = DirectX::XMLoadFloat4x4(&projection);
 
@@ -286,15 +275,6 @@ void GameObject::DebugUI()
 		}
 	}
 	ImGui::End();
-}
-
-void GameObject::SaveGameState(bool isRuntimeSave)
-{
-	std::string name = isRuntimeSave ? runTimeSaveFilePath + saveFileName : editedSaveFilePath + saveFileName;
-	name = name + ".cereal";	
-	std::ofstream ofs(name , std::ios::binary);
-	cereal::BinaryOutputArchive serialization(ofs);
-	serialization(modelFilePaths, dataInfos, datas);
 }
 
 void GameObject::DeleteDataByID(const std::string& ID)
@@ -340,7 +320,7 @@ void GameObject::HandleInput(std::string input)
 	{
 		if(filePath.first == modelName)
 		{
-			assetManager.loadModel(gameContext, input);
+			assetManager->loadModel(*gameContext, input);
 			return;
 		}
 	}	
@@ -348,4 +328,4 @@ void GameObject::HandleInput(std::string input)
 	modelFilePaths.emplace(modelName, input);
 
 	LoadModelFromFile(input);
-}	
+}

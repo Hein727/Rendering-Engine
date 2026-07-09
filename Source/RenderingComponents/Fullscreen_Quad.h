@@ -3,7 +3,7 @@
 #include <wrl.h>
 #include <cstdint>
 #include <memory>
-#include "GameContext.h"
+#include "../System/GameContext.h"
 
 class Fullscreen_Quad
 {

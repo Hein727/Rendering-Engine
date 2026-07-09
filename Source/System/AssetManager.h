@@ -1,5 +1,5 @@
 #pragma once
-#include "GltfModel.h"
+#include "../RenderingComponents/GltfModel.h"
 #include "GameContext.h"
 #include "../HitCheck/AABB.h"
 #include <string>

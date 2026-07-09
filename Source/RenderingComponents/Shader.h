@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Misc.h"
+#include "../System/Misc.h"
 #include <d3d11.h>
 
 HRESULT createVsFromCso(ID3D11Device* device, const char* filename, ID3D11VertexShader** vertex_shader,

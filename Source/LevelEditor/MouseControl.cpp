@@ -1,6 +1,6 @@
 #include "MouseControl.h"
 #include "CameraControl.h"
-#include "../System/Graphics.h"
+#include "../RenderingComponents/Graphics.h"
 #include "imgui.h"
 
 void MouseControl::Update(float elapsedTime)

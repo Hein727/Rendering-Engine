@@ -1,7 +1,7 @@
 #pragma once
 #include <DirectXMath.h>
 #include <memory>
-#include "../System/Static_Mesh.h"
+#include "../RenderingComponents/Static_Mesh.h"
 #include "../System/GameContext.h"
 #include <DirectXCollision.h>
 

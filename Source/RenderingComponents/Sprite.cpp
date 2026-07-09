@@ -1,5 +1,5 @@
 #include "Sprite.h"
-#include "Misc.h"
+#include "../System/Misc.h"
 #include "Texture.h"
 #include "Shader.h"
 #include <sstream>
