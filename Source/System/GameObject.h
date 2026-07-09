@@ -21,6 +21,7 @@ enum Layer
 
 struct ModelData
 {
+private:
 	DirectX::XMFLOAT3 translation;
 	DirectX::XMFLOAT3 scale;
 	DirectX::XMFLOAT3 rotation;
@@ -36,17 +37,30 @@ struct ModelData
 	std::weak_ptr<GltfModel> model;
 	bool selected = false;
 
+	friend class GameObject;
+
+public:
 	ModelData() = default;
 	ModelData(const ModelData&) = delete;            // can't copy
 	ModelData& operator=(const ModelData&) = delete; // can't copy assign
 	ModelData(ModelData&&) = default;                // can move
 	ModelData& operator=(ModelData&&) = default;     // can move assign
 
-	virtual ~ModelData() = default; 
+	virtual ~ModelData() = default;
+
+	// Accessors
+	bool IsSelected() const { return selected; }
+	AABB* GetAABB() const { return aabb.get(); }
+
 	virtual void AABBvsCursor() 
 	{
 		selected = true;
 	};
+
+	virtual void AABBvsCursorRelease()
+	{
+		selected = false;
+	}
 
 	template<class T> 	
 	void serialize(T& archive)
@@ -98,7 +112,11 @@ protected:
 
 	std::string saveFileName = " ";
 
+	ModelData* selected = nullptr;
+
 public:
 
 	std::vector<ModelData>& GetDatas() { return datas; }
+
+	ModelData* GetSelectedData() { return selected; }
 };

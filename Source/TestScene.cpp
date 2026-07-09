@@ -18,7 +18,7 @@ TestScene::TestScene(GameContext& gameContext, SceneManager& sceneManager, Asset
 
 #ifdef _DEBUG
 
-	levelEditorBridge = std::make_unique<LevelEditorBridge>(gameContext, assetManager, *testObject);
+	levelEditorBridge = std::make_unique<LevelEditorBridge>(gameContext, assetManager, *testObject, *collisionManager);
 
 #endif
 }
@@ -102,15 +102,6 @@ void TestScene::DebugUI()
 #ifdef _DEBUG
 
 	levelEditorBridge->DebugUI();
-	auto& io = ImGui::GetIO();
-
-	if (!io.WantCaptureMouse && !levelEditorBridge->GetPlacingModel())
-	{
-		if (gameContext->input.mouseControl.GetMouseLeftClick())
-		{
-			collisionManager->CheckCursorWithModel();
-		}
-	}
 
 	ImGui::Begin(testSceneSaveFileName);
 	if (ImGui::CollapsingHeader("lights"))

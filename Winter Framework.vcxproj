@@ -159,7 +159,6 @@
     <ClCompile Include="Imgui\src\ImGuizmo.cpp" />
     <ClCompile Include="Imgui\src\ImSequencer.cpp" />
     <ClCompile Include="Imgui\src\ImVectorEditor.cpp" />
-    <ClCompile Include="Source\BattleScene.cpp" />
     <ClCompile Include="Source\HitCheck\AABB.cpp" />
     <ClCompile Include="Source\HitCheck\CollisionManager.cpp" />
     <ClCompile Include="Source\LevelEditor\CameraControl.cpp" />
@@ -203,7 +202,6 @@
     <ClInclude Include="Imgui\src\ImSequencer.h" />
     <ClInclude Include="Imgui\src\ImVectorEditor.h" />
     <ClInclude Include="Imgui\src\ImZoomSlider.h" />
-    <ClInclude Include="Source\BattleScene.h" />
     <ClInclude Include="Source\HitCheck\AABB.h" />
     <ClInclude Include="Source\HitCheck\CollisionManager.h" />
     <ClInclude Include="Source\LevelEditor\CameraControl.h" />

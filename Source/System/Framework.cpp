@@ -1,6 +1,5 @@
 #include "Framework.h"
 #include "../TestScene.h"
-#include "../BattleScene.h"
 #include "../Imgui/src/ImGuizmo.h"
 
 framework::framework(HWND hwnd) : hwnd(hwnd)
@@ -29,7 +28,6 @@ bool framework::initialized()
 
 	// scene manager initialize(the first scene to load)
 	sceneManager.ChangeScene(std::make_unique<TestScene>(gameContext, sceneManager, assetManager));
-	//sceneManager.ChangeScene(std::make_unique<BattleScene>(gameContext, sceneManager, assetManager));
 
 	return true;
 }

@@ -44,7 +44,15 @@ void LevelEditorBridge::DebugUI()
 
 	ImGui::End();
 
-	auto io = ImGui::GetIO();
+	auto& io = ImGui::GetIO();
+
+	if (!io.WantCaptureMouse && !placingModel)
+	{
+		if (gameContext.input.mouseControl.GetMouseLeftClick() && currentGameObject->GetSelectedData() == nullptr)
+		{
+			collisionManager.CheckCursorWithModel();
+		}
+	}
 
 	if (!io.WantCaptureMouse && placingModel)
 	{

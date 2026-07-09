@@ -20,9 +20,9 @@ void CollisionManager::CheckCursorWithModel()
 	{
 		if (XMVector3Equal(Origin, Dir)) break;
 
-		if (data.aabb)
+		if (data.GetAABB())
 		{
-			if(data.aabb->GetCollider().Intersects(Origin, Dir, distance))
+			if(data.GetAABB()->GetCollider().Intersects(Origin, Dir, distance))
 			{
 				data.AABBvsCursor();
 				break;

@@ -151,7 +151,7 @@ inline void CheckForSelectedModel(const std::vector<ModelData>& datas, int& sele
 {
 	for (size_t i = 0; i < datas.size(); ++i)
 	{
-		if (datas[i].selected)
+		if (datas[i].IsSelected())
 		{
 			selectedDataIndex = static_cast<int>(i);
 			break;
@@ -170,19 +170,22 @@ void GameObject::DebugUI()
 	}
 
 	int selectedDataIndex = -1;
-	ModelData* selectedData = NULL;
-	CheckForSelectedModel(datas, selectedDataIndex);
+	if(selected == nullptr) CheckForSelectedModel(datas, selectedDataIndex);
 	std::string selectedID = selectedDataIndex >= 0 ? container[selectedDataIndex] : "None";
 	if (!datas.empty() && selectedDataIndex >= 0)
 	{
 		int index = dataInfos[selectedID];
 
-		selectedData = &datas[index];
+		selected = &datas[index];
 	}
-	
+
 	if (gameContext->input.mouseControl.GetMouseRightClick() && !(::GetAsyncKeyState(VK_LMENU) & 0x8000))
 	{
-		selectedDataIndex = -1;
+		if (selected != nullptr)
+		{
+			selected->AABBvsCursorRelease();
+			selected = nullptr;
+		}
 	}
 
 	if (ImGui::Begin("TestScene Debug UI"))
@@ -239,7 +242,7 @@ void GameObject::DebugUI()
 
 		if (!datas.empty())
 		{
-			if (selectedData == NULL)
+			if (selected == nullptr)
 			{
 				ImGui::End();
 				return;
@@ -248,25 +251,25 @@ void GameObject::DebugUI()
 			ImGuizmo::SetGizmoSizeClipSpace(0.2f);
 
 			ImGui::Text("Selected Model ID: %s", selectedID.c_str());
-			ImGui::DragFloat3("Translation", &selectedData->translation.x, 0.1f);
-			ImGui::DragFloat3("Rotation", &selectedData->rotation.x, 0.1f);
-			ImGui::DragFloat3("Scale", &selectedData->scale.x, 0.1f);
+			ImGui::DragFloat3("Translation", &selected->translation.x, 0.1f);
+			ImGui::DragFloat3("Rotation", &selected->rotation.x, 0.1f);
+			ImGui::DragFloat3("Scale", &selected->scale.x, 0.1f);
 
 			if (ImGuizmo::Manipulate(
 				&view._11, &projection._11,
 				currentGizmoOperation, ImGuizmo::LOCAL,
-				&selectedData->world._11))
+				&selected->world._11))
 			{
 				float t[3], r[3], s[3];
-				ImGuizmo::DecomposeMatrixToComponents(&selectedData->world._11, t, r, s);
+				ImGuizmo::DecomposeMatrixToComponents(&selected->world._11, t, r, s);
 
-				selectedData->translation = { t[0], t[1], t[2] };
-				selectedData->rotation = {
+				selected->translation = { t[0], t[1], t[2] };
+				selected->rotation = {
 					DirectX::XMConvertToRadians(r[0]),
 					DirectX::XMConvertToRadians(r[1]),
 					DirectX::XMConvertToRadians(r[2])
 				};
-				selectedData->scale = { s[0], s[1], s[2] };
+				selected->scale = { s[0], s[1], s[2] };
 			}
 			if (ImGui::Button("Delete Model"))
 			{

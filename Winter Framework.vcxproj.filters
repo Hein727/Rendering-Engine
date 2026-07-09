@@ -102,9 +102,6 @@
     <ClCompile Include="Imgui\src\ImVectorEditor.cpp">
       <Filter>Source\Imgui\src</Filter>
     </ClCompile>
-    <ClCompile Include="Source\BattleScene.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\RenderingComponents\Framebuffer.cpp">
       <Filter>Source\RenderingComponents</Filter>
     </ClCompile>
@@ -244,9 +241,6 @@
     </ClInclude>
     <ClInclude Include="Imgui\src\ImZoomSlider.h">
       <Filter>Source\Imgui\src</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\BattleScene.h">
-      <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\System\Serializer.h">
       <Filter>Source\System</Filter>

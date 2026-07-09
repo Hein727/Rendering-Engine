@@ -3,6 +3,7 @@
 #include "../System/GameContext.h"
 #include "../System/AssetManager.h"
 #include "../System/GameObject.h"
+#include "../HitCheck/CollisionManager.h"
 #include "Grid.h"
 #include <memory>	
 #include <vector>
@@ -12,7 +13,7 @@
 class LevelEditorBridge
 {
 public:
-	LevelEditorBridge(GameContext& gameContext, AssetManager& assetManager, GameObject& gameObject) : gameContext(gameContext), assetManager(assetManager), currentGameObject(&gameObject) 
+	LevelEditorBridge(GameContext& gameContext, AssetManager& assetManager, GameObject& gameObject, CollisionManager& collisionManager) : gameContext(gameContext), assetManager(assetManager), currentGameObject(&gameObject), collisionManager(collisionManager)
 	{
 		grid = std::make_unique<Grid>(gameContext);
 	};
@@ -27,7 +28,8 @@ public:
 protected:
 	GameContext& gameContext;
 	AssetManager& assetManager;
-	GameObject* currentGameObject = nullptr;	
+	GameObject* currentGameObject = nullptr;
+	CollisionManager& collisionManager;
 	bool placingModel = false;
 
 	std::list<std::string> loadedModelNames;
