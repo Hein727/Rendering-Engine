@@ -47,7 +47,8 @@ StructuredBuffer<MaterialConstants> materials : register(t0);
 #define NORMAL_TEXTURE 2
 #define EMISSIVE_TEXTURE 3
 #define OCCLUSION_TEXTURE 4
-Texture2D<float4> materialTextures[5] : register(t1);   
+Texture2D<float4> materialTextures[5] : register(t1);  
+Texture2D<float4> shadowMapTexture : register(t6);  
 
 // SamplerStates are already defined in Common.hlsli, so we can just use them here.
 
@@ -95,8 +96,6 @@ float4 main(VS_OUT pin) : SV_TARGET
     }
     const float occlusionStrength = m.occlusionTexture.strength;    
     
-    //metallicFactor = 0.0f; // For testing, we will set metallic to 0 to see the diffuse component clearly.
-    
     const float3 f0 = lerp(0.04, baseColorFactor.rgb, metallicFactor);
     const float3 f90 = 1.0;
     const float alphaRoughness = roughnessFactor * roughnessFactor;
@@ -134,6 +133,13 @@ float4 main(VS_OUT pin) : SV_TARGET
             float3 LC = directionalLight.color.rgb * directionalLight.color.a;
             directionalDiuffse = CalcLambert(N, L, LC, 1);
             directionalSpecular = CalcPhongSpecular(N, V, L, LC, 1);
+            
+            float depth = shadowMapTexture.SampleCmpLevelZero(shadow_samplers[SHADOW_COMPARISON_SAMPLER], pin.shadow_texcoord.xy, pin.shadow_texcoord.z - shadow_bias).r;
+            
+            float3 shadowFactor = lerp(shadow_color, float3(1, 1, 1), depth);
+            
+            directionalDiuffse *= shadowFactor;
+            directionalSpecular *= shadowFactor;
         }
         
         float3 pointDiffuse = 0, pointSpecular = 0;
@@ -182,5 +188,6 @@ float4 main(VS_OUT pin) : SV_TARGET
     }
     
     color.rgb += emissiveFactor;
+    
     return color;
 }

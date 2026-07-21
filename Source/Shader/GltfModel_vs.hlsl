@@ -25,7 +25,16 @@ VS_OUT main(VS_IN vin)
     vout.w_normal = normalize(mul(vin.normal, world));
     vin.tangent.w = 0;
     vout.w_tangent = normalize(mul(vin.tangent, world));
-    vout.w_tangent = sigma;
+    vout.w_tangent.w = sigma;
     vout.texcoord = vin.texcoord;
+    
+    {
+        float4 wvpPos = mul(vin.position, mul(world, light_view_projection));
+        wvpPos /= wvpPos.w;
+        wvpPos.y = -wvpPos.y;
+        wvpPos.xy = 0.5f * wvpPos.xy + 0.5f;
+        vout.shadow_texcoord = wvpPos.xyz;
+    }
+    
     return vout;
 }

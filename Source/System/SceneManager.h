@@ -13,11 +13,15 @@ public :
 
 	void Update(float deltaTime);
 	
-	void Render(float deltaTime);
+	void ShadowRender(float deltaTime);
+
+	void MainRender(float deltaTime);
 
 	void ChangeScene(std::unique_ptr<Scene> new_scene);
 
 	void HandleInput(std::string input);
+
+	Scene::LightConstants& GetCurrentSceneLightConstants() { return currentScene->lightConstants; };
 	
 private :
 	std::unique_ptr<Scene> currentScene = nullptr;

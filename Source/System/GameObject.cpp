@@ -123,6 +123,19 @@ void GameObject::Update(float deltaTime)
 	}
 }
 
+void GameObject::ShadowMapRender(float deltaTime)
+{
+	for (auto& data : datas)
+	{
+		if (data.hasShadow != true) continue;	
+
+		if (auto modelPtr = data.model.lock())
+		{
+			modelPtr->Render(data.world);
+		}
+	}
+}
+
 void GameObject::Render(float deltaTime)
 {
 	for (auto& data : datas)
@@ -169,13 +182,11 @@ void GameObject::DebugUI()
 		GetID(dataInfos, container);
 	}
 
-	int selectedDataIndex = -1;
 	if(selected == nullptr) CheckForSelectedModel(datas, selectedDataIndex);
 	std::string selectedID = selectedDataIndex >= 0 ? container[selectedDataIndex] : "None";
 	if (!datas.empty() && selectedDataIndex >= 0)
 	{
 		int index = dataInfos[selectedID];
-
 		selected = &datas[index];
 	}
 
@@ -183,8 +194,9 @@ void GameObject::DebugUI()
 	{
 		if (selected != nullptr)
 		{
-			selected->AABBvsCursorRelease();
+			if(selected->aabb)	selected->AABBvsCursorRelease();
 			selected = nullptr;
+			selectedDataIndex = -1;
 		}
 	}
 
@@ -206,6 +218,7 @@ void GameObject::DebugUI()
 					if (auto model = data.model.lock())
 					{
 						ImGui::Checkbox("Render AABB", &data.aabb->renderBoundingBox);
+						ImGui::Checkbox("Has Shadow", &data.hasShadow);
 					}
 					if (ImGui::Button("Delete Model"))
 					{

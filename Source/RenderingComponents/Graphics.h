@@ -54,9 +54,16 @@ public:
 		ANISOTROPIC_BORDER,
 		POINT_CLAMP,
 		POINT_WRAP,
-		SHADOW_COMPARISON_SAMPLER,
-		NORMAL_MAP_SAMPLER
+		NORMAL_MAP_SAMPLER,
+		SAMPLER_STATE_COUNT
 	};
+
+	enum ShadowSamplerState
+	{
+		SHADOW_COMPARISON_SAMPLER,
+		SHADOW_BORDER_SAMPLER,
+		SHADOW_SAMPLER_STATE_COUNT	
+	};	
 	
 	enum CoordChange
 	{
@@ -72,13 +79,9 @@ public:
 	{
 		DirectX::XMFLOAT4X4 view_projection;
 		DirectX::XMFLOAT4 camera_position;
+		DirectX::XMFLOAT4 options; // xy : mouse coordinates, z : timer, w : flags 
 	};
 	Microsoft::WRL::ComPtr<ID3D11Buffer> sceneConstantBuffer[8];
-
-	struct SkyMapConstants
-	{
-		DirectX::XMFLOAT4X4 inverse_view_projection;
-	};
 
 	// Accessors
 	ID3D11Device* GetDevice() const { return device.Get(); }
@@ -88,19 +91,26 @@ public:
 	IDXGISwapChain* GetSwapChain() const { return swapChain.Get(); }
 	ID3D11DepthStencilState* GetDepthStencilState(DepthStencilState state) const { return depthStencilStates[state].Get(); }
 	ID3D11BlendState* GetBlendState(BlendState state) const { return blendStates[state].Get(); }
+	ID3D11RasterizerState* GetRasterizerState(RasterizerState state) const { return rasterizerStates[state].Get(); }	
 
 	// State Setters
 	void SetRasterizerState(RasterizerState state) const { deviceContext->RSSetState(rasterizerStates[state].Get()); }
 	void SetDepthStencilState(DepthStencilState state, UINT stencilRef = 0) const { deviceContext->OMSetDepthStencilState(depthStencilStates[state].Get(), stencilRef); }
-	void SetSamplerState(SamplerState state) const { deviceContext->PSSetSamplers(0, 1, samplerStates[state].GetAddressOf()); }
 	void SetBlendState(BlendState state) const { deviceContext->OMSetBlendState(blendStates[state].Get(), nullptr, 0xFFFFFFFF); }
+	void SetReplacementViewProjection(const DirectX::XMFLOAT4X4& viewProjection) { viewProjectionReplacement = viewProjection; sceneReplacements = REPLACE_VIEW_PROJECTION; }
+	void SetReplacementCameraPosition(const DirectX::XMFLOAT4& cameraPosition) { cameraPositionReplacement = cameraPosition; sceneReplacements = REPLACE_CAMERA_POSITION; }
+	void SetReplacementOptions(const DirectX::XMFLOAT4& options) { optionsReplacement = options; sceneReplacements = REPLACE_OPTIONS; }
+	void ResetSceneReplacements() { sceneReplacements = 0x00000000; }	
+	void SceneConstantsUpdate(camera_controls& cam);
 
 	// Prevent copying
 	graphics(const graphics&) = delete;
 	graphics& operator=(const graphics&) = delete;
-	void renderingBegin(camera_controls& cam);
+	void renderingBegin(camera_controls& cam, float elapsedTime);
 	void render();
 	void renderingEnd();
+
+	void ResetViewport();
 
 
 private:
@@ -114,14 +124,18 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11BlendState> blendStates[4];
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerStates[8];
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerStates[7];
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSamplerStates[2];
 
-	// Skymap resources
-	Microsoft::WRL::ComPtr<ID3D11Buffer> skyMapConstantBuffer;
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> skyMapVertexShader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> skyMapPixelShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> skyMapInputLayout;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> skyMapDepthStencilView;
-	D3D11_TEXTURE2D_DESC skyMapTextureDesc;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> skyMapShaderResourceView;
-	//std::unique_ptr<Sprite> skyMapSprite;
+	DirectX::XMFLOAT4X4 viewProjectionReplacement;
+	DirectX::XMFLOAT4 cameraPositionReplacement;
+	DirectX::XMFLOAT4 optionsReplacement;
+
+	int8_t sceneReplacements = 0x00000000; // Bitmask to track which scene constants have been replaced
+
+	enum replacement_flags
+	{
+		REPLACE_VIEW_PROJECTION = 1 << 0,
+		REPLACE_CAMERA_POSITION = 1 << 1,
+		REPLACE_OPTIONS = 1 << 2,
+	};
 };

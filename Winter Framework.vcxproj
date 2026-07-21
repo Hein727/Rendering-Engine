@@ -102,14 +102,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\DirectXTK-main\Inc;Imgui;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7\include;.\cereal-master\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\DirectXTK-main\Inc;Imgui;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7\include;.\cereal-master\include;.\DirectXTex-main\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>.\DirectXTK-main\Bin\Desktop_2022\x64\Debug;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7\lib\x64\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;zlib-md.lib;libxml2-md.lib;libfbxsdk-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\DirectXTK-main\Bin\Desktop_2022\x64\Debug;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7\lib\x64\debug;.\DirectXTex-main\DirectXTex\Bin\Desktop_2022\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;zlib-md.lib;libxml2-md.lib;libfbxsdk-md.lib;DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -126,15 +126,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>Imgui;.\DirectXTK-main\Inc;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7\include;.\cereal-master\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Imgui;.\DirectXTK-main\Inc;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7\include;.\cereal-master\include;.\DirectXTex-main\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;zlib-md.lib;libxml2-md.lib;libfbxsdk-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>.\DirectXTK-main\Bin\Desktop_2022\x64\Release;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7\lib\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;DirectXTK.lib;zlib-md.lib;libxml2-md.lib;libfbxsdk-md.lib;DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\DirectXTK-main\Bin\Desktop_2022\x64\Release;C:\Program Files\Autodesk\FBX\FBX SDK\2020.3.7\lib\x64\release;.\DirectXTex-main\DirectXTex\Bin\Desktop_2022\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <AssemblerOutput>AssemblyCode</AssemblerOutput>
@@ -165,6 +165,7 @@
     <ClCompile Include="Source\LevelEditor\Grid.cpp" />
     <ClCompile Include="Source\LevelEditor\LevelEditorBridge.cpp" />
     <ClCompile Include="Source\LevelEditor\MouseControl.cpp" />
+    <ClCompile Include="Source\RenderingComponents\Environment.cpp" />
     <ClCompile Include="Source\RenderingComponents\Framebuffer.cpp" />
     <ClCompile Include="Source\RenderingComponents\Fullscreen_Quad.cpp" />
     <ClCompile Include="Source\RenderingComponents\Geometeric_Primitive.cpp" />
@@ -173,7 +174,9 @@
     <ClCompile Include="Source\RenderingComponents\LineRenderer.cpp" />
     <ClCompile Include="Source\RenderingComponents\Shader.cpp" />
     <ClCompile Include="Source\RenderingComponents\ShadingSetup.cpp" />
+    <ClCompile Include="Source\RenderingComponents\ShadowMap.cpp" />
     <ClCompile Include="Source\RenderingComponents\Skinned_Mesh.cpp" />
+    <ClCompile Include="Source\RenderingComponents\SkyBox.cpp" />
     <ClCompile Include="Source\RenderingComponents\Sprite.cpp" />
     <ClCompile Include="Source\RenderingComponents\SpriteBatch.cpp" />
     <ClCompile Include="Source\RenderingComponents\Static_Mesh.cpp" />
@@ -209,6 +212,7 @@
     <ClInclude Include="Source\LevelEditor\LevelEditorBridge.h" />
     <ClInclude Include="Source\LevelEditor\MouseControl.h" />
     <ClInclude Include="Source\OnCollisionFuncs.h" />
+    <ClInclude Include="Source\RenderingComponents\Environment.h" />
     <ClInclude Include="Source\RenderingComponents\Framebuffer.h" />
     <ClInclude Include="Source\RenderingComponents\Fullscreen_Quad.h" />
     <ClInclude Include="Source\RenderingComponents\Geometric_Primitive.h" />
@@ -218,7 +222,9 @@
     <ClInclude Include="Source\RenderingComponents\LineRenderer.h" />
     <ClInclude Include="Source\RenderingComponents\Shader.h" />
     <ClInclude Include="Source\RenderingComponents\ShadingSetup.h" />
+    <ClInclude Include="Source\RenderingComponents\ShadowMap.h" />
     <ClInclude Include="Source\RenderingComponents\Skinned_Mesh.h" />
+    <ClInclude Include="Source\RenderingComponents\SkyBox.h" />
     <ClInclude Include="Source\RenderingComponents\Sprite.h" />
     <ClInclude Include="Source\RenderingComponents\SpriteBatch.h" />
     <ClInclude Include="Source\RenderingComponents\Static_Mesh.h" />
@@ -247,6 +253,7 @@
     <None Include="Source\Shader\LineRenderer.hlsli" />
     <None Include="Source\Shader\ShaderingFunctions.hlsli" />
     <None Include="Source\Shader\Skinned_Mesh.hlsli" />
+    <None Include="Source\Shader\SkyMap.hlsli" />
     <None Include="Source\Shader\Sprite.hlsli" />
     <None Include="Source\Shader\Static_Mesh.hlsli" />
   </ItemGroup>
@@ -309,6 +316,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
+    <FxCompile Include="Source\Shader\ShadowMapCaster_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="Source\Shader\Skinned_Mesh_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -316,6 +329,18 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Source\Shader\Skinned_Mesh_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\SkyMap_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\SkyMap_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>

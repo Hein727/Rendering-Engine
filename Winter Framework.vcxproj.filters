@@ -141,6 +141,15 @@
     <ClCompile Include="Source\RenderingComponents\Texture.cpp">
       <Filter>Source\RenderingComponents</Filter>
     </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\SkyBox.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\ShadowMap.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\Environment.cpp">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\Framework.h">
@@ -284,10 +293,19 @@
     <ClInclude Include="Source\RenderingComponents\Static_Mesh.h">
       <Filter>Source\RenderingComponents</Filter>
     </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\Lights.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\SkyBox.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
     <ClInclude Include="Source\RenderingComponents\Texture.h">
       <Filter>Source\RenderingComponents</Filter>
     </ClInclude>
-    <ClInclude Include="Source\RenderingComponents\Lights.h">
+    <ClInclude Include="Source\RenderingComponents\ShadowMap.h">
+      <Filter>Source\RenderingComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\Environment.h">
       <Filter>Source\RenderingComponents</Filter>
     </ClInclude>
   </ItemGroup>
@@ -326,6 +344,9 @@
       <Filter>Source\Shader</Filter>
     </None>
     <None Include="Source\Shader\ShaderingFunctions.hlsli">
+      <Filter>Source\Shader</Filter>
+    </None>
+    <None Include="Source\Shader\SkyMap.hlsli">
       <Filter>Source\Shader</Filter>
     </None>
   </ItemGroup>
@@ -376,6 +397,15 @@
       <Filter>Source\Shader</Filter>
     </FxCompile>
     <FxCompile Include="Source\Shader\LineRenderer_ps.hlsl">
+      <Filter>Source\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\SkyMap_vs.hlsl">
+      <Filter>Source\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\SkyMap_ps.hlsl">
+      <Filter>Source\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\Shader\ShadowMapCaster_vs.hlsl">
       <Filter>Source\Shader</Filter>
     </FxCompile>
   </ItemGroup>

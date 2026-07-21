@@ -12,18 +12,25 @@ void SceneManager::Update(float deltaTime)
 		nextScene = nullptr;
 	}
 
-
 	if (currentScene != nullptr)
 	{
 		currentScene->Update(deltaTime);
 	}
 }
 
-void SceneManager::Render(float deltaTime)
+void SceneManager::ShadowRender(float deltaTime)
 {
 	if (currentScene != nullptr)
 	{
-		currentScene->Render(deltaTime);
+		currentScene->ShadowRender(deltaTime);
+	}
+}	
+
+void SceneManager::MainRender(float deltaTime)
+{
+	if (currentScene != nullptr)
+	{
+		currentScene->MainRender(deltaTime);
 
 #ifdef _DEBUG
 
@@ -35,11 +42,11 @@ void SceneManager::Render(float deltaTime)
 
 void SceneManager::ChangeScene(std::unique_ptr<Scene> new_scene)
 {
-
 	if (!currentScene)
 	{
 		currentScene = std::move(new_scene);
 		currentScene->Init();
+		currentScene->LoadScene();
 		return;
 	}
 

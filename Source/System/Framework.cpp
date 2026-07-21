@@ -73,10 +73,12 @@ void framework::render(float delta_time)
 	context->PSSetShaderResources(0, _countof(null_srv), null_srv);
 
 	graphics& graph = gameContext.graphics;
-	
-	graph.renderingBegin(gameContext.input.cameraControls);
 
-	sceneManager.Render(delta_time);
+	graph.renderingBegin(gameContext.input.cameraControls, delta_time);
+
+	sceneManager.ShadowRender(delta_time);
+	
+	sceneManager.MainRender(delta_time);
 
 #ifdef _DEBUG
 

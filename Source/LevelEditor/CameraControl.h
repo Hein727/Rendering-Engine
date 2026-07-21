@@ -12,8 +12,10 @@ public:
 	void setWheel(float wheel) { this->wheel = wheel; }	
 	DirectX::XMFLOAT4X4& get_view() { return view; }
 	DirectX::XMFLOAT4X4& get_projection() { return projection; }
+	//DirectX::XMFLOAT4X4& get_lightViewProjection() { return lightViewProjection; }
 	POINT& get_cursor_position() { return new_cursor; }	
 	DirectX::XMFLOAT3& get_position() { return position; }
+	//void SetLightViewProjection(const DirectX::XMFLOAT4X4& lightViewProjection) { this->lightViewProjection = lightViewProjection; }	
 
 private :
 	void Update_transform();
@@ -23,6 +25,7 @@ private :
 	DirectX::XMFLOAT3 up = { 0, 1, 0 };
 	DirectX::XMFLOAT4X4 view;
 	DirectX::XMFLOAT4X4 projection;
+	//DirectX::XMFLOAT4X4 lightViewProjection;
 	float rotateX{ 0.0f };
 	float rotateY{ DirectX::XMConvertToRadians(180.0f) };
 	float distance{ 10.0f };

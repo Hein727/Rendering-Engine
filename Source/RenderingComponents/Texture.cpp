@@ -1,5 +1,7 @@
+#define STB_IMAGE_IMPLEMENTATION	
 #include "Texture.h"
 #include "../System/Misc.h"
+#include <DirectXTex.h>
 #include <memory>
 #include <filesystem>
 #include <DDSTextureLoader.h>
@@ -102,5 +104,30 @@ HRESULT loadTextureFromMemory(ID3D11Device* device, const void* data, size_t siz
 		_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
 	}
 
+	return hr;
+}
+
+HRESULT LoadHDRTextureFromFile(ID3D11Device* device, const wchar_t* filename, ID3D11ShaderResourceView** shader_resource_view)
+{
+	HRESULT hr{ S_OK };	
+	DirectX::ScratchImage image;
+	DirectX::TexMetadata metaData;
+
+	hr = LoadFromHDRFile(filename, &metaData, image);
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+
+	hr = CreateShaderResourceView(device, image.GetImages(), image.GetImageCount(), metaData, shader_resource_view);
+
+	return hr;
+}
+
+HRESULT LoadHDRTextureFromMemory(ID3D11Device* device, const void* data, size_t size, ID3D11ShaderResourceView** srv)
+{
+	HRESULT hr{ S_OK };
+	DirectX::ScratchImage image;
+	DirectX::TexMetadata metaData;
+	hr = LoadFromHDRMemory(reinterpret_cast<const uint8_t*>(data), size, &metaData, image);
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+	hr = CreateShaderResourceView(device, image.GetImages(), image.GetImageCount(), metaData, srv);
 	return hr;
 }

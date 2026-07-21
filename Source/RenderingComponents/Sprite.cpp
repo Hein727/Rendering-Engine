@@ -4,6 +4,7 @@
 #include "Shader.h"
 #include <sstream>
 #include <WICTextureLoader.h>
+#include <filesystem>
 
 // Rotate around center
 inline auto rotate(float& x, float& y, float cx, float cy, float angle)
@@ -70,9 +71,81 @@ Sprite::Sprite(GameContext& gameContext, const wchar_t* filename) : gameContext(
 
 	//Create Texture and Shader Resource View
 
-	loadTextureFromFile(device, filename, shader_resource_view.GetAddressOf(), &texture2d_desc);
+	std::filesystem::path path{ filename };
+
+	if(path.extension() == ".hdr")
+		LoadHDRTextureFromFile(device, filename, shader_resource_view.GetAddressOf());
+	else
+		loadTextureFromFile(device, filename, shader_resource_view.GetAddressOf(), &texture2d_desc);
 
 	//////////////////////////////////////////////////////////////////////////////////////
+}
+
+Sprite::Sprite(GameContext& gameContext, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) : gameContext(gameContext)
+{
+	auto device = gameContext.graphics.GetDevice();	
+
+	HRESULT hr{ S_OK };
+	Vertex vertices[]
+	{
+	{ { -1.0, +1.0, 0 }, { 1, 1, 1, 1 }, { 0, 0 } },
+	{ { +1.0, +1.0, 0 }, { 1, 1, 1, 1 }, { 1, 0 } },
+	{ { -1.0, -1.0, 0 }, { 1, 1, 1, 1 }, { 0, 1 } },
+	{ { +1.0, -1.0, 0 }, { 1, 1, 1, 1 }, { 1, 1 } },
+	};
+
+	D3D11_BUFFER_DESC bufferDesc = {};
+	bufferDesc.ByteWidth = sizeof(vertices);
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.MiscFlags = 0;
+	bufferDesc.StructureByteStride = 0;
+	D3D11_SUBRESOURCE_DATA subresourceData = {};	
+	subresourceData.pSysMem = vertices;
+	subresourceData.SysMemPitch = 0;
+	subresourceData.SysMemSlicePitch = 0;
+	hr = gameContext.graphics.GetDevice()->CreateBuffer(&bufferDesc, &subresourceData, vertexBuffer.GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+
+	const char* cso_name{ "Shader\\Sprite_vs.cso" };
+
+	D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	hr = createVsFromCso(device, cso_name, vertexShader.GetAddressOf(), inputLayout.GetAddressOf(), layoutDesc, _countof(layoutDesc));
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+
+	// Load and create pixel shader
+	cso_name = { "Shader\\Sprite_ps.cso" };
+
+	hr = createPsFromCso(device, cso_name, pixelShader.GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+
+	if (srv)
+	{
+		isLoaded = false;
+		srv.Get()->AddRef();
+		shader_resource_view = srv;
+
+		Microsoft::WRL::ComPtr<ID3D11Resource> resource;
+		srv->GetResource(resource.GetAddressOf());
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2d;
+		hr = resource.Get()->QueryInterface<ID3D11Texture2D>(texture2d.GetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+		texture2d->GetDesc(&texture2d_desc);
+	}
+}
+
+Sprite::~Sprite()
+{
+	if (!isLoaded)
+	{
+		shader_resource_view->Release();
+	}
 }
 
 /*
@@ -88,7 +161,8 @@ Sprite::Sprite(GameContext& gameContext, const wchar_t* filename) : gameContext(
 	sh : source height
 */
 
-void Sprite::Render(float dx, float dy, float dw, float dh, float r, float g, float b, float a, float angle, float sx, float sy, float sw, float sh)
+void Sprite::Render(float dx, float dy, float dw, float dh, float r, float g, float b, float a, float angle, float sx, float sy, float sw, float sh, ID3D11VertexShader* replacementVS,
+	ID3D11PixelShader* replacementPS)
 {
 	auto context = gameContext.graphics.GetDeviceContext();
 
@@ -164,8 +238,15 @@ void Sprite::Render(float dx, float dy, float dw, float dh, float r, float g, fl
 	context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
 	context->IASetInputLayout(inputLayout.Get());
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	context->VSSetShader(vertexShader.Get(), nullptr, 0);
-	context->PSSetShader(pixelShader.Get(), nullptr, 0);
+	if(replacementVS != nullptr)
+		context->VSSetShader(replacementVS, nullptr, 0);
+	else
+		context->VSSetShader(vertexShader.Get(), nullptr, 0);
+
+	if(replacementPS != nullptr)
+		context->PSSetShader(replacementPS, nullptr, 0);
+	else
+		context->PSSetShader(pixelShader.Get(), nullptr, 0);
 
 	context->Draw(4, 0);
 }

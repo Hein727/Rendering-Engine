@@ -6,12 +6,13 @@
 
 void LevelEditorBridge::Update(float elapsedTime)
 {
-	grid->Update(elapsedTime);
+
 }	
 
 void LevelEditorBridge::Render(float elapsedTime)
 {
-	grid->Render(elapsedTime);
+	if(renderGrid)
+		grid->Render(elapsedTime);
 }
 
 void LevelEditorBridge::DebugUI()
@@ -39,6 +40,8 @@ void LevelEditorBridge::DebugUI()
 	ImGui::Text("Selected Model: %s", selectedModelName.c_str());
 
 	ImGui::Checkbox("Placing Model", &placingModel);
+
+	ImGui::Checkbox("Render Grid", &renderGrid);
 
 	ImGui::Text("IT DOESN'T AUTOSAVE");
 

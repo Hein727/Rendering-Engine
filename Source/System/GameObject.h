@@ -21,13 +21,14 @@ enum Layer
 
 struct ModelData
 {
-private:
+protected:
 	DirectX::XMFLOAT3 translation;
 	DirectX::XMFLOAT3 scale;
 	DirectX::XMFLOAT3 rotation;
 	Layer layer = Layer::DEFAULT;
 	std::unique_ptr<AABB> aabb;
 	bool hasCollider = false;
+	bool hasShadow = true;
 	DirectX::XMFLOAT4X4 world = {
 		1, 0, 0, 0,
 		0, 1, 0, 0,
@@ -80,6 +81,7 @@ public:
 
 	void PlaceModel(const std::string ID, Grid& grid);
 	void Update(float deltaTime);
+	void ShadowMapRender(float deltaTime);
 	void Render(float deltaTime);
 	void DebugUI();	
 
@@ -113,6 +115,8 @@ protected:
 	std::string saveFileName = " ";
 
 	ModelData* selected = nullptr;
+
+	int selectedDataIndex = -1;
 
 public:
 

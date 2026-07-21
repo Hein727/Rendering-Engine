@@ -31,6 +31,7 @@ protected:
 	GameObject* currentGameObject = nullptr;
 	CollisionManager& collisionManager;
 	bool placingModel = false;
+	bool renderGrid = true;
 
 	std::list<std::string> loadedModelNames;
 	std::string selectedModelName;

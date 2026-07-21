@@ -3,11 +3,6 @@
 constexpr int subdivisions{ 50 };
 constexpr int scale{ 1 };
 
-void Grid::Update(float elapsedTime)
-{
-
-}
-
 void Grid::Render(float elapsedTime)
 {
 	lineRenderer->DrawGrid(subdivisions, scale);

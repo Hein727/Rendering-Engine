@@ -25,20 +25,25 @@ private:
 
 	GameContext& gameContext;
 
+	bool isLoaded{ true };
+
 public :
 	
 	Sprite(GameContext& gameContext, const wchar_t* filename);
-	~Sprite() = default;
+	Sprite(GameContext& gameContext, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv);
+	~Sprite();
 
 	void Render(float dx, float dy, float dw, float dh, float r, float g, float b, float a, float angle,
-		float sx, float sy, float sw, float sh);
-	void Render(float dx, float dy, float dw, float dh, float r = 1, float g = 1, float b = 1, float a = 1, float angle = 0.0f)
+		float sx, float sy, float sw, float sh, ID3D11VertexShader* replacementVS,
+		ID3D11PixelShader* replacementPS);
+	void Render(float dx, float dy, float dw, float dh, ID3D11VertexShader* replacementVS = nullptr,
+	ID3D11PixelShader* replacementPS = nullptr, float r = 1, float g = 1, float b = 1, float a = 1, float angle = 0.0f)
 	{
 		float sx = 0.0f;
 		float sy = 0.0f;
 		float sw = static_cast<float>(texture2d_desc.Width);
 		float sh = static_cast<float>(texture2d_desc.Height);
-		Render(dx, dy, dw, dh, r, g, b, a, angle, sx, sy, sw, sh);
+		Render(dx, dy, dw, dh, r, g, b, a, angle, sx, sy, sw, sh, replacementVS, replacementPS);
 	}
 	void textout(std::string s, float x, float y, float w, float h, float r, float g, float b, float a)
 	{
@@ -48,7 +53,7 @@ public :
 		for (const char c : s)
 		{
 			Render(x + carriage, y, w, h, r, g, b, a, 0,
-				sw * (c & 0x0F), sh * (c >> 4), sw, sh);
+				sw * (c & 0x0F), sh * (c >> 4), sw, sh, nullptr, nullptr);
 			carriage += w;
 		}
 	}

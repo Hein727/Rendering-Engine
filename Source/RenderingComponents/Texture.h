@@ -19,4 +19,9 @@ HRESULT makeDummyTexture(ID3D11Device* device, ID3D11ShaderResourceView** shader
 
 HRESULT loadTextureFromMemory(ID3D11Device* device, const void* data, size_t size, ID3D11ShaderResourceView** srv);
 
+HRESULT LoadHDRTextureFromFile(ID3D11Device* device, const wchar_t* filename,
+	ID3D11ShaderResourceView** shader_resource_view);
+
+HRESULT LoadHDRTextureFromMemory(ID3D11Device* device, const void* data, size_t size, ID3D11ShaderResourceView** srv);
+
 void releaseTextureCache();

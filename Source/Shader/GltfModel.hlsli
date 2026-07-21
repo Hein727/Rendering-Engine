@@ -15,6 +15,7 @@ struct VS_OUT
     float4 w_normal : NORMAL;
     float4 w_tangent : TANGENT;
     float2 texcoord : TEXCOORD;
+    float3 shadow_texcoord : TEXCOORD1;
 };
 
 cbuffer PrimaryConstBuffer : register(b1)

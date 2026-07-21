@@ -12,9 +12,13 @@ TestScene::TestScene(GameContext& gameContext, SceneManager& sceneManager, Asset
 {
 	testObject = std::make_unique<GameObject>();
 
+	shadowMap = std::make_unique<ShadowMap>();
+
 	testObject->Init(gameContext, assetManager);
 
 	collisionManager = std::make_unique<CollisionManager>(gameContext, testObject->GetDatas());
+
+	environment = std::make_unique<Environment>(gameContext);	
 
 #ifdef _DEBUG
 
@@ -33,6 +37,8 @@ void TestScene::Init()
 
 	SetupConstantBuffer(*gameContext, lightConstantBuffer, lightConstants);
 
+	shadowMap->Init(*gameContext, lightConstants);
+
 	D3D11_TEXTURE2D_DESC desc{};
 	desc.MipLevels = 0;
 	desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
@@ -47,6 +53,8 @@ void TestScene::Update(float deltaTime)
 {
 	testObject->Update(deltaTime);
 
+	environment->Update(deltaTime);
+
 #ifdef _DEBUG
 
 	levelEditorBridge->Update(deltaTime);
@@ -54,17 +62,39 @@ void TestScene::Update(float deltaTime)
 #endif
 }
 
-void TestScene::Render(float deltaTime)
+void TestScene::ShadowRender(float deltaTime)
+{
+	int lightShaderSlot = 13;
+	UpdateConstantBuffer(*gameContext, lightConstantBuffer, lightConstants, lightShaderSlot);
+
+	shadowMap->Begin();
+	testObject->ShadowMapRender(deltaTime);
+	shadowMap->End();
+}
+
+void TestScene::MainRender(float deltaTime)
 {	
-	//auto context = gameContext->graphics.GetDeviceContext();
+	gameContext->graphics.ResetSceneReplacements();
+
+	gameContext->graphics.SceneConstantsUpdate(gameContext->input.cameraControls);
+
+	environment->Render(deltaTime);
+
+	testObject->Render(deltaTime);
+
+#ifdef _DEBUG
+
+	levelEditorBridge->Render(deltaTime);
+	
+#endif
+}
+
+//auto context = gameContext->graphics.GetDeviceContext();
 
 	/*context->PSSetShaderResources(32, 1, srvs[0].GetAddressOf());
 	context->PSSetShaderResources(33, 1, srvs[1].GetAddressOf());
 	context->PSSetShaderResources(34, 1, srvs[2].GetAddressOf());
 	context->PSSetShaderResources(35, 1, srvs[3].GetAddressOf());*/
-
-	int lightShaderSlot = 13;
-	UpdateConstantBuffer(*gameContext, lightConstantBuffer, lightConstants, lightShaderSlot);
 
 	//static std::vector<GltfModel::Node> animatedNodes{ gltfModels[0]->nodes };
 	//static float time{ 0 };
@@ -80,16 +110,6 @@ void TestScene::Render(float deltaTime)
 	//	gltfModels[0]->aabb->Render(deltaTime);
 	//}
 
-	testObject->Render(deltaTime);
-
-#ifdef _DEBUG
-
-	levelEditorBridge->Render(deltaTime);
-	
-
-#endif
-}
-
 void TestScene::Uninit()
 {
 	
@@ -103,7 +123,7 @@ void TestScene::DebugUI()
 
 	levelEditorBridge->DebugUI();
 
-	ImGui::Begin(testSceneSaveFileName);
+	ImGui::Begin(saveFileName);
 	if (ImGui::CollapsingHeader("lights"))
 	{
 		ImGui::ColorEdit3("ambientColor", &lightConstants.ambientColor.x);
@@ -125,6 +145,7 @@ void TestScene::DebugUI()
 
 #endif
 
+	shadowMap->Debug();
 	
 }
 
@@ -138,18 +159,18 @@ void TestScene::HandleInput(std::string input)
 void TestScene::SaveScene()
 {
 #if _DEBUG
-	SaveSceneData(testSceneSaveFileName, *this, false);
+	SaveSceneData(saveFileName, *this, false);
 #else
-	SaveSceneData(testSceneSaveFileName, *this, true);	
+	SaveSceneData(saveFileName, *this, true);
 #endif
 }
 
 void TestScene::LoadScene()
 {
 #if _DEBUG
-	LoadSceneData(testSceneSaveFileName, *this, false);
+	LoadSceneData(saveFileName, *this, false);
 #else
-	LoadSceneData(testSceneSaveFileName, *this, true);
+	LoadSceneData(saveFileName, *this, true);
 #endif
 	testObject->RestoreRuntimeData(*gameContext, *assetManager);
 

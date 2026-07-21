@@ -9,7 +9,9 @@
 #include "System/AssetManager.h"
 #include "LevelEditor/LevelEditorBridge.h"
 #include "HitCheck/CollisionManager.h"
-#include "System/Serializer.h"	
+#include "System/Serializer.h"
+#include "RenderingComponents/ShadowMap.h"
+#include "RenderingComponents/Environment.h"
 
 class TestScene : public Scene
 {
@@ -20,11 +22,12 @@ public:
 
 	void Init() override;
 	void Update(float deltaTime) override;
-	void Render(float deltaTime) override;
+	void ShadowRender(float deltaTime) override;
+	void MainRender(float deltaTime) override;
 	void Uninit() override;
 	void DebugUI() override;
 	void HandleInput(std::string input) override;	
-	std::string GetFileName() { return testSceneSaveFileName; }
+	std::string GetFileName() { return saveFileName; }
 	void SaveScene();
 	void LoadScene();
 
@@ -47,5 +50,10 @@ private:
 	std::unique_ptr<LevelEditorBridge> levelEditorBridge;
 
 	std::unique_ptr<CollisionManager> collisionManager;
-	static constexpr const char* testSceneSaveFileName = "TestScene";
+
+	std::unique_ptr<ShadowMap> shadowMap;
+
+	std::unique_ptr<Environment> environment;
+
+	static constexpr const char* saveFileName = "TestScene";
 };

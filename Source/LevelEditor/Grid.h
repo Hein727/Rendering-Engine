@@ -14,7 +14,6 @@ public :
 		lineRenderer = std::make_unique<LineRenderer>(gameContext);
 	}
 	~Grid() = default;
-	void Update(float elapsedTime);
 	void Render(float elapsedTime);
 	DirectX::XMFLOAT3 GetCurrentCellLocation() const;
 

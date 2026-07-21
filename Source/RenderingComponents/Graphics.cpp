@@ -300,12 +300,29 @@ void graphics::initialize(HWND hwnd)
 	sampler_desc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
 	sampler_desc.MinLOD = 0;
 	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
-	hr = device->CreateSamplerState(&sampler_desc, samplerStates[SHADOW_COMPARISON_SAMPLER].GetAddressOf());
+	hr = device->CreateSamplerState(&sampler_desc, shadowSamplerStates[SHADOW_COMPARISON_SAMPLER].GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+
+	sampler_desc = {};
+	sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampler_desc.MipLODBias = 0.0f;
+	sampler_desc.MaxAnisotropy = 16;
+	sampler_desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	sampler_desc.BorderColor[0] = FLT_MAX;
+	sampler_desc.BorderColor[1] = FLT_MAX;
+	sampler_desc.BorderColor[2] = FLT_MAX;
+	sampler_desc.BorderColor[3] = FLT_MAX;
+	sampler_desc.MinLOD = 0;
+	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = device->CreateSamplerState(&sampler_desc, shadowSamplerStates[SHADOW_BORDER_SAMPLER].GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
 }
 
 //Call at the beginning of every frame for rendering
-void graphics::renderingBegin(camera_controls& cam)
+void graphics::renderingBegin(camera_controls& cam, float elapsedTime)
 {
 	// Clear the back buffer and depth stencil view
 	HRESULT hr{ S_OK };
@@ -322,33 +339,67 @@ void graphics::renderingBegin(camera_controls& cam)
 
 	deviceContext->PSSetSamplers(
 		0,
-		7,
+		SAMPLER_STATE_COUNT,
 		samplerStates->GetAddressOf()
 	);
 
+	deviceContext->PSSetSamplers(
+		SAMPLER_STATE_COUNT,
+		SHADOW_SAMPLER_STATE_COUNT,
+		shadowSamplerStates->GetAddressOf()
+	);
+
+	SceneConstantsUpdate(cam);
+
+	deviceContext->VSSetConstantBuffers(0, 1, sceneConstantBuffer[0].GetAddressOf());
+	deviceContext->PSSetConstantBuffers(0, 1, sceneConstantBuffer[0].GetAddressOf());
+
+	deviceContext->RSSetState(rasterizerStates[RasterizerState::FS_ON_CB_OFF_CW_OFF].Get());
+}
+
+void graphics::SceneConstantsUpdate(camera_controls& cam)
+{
 	// Get the current viewport dimensions
-	D3D11_VIEWPORT viewport{};	
+	D3D11_VIEWPORT viewport{};
 	UINT num_viewports = 1;
 	deviceContext->RSGetViewports(&num_viewports, &viewport);
 
 	// Update scene constant buffer with the current screen dimensions
-	float  aspect_ratio = viewport.Width / viewport.Height;	
+	float  aspect_ratio = viewport.Width / viewport.Height;
 	DirectX::XMMATRIX P{ DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(45.0f), aspect_ratio, 0.1f, 100.0f) };
 
 	DirectX::XMFLOAT4X4 view = cam.get_view();
 
 	DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&view);
 
-	// Set up the scene constants buffer
 	SceneConstants scene_constants{};
-	DirectX::XMStoreFloat4x4(&scene_constants.view_projection, V * P);
-	DirectX::XMFLOAT3 camera_position = cam.get_position();
-	scene_constants.camera_position = { camera_position.x, camera_position.y, camera_position.z, 0.0f };
-	deviceContext->UpdateSubresource(sceneConstantBuffer[0].Get(), 0, NULL, &scene_constants, 0, 0);
-	deviceContext->VSSetConstantBuffers(0, 1, sceneConstantBuffer[0].GetAddressOf());
-	deviceContext->PSSetConstantBuffers(0, 1, sceneConstantBuffer[0].GetAddressOf());
+	// Set up the scene constants buffer
+	if (!(sceneReplacements & REPLACE_VIEW_PROJECTION))
+	{
+		DirectX::XMStoreFloat4x4(&scene_constants.view_projection, V * P);
+	}
+	else
+		scene_constants.view_projection = viewProjectionReplacement;
 
-	deviceContext->RSSetState(rasterizerStates[RasterizerState::FS_ON_CB_OFF_CW_OFF].Get());
+	if (!(sceneReplacements & REPLACE_CAMERA_POSITION))
+	{
+		DirectX::XMFLOAT3 camera_position = cam.get_position();
+		scene_constants.camera_position = { camera_position.x, camera_position.y, camera_position.z, 0.0f };
+	}
+	else
+		scene_constants.camera_position = cameraPositionReplacement;
+
+	if (!(sceneReplacements & REPLACE_OPTIONS))
+	{
+		scene_constants.options.x = cam.get_cursor_position().x;
+		scene_constants.options.y = cam.get_cursor_position().y;
+		scene_constants.options.z = 0.0f;
+		scene_constants.options.w = 0.0f; // Flags can be set here if needed
+	}
+	else
+		scene_constants.options = optionsReplacement;
+
+	deviceContext->UpdateSubresource(sceneConstantBuffer[0].Get(), 0, NULL, &scene_constants, 0, 0);
 }
 
 void graphics::render()
@@ -384,4 +435,17 @@ DirectX::XMMATRIX graphics::coordinate_system_transform(CoordChange type, float 
 	};
 
 	return DirectX::XMMatrixScaling(scale_factor, scale_factor, scale_factor) * DirectX::XMLoadFloat4x4(&coord_system_transforms[type]);
+}
+
+void graphics::ResetViewport()
+{
+	D3D11_VIEWPORT viewport{};
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+	viewport.Width = static_cast<FLOAT>(SCREEN_WIDTH);
+	viewport.Height = static_cast<FLOAT>(SCREEN_HEIGHT);
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	
+	deviceContext->RSSetViewports(1, &viewport);
 }
