@@ -12,13 +12,11 @@ TestScene::TestScene(GameContext& gameContext, SceneManager& sceneManager, Asset
 {
 	testObject = std::make_unique<GameObject>();
 
-	shadowMap = std::make_unique<ShadowMap>();
-
 	testObject->Init(gameContext, assetManager);
 
 	collisionManager = std::make_unique<CollisionManager>(gameContext, testObject->GetDatas());
 
-	environment = std::make_unique<Environment>(gameContext);	
+	environment = std::make_unique<Environment>();	
 
 #ifdef _DEBUG
 
@@ -35,13 +33,11 @@ void TestScene::Init()
 	lightConstants.directionalLights.direction = { 0.3f, -1.0f, 0.2f, 0.0f };
 	lightConstants.directionalLights.color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-	SetupConstantBuffer(*gameContext, lightConstantBuffer, lightConstants);
+	environment->Init(*gameContext, *testObject, lightConstants, lightConstantBuffer);
 
-	shadowMap->Init(*gameContext, lightConstants);
-
-	D3D11_TEXTURE2D_DESC desc{};
+	/*D3D11_TEXTURE2D_DESC desc{};
 	desc.MipLevels = 0;
-	desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+	desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;*/
 	//already deleted the textures if in need download new environment textures 
 	//loadTextureFromFile(device, L"Data/environments/test texture/skybox.dds", srvs[0].GetAddressOf(), &desc);
 	//loadTextureFromFile(device, L"Data/environments/test texture/diffuse_iem.dds", srvs[1].GetAddressOf(), &desc);
@@ -53,7 +49,7 @@ void TestScene::Update(float deltaTime)
 {
 	testObject->Update(deltaTime);
 
-	environment->Update(deltaTime);
+	environment->CaptureEnvironmentProbes(deltaTime);
 
 #ifdef _DEBUG
 
@@ -67,17 +63,11 @@ void TestScene::ShadowRender(float deltaTime)
 	int lightShaderSlot = 13;
 	UpdateConstantBuffer(*gameContext, lightConstantBuffer, lightConstants, lightShaderSlot);
 
-	shadowMap->Begin();
-	testObject->ShadowMapRender(deltaTime);
-	shadowMap->End();
+	environment->ShadowRender(deltaTime);
 }
 
 void TestScene::MainRender(float deltaTime)
-{	
-	gameContext->graphics.ResetSceneReplacements();
-
-	gameContext->graphics.SceneConstantsUpdate(gameContext->input.cameraControls);
-
+{
 	environment->Render(deltaTime);
 
 	testObject->Render(deltaTime);
@@ -145,7 +135,7 @@ void TestScene::DebugUI()
 
 #endif
 
-	shadowMap->Debug();
+	environment->DebugUI();
 	
 }
 

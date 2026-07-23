@@ -48,7 +48,8 @@ StructuredBuffer<MaterialConstants> materials : register(t0);
 #define EMISSIVE_TEXTURE 3
 #define OCCLUSION_TEXTURE 4
 Texture2D<float4> materialTextures[5] : register(t1);  
-Texture2D<float4> shadowMapTexture : register(t6);  
+Texture2D<float4> shadowMapTexture : register(t126); 
+TextureCube environmentMapTexture : register(t127); 
 
 // SamplerStates are already defined in Common.hlsli, so we can just use them here.
 
@@ -188,6 +189,13 @@ float4 main(VS_OUT pin) : SV_TARGET
     }
     
     color.rgb += emissiveFactor;
+    
+     // Probe environment map for reflections    
+    {
+        float3 R = reflect(-V, N);
+        float3 reflection = environmentMapTexture.Sample(sampler_states[LINEAR_WRAP], R).rgb;
+        color.rgb += reflection * metallicFactor;
+    }
     
     return color;
 }

@@ -25,6 +25,9 @@
     <Filter Include="Source\RenderingComponents">
       <UniqueIdentifier>{ddcfb0f6-ebe2-4702-8727-965481f1a0b8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\RenderingComponents\SceneComponents">
+      <UniqueIdentifier>{3742be91-904f-4716-a2a2-fa6bc7773b38}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\Main.cpp">
@@ -141,14 +144,17 @@
     <ClCompile Include="Source\RenderingComponents\Texture.cpp">
       <Filter>Source\RenderingComponents</Filter>
     </ClCompile>
-    <ClCompile Include="Source\RenderingComponents\SkyBox.cpp">
-      <Filter>Source\RenderingComponents</Filter>
+    <ClCompile Include="Source\RenderingComponents\SceneComponents\Environment.cpp">
+      <Filter>Source\RenderingComponents\SceneComponents</Filter>
     </ClCompile>
-    <ClCompile Include="Source\RenderingComponents\ShadowMap.cpp">
-      <Filter>Source\RenderingComponents</Filter>
+    <ClCompile Include="Source\RenderingComponents\SceneComponents\ShadowMap.cpp">
+      <Filter>Source\RenderingComponents\SceneComponents</Filter>
     </ClCompile>
-    <ClCompile Include="Source\RenderingComponents\Environment.cpp">
-      <Filter>Source\RenderingComponents</Filter>
+    <ClCompile Include="Source\RenderingComponents\SceneComponents\SkyBox.cpp">
+      <Filter>Source\RenderingComponents\SceneComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RenderingComponents\SceneComponents\EnvironmentProbe.cpp">
+      <Filter>Source\RenderingComponents\SceneComponents</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -296,17 +302,20 @@
     <ClInclude Include="Source\RenderingComponents\Lights.h">
       <Filter>Source\RenderingComponents</Filter>
     </ClInclude>
-    <ClInclude Include="Source\RenderingComponents\SkyBox.h">
-      <Filter>Source\RenderingComponents</Filter>
-    </ClInclude>
     <ClInclude Include="Source\RenderingComponents\Texture.h">
       <Filter>Source\RenderingComponents</Filter>
     </ClInclude>
-    <ClInclude Include="Source\RenderingComponents\ShadowMap.h">
-      <Filter>Source\RenderingComponents</Filter>
+    <ClInclude Include="Source\RenderingComponents\SceneComponents\Environment.h">
+      <Filter>Source\RenderingComponents\SceneComponents</Filter>
     </ClInclude>
-    <ClInclude Include="Source\RenderingComponents\Environment.h">
-      <Filter>Source\RenderingComponents</Filter>
+    <ClInclude Include="Source\RenderingComponents\SceneComponents\ShadowMap.h">
+      <Filter>Source\RenderingComponents\SceneComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\SceneComponents\SkyBox.h">
+      <Filter>Source\RenderingComponents\SceneComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RenderingComponents\SceneComponents\EnvironmentProbe.h">
+      <Filter>Source\RenderingComponents\SceneComponents</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -10,8 +10,7 @@
 #include "LevelEditor/LevelEditorBridge.h"
 #include "HitCheck/CollisionManager.h"
 #include "System/Serializer.h"
-#include "RenderingComponents/ShadowMap.h"
-#include "RenderingComponents/Environment.h"
+#include "RenderingComponents/SceneComponents/Environment.h"
 
 class TestScene : public Scene
 {
@@ -50,8 +49,6 @@ private:
 	std::unique_ptr<LevelEditorBridge> levelEditorBridge;
 
 	std::unique_ptr<CollisionManager> collisionManager;
-
-	std::unique_ptr<ShadowMap> shadowMap;
 
 	std::unique_ptr<Environment> environment;
 
