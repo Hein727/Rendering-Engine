@@ -51,7 +51,7 @@ void LevelEditorBridge::DebugUI()
 
 	if (!io.WantCaptureMouse && !placingModel)
 	{
-		if (gameContext.input.mouseControl.GetMouseLeftClick() && currentGameObject->GetSelectedData() == nullptr)
+		if (gameContext.input.mouseControl.GetLeftButtonPressed() && currentGameObject->GetSelectedData() == nullptr)
 		{
 			collisionManager.CheckCursorWithModel();
 		}
@@ -59,7 +59,7 @@ void LevelEditorBridge::DebugUI()
 
 	if (!io.WantCaptureMouse && placingModel)
 	{
-		if (gameContext.input.mouseControl.GetMouseLeftClick())
+		if (gameContext.input.mouseControl.GetLeftButtonPressed())
 		{
 			currentGameObject->PlaceModel(selectedModelName, *grid);
 		}

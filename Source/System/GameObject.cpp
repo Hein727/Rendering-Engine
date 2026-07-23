@@ -190,7 +190,7 @@ void GameObject::DebugUI()
 		selected = &datas[index];
 	}
 
-	if (gameContext->input.mouseControl.GetMouseRightClick() && !(::GetAsyncKeyState(VK_LMENU) & 0x8000))
+	if (gameContext->input.mouseControl.GetRightButtonPressed() && !(::GetAsyncKeyState(VK_LMENU) & 0x8000))
 	{
 		if (selected != nullptr)
 		{

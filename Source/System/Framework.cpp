@@ -55,7 +55,7 @@ void framework::update(float delta_time)
 
 	gameContext.input.mouseControl.Update(delta_time);
 
-	if (gameContext.input.mouseControl.GetMouseLeftClick())
+	if (gameContext.input.mouseControl.GetLeftButtonPressed())
 	{
 		gameContext.input.mouseControl.UpdateMouseRay(gameContext.graphics);
 	}

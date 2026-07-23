@@ -15,7 +15,7 @@ EnvironmentProbe::EnvironmentProbe(GameContext& gameContext, GameObject& gameObj
 	textureDesc.Height = CUBE_MAP_SIZE;
 	textureDesc.MipLevels = 0;
 	textureDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE | D3D11_RESOURCE_MISC_GENERATE_MIPS;
-	textureDesc.ArraySize = 6; // For cube map
+	textureDesc.ArraySize = 6; 
 	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	textureDesc.SampleDesc.Count = 1;
