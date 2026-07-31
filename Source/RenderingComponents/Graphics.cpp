@@ -366,16 +366,15 @@ void graphics::SceneConstantsUpdate(camera_controls& cam)
 
 	// Update scene constant buffer with the current screen dimensions
 	float  aspect_ratio = viewport.Width / viewport.Height;
-	DirectX::XMMATRIX P{ DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(45.0f), aspect_ratio, 0.1f, 100.0f) };
-
-	DirectX::XMFLOAT4X4 view = cam.get_view();
-
-	DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&view);
 
 	SceneConstants scene_constants{};
+
 	// Set up the scene constants buffer
 	if (!(sceneReplacements & REPLACE_VIEW_PROJECTION))
 	{
+		DirectX::XMFLOAT4X4 view = cam.get_view();
+		DirectX::XMMATRIX P{ DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(45.0f), aspect_ratio, 0.1f, 100.0f) };
+		DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&view);
 		DirectX::XMStoreFloat4x4(&scene_constants.view_projection, V * P);
 	}
 	else
@@ -446,6 +445,8 @@ void graphics::ResetViewport()
 	viewport.Height = static_cast<FLOAT>(SCREEN_HEIGHT);
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
+
+	sceneReplacements = 0;
 	
 	deviceContext->RSSetViewports(1, &viewport);
 }

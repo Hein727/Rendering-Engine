@@ -59,7 +59,17 @@ void SkyBox::Render(float elapsedTime)
 		DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&v);
 		DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&p);
 
-		DirectX::XMStoreFloat4x4(&skyMapConstants.inverse_view_projection, DirectX::XMMatrixInverse(nullptr, V * P));
+		if(gameContext.graphics.IsViewProjectionReplaced())
+		{
+			DirectX::XMFLOAT4X4 replacementVP = gameContext.graphics.GetReplacementViewProjection();
+			DirectX::XMStoreFloat4x4(&skyMapConstants.inverse_view_projection, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&replacementVP)));
+		}
+		else
+		{
+			DirectX::XMStoreFloat4x4(&skyMapConstants.inverse_view_projection, DirectX::XMMatrixInverse(nullptr, V * P));
+		}
+
+
 
 		context->UpdateSubresource(skyMapConstantBuffer.Get(), 0, 0, &skyMapConstants, 0, 0);
 		context->VSSetConstantBuffers(1, 1, skyMapConstantBuffer.GetAddressOf());

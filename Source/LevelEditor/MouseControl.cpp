@@ -5,32 +5,16 @@
 
 void MouseControl::Update(float elapsedTime)
 {
-	uint8_t currentButtons = 0;
-
-	currentButtons |= (::GetAsyncKeyState(VK_LBUTTON) & 0x8000) ? LEFT_BUTTON : 0;
-	currentButtons |= (::GetAsyncKeyState(VK_RBUTTON) & 0x8000) ? RIGHT_BUTTON : 0;
-	currentButtons |= (::GetAsyncKeyState(VK_MBUTTON) & 0x8000) ? MIDDLE_BUTTON : 0;
-	
-	uint8_t pressed = inputState & ~inputStatePrev;
-	uint8_t released = ~inputState & inputStatePrev;	
-	uint8_t hold = inputState & inputStatePrev;
-
 	inputStatePrev = inputState;
+
 	inputState = 0;
 
-	inputState |= (pressed & LEFT_BUTTON) ? PRESSED : 0;
-	inputState |= (pressed & RIGHT_BUTTON) ? PRESSED : 0;
-	inputState |= (pressed & MIDDLE_BUTTON) ? PRESSED : 0;
-
-	inputState |= (released & LEFT_BUTTON) ? RELEASED : 0;
-	inputState |= (released & RIGHT_BUTTON) ? RELEASED : 0;
-	inputState |= (released & MIDDLE_BUTTON) ? RELEASED : 0;
-
-	inputState |= (hold & LEFT_BUTTON) ? HELD : 0;
-	inputState |= (hold & RIGHT_BUTTON) ? HELD : 0;
-	inputState |= (hold & MIDDLE_BUTTON) ? HELD : 0;
-
-	buttonType = currentButtons;
+	if(::GetAsyncKeyState(VK_LBUTTON) & 0x8000)
+		inputState |= LEFT_BUTTON;
+	if(::GetAsyncKeyState(VK_RBUTTON) & 0x8000)
+		inputState |= RIGHT_BUTTON;
+	if(::GetAsyncKeyState(VK_MBUTTON) & 0x8000)
+		inputState |= MIDDLE_BUTTON;
 }
 
 void MouseControl::UpdateMouseRay(graphics& graphics)

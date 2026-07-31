@@ -22,18 +22,9 @@ public :
 		COUNT_BUTTON
 	};
 
-	enum MouseState
-	{
-		PRESSED = 1 << 0,
-		RELEASED = 1 << 1,
-		HELD = 1 << 2,
-		COUNT_STATE
-	};
-
 private:
 	uint8_t inputState{ 0 };
 	uint8_t inputStatePrev{ 0 };
-	uint8_t buttonType{ 0 };
 
 	camera_controls& cameraControls;
 
@@ -41,15 +32,13 @@ private:
 	DirectX::XMFLOAT3 dir{ 0,0,0 };
 
 public :
-	bool GetLeftButtonPressed() { return (inputState & LEFT_BUTTON) && (inputStatePrev & ~LEFT_BUTTON); }
-	bool GetLeftButtonReleased() { return (~inputState & LEFT_BUTTON) && (inputStatePrev & LEFT_BUTTON); }
-	bool GetLeftButtonHold() { return (inputState & LEFT_BUTTON) && (inputStatePrev & LEFT_BUTTON); }
-	bool GetRightButtonPressed() { return (inputState & RIGHT_BUTTON) && (inputStatePrev & ~RIGHT_BUTTON); }	
-	bool GetRightButtonReleased() { return (~inputState & RIGHT_BUTTON) && (inputStatePrev & RIGHT_BUTTON); }
-	bool GetRightButtonHold() { return (inputState & RIGHT_BUTTON) && (inputStatePrev & RIGHT_BUTTON); }
-	bool GetMiddleButtonPressed() { return (inputState & MIDDLE_BUTTON) && (inputStatePrev & ~MIDDLE_BUTTON); }
-	bool GetMiddleButtonReleased() { return (~inputState & MIDDLE_BUTTON) && (inputStatePrev & MIDDLE_BUTTON); }
-	bool GetMiddleButtonHold() { return (inputState & MIDDLE_BUTTON) && (inputStatePrev & MIDDLE_BUTTON); }
+	
+	bool GetLeftButtonPressed() { return (inputState & LEFT_BUTTON) && !(inputStatePrev & LEFT_BUTTON); }
+	bool GetLeftButtonReleased() { return !(inputState & LEFT_BUTTON) && (inputStatePrev & LEFT_BUTTON); }
+	bool GetRightButtonPressed() { return (inputState & RIGHT_BUTTON) && !(inputStatePrev & RIGHT_BUTTON); }
+	bool GetRightButtonReleased() { return !(inputState & RIGHT_BUTTON) && (inputStatePrev & RIGHT_BUTTON); }
+	bool GetMiddleButtonPressed() { return (inputState & MIDDLE_BUTTON) && !(inputStatePrev & MIDDLE_BUTTON); }
+	bool GetMiddleButtonReleased() { return !(inputState & MIDDLE_BUTTON) && (inputStatePrev & MIDDLE_BUTTON); }
 	DirectX::XMFLOAT3 GetMouseOrigin() { return origin; }
 	DirectX::XMFLOAT3 GetMouseDir() { return dir; }
 };

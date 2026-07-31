@@ -97,9 +97,11 @@ public:
 	void SetRasterizerState(RasterizerState state) const { deviceContext->RSSetState(rasterizerStates[state].Get()); }
 	void SetDepthStencilState(DepthStencilState state, UINT stencilRef = 0) const { deviceContext->OMSetDepthStencilState(depthStencilStates[state].Get(), stencilRef); }
 	void SetBlendState(BlendState state) const { deviceContext->OMSetBlendState(blendStates[state].Get(), nullptr, 0xFFFFFFFF); }
-	void SetReplacementViewProjection(const DirectX::XMFLOAT4X4& viewProjection) { viewProjectionReplacement = viewProjection; sceneReplacements = REPLACE_VIEW_PROJECTION; }
-	void SetReplacementCameraPosition(const DirectX::XMFLOAT4& cameraPosition) { cameraPositionReplacement = cameraPosition; sceneReplacements = REPLACE_CAMERA_POSITION; }
-	void SetReplacementOptions(const DirectX::XMFLOAT4& options) { optionsReplacement = options; sceneReplacements = REPLACE_OPTIONS; }
+	void SetReplacementViewProjection(const DirectX::XMFLOAT4X4& viewProjection) { viewProjectionReplacement = viewProjection; sceneReplacements |= REPLACE_VIEW_PROJECTION; }
+	void SetReplacementCameraPosition(const DirectX::XMFLOAT4& cameraPosition) { cameraPositionReplacement = cameraPosition; sceneReplacements |= REPLACE_CAMERA_POSITION; }
+	void SetReplacementOptions(const DirectX::XMFLOAT4& options) { optionsReplacement = options; sceneReplacements |= REPLACE_OPTIONS; }
+	DirectX::XMFLOAT4X4 GetReplacementViewProjection() const { return viewProjectionReplacement; }
+	bool IsViewProjectionReplaced() const { return (sceneReplacements & REPLACE_VIEW_PROJECTION) != 0; }	
 	void ResetSceneReplacements() { sceneReplacements = 0x00000000; }	
 	void SceneConstantsUpdate(camera_controls& cam);
 
@@ -111,7 +113,6 @@ public:
 	void renderingEnd();
 
 	void ResetViewport();
-
 
 private:
 
@@ -130,7 +131,7 @@ private:
 	DirectX::XMFLOAT4 cameraPositionReplacement;
 	DirectX::XMFLOAT4 optionsReplacement;
 
-	int8_t sceneReplacements = 0x00000000; // Bitmask to track which scene constants have been replaced
+	int8_t sceneReplacements = 0x00000000;
 
 	enum replacement_flags
 	{

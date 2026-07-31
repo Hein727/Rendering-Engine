@@ -6,9 +6,12 @@ void Environment::Init(GameContext& gameContext, GameObject& gameObject, Scene::
 	this->gameContext = &gameContext;
 	this->gameObject = &gameObject;
 	this->lightConstants = &lightConstants;
+
 	skyBox = std::make_unique<SkyBox>(gameContext, skyBoxPath == nullptr ? defaultSkyBoxPath : skyBoxPath);
 	shadowMap = std::make_unique<ShadowMap>();
-	std::unique_ptr<EnvironmentProbe> probe = std::make_unique<EnvironmentProbe>(gameContext, gameObject, *skyBox);
+
+	probeMesh = std::make_shared<GltfModel>(gameContext, "./Data/ProbeCube.gltf");
+	std::unique_ptr<EnvironmentProbe> probe = std::make_unique<EnvironmentProbe>(gameContext, gameObject, *skyBox, probeMesh);
 	environmentProbes.push_back(std::move(probe));
 
 	SetupConstantBuffer(gameContext, lightConstantBuffer, lightConstants);
@@ -41,15 +44,24 @@ void Environment::Render(float deltaTime)
 
 	gameContext->graphics.SceneConstantsUpdate(gameContext->input.cameraControls);
 
+	skyBox->Render(deltaTime);
+
 	for (auto& probe : environmentProbes)
 	{
 		probe->Update(deltaTime);
-	}
 
-	skyBox->Render(deltaTime);
+#ifdef _DEBUG
+		probe->Render(deltaTime);
+#endif
+	}
 }
 
 void Environment::DebugUI()
 {
 	//shadowMap->Debug();
+
+	for(auto& probe : environmentProbes)
+	{
+		probe->DebugUI();
+	}	
 }

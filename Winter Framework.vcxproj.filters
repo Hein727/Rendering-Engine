@@ -156,6 +156,15 @@
     <ClCompile Include="Source\RenderingComponents\SceneComponents\EnvironmentProbe.cpp">
       <Filter>Source\RenderingComponents\SceneComponents</Filter>
     </ClCompile>
+    <ClCompile Include="Source\System\AudioResource.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\AudioSource.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\Audio.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\Framework.h">
@@ -316,6 +325,15 @@
     </ClInclude>
     <ClInclude Include="Source\RenderingComponents\SceneComponents\EnvironmentProbe.h">
       <Filter>Source\RenderingComponents\SceneComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\AudioSource.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\AudioResource.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\Audio.h">
+      <Filter>Source\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

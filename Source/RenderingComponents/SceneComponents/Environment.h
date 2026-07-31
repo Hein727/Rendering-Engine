@@ -5,6 +5,7 @@
 #include "../Source/System/GameObject.h"
 #include "../Source/System/Scene.h"
 #include "EnvironmentProbe.h"
+#include "../GltfModel.h"
 #include <memory>
 #include <vector>
 
@@ -30,6 +31,7 @@ private:
 	std::vector<std::unique_ptr<EnvironmentProbe>> environmentProbes;
 	std::unique_ptr<SkyBox> skyBox;
 	std::unique_ptr<ShadowMap> shadowMap;
+	std::shared_ptr<GltfModel> probeMesh;
 
 	static constexpr const wchar_t* defaultSkyBoxPath = L"./Data/Skybox/overcast_soil_puresky_4k.hdr";
 };

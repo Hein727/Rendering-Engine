@@ -2,9 +2,9 @@
 #include "../Source/System/Misc.h"
 #include <imgui.h>
 
-static constexpr int CUBE_MAP_SIZE = 512;
+static constexpr float CUBE_MAP_SIZE = 512.0f;
 
-EnvironmentProbe::EnvironmentProbe(GameContext& gameContext, GameObject& gameObject, SkyBox& skyBox) : gameContext(gameContext), gameObject(gameObject), skyBox(skyBox)	
+EnvironmentProbe::EnvironmentProbe(GameContext& gameContext, GameObject& gameObject, SkyBox& skyBox, std::shared_ptr<GltfModel> model) : gameContext(gameContext), gameObject(gameObject), skyBox(skyBox), model(model)
 {
 	auto device = gameContext.graphics.GetDevice();	
 
@@ -64,6 +64,7 @@ EnvironmentProbe::EnvironmentProbe(GameContext& gameContext, GameObject& gameObj
 	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
 
 	SetOptions(DIRTY);
+	SetOptions(ACTIVE);
 }
 
 void EnvironmentProbe::Update(float elapsedTime)
@@ -90,64 +91,89 @@ void EnvironmentProbe::Update(float elapsedTime)
 		DirectX::XMVectorSet(0,1,0,0)
 	};
 
-	auto context = gameContext.graphics.GetDeviceContext();	
+	auto context = gameContext.graphics.GetDeviceContext();
 
-	XMVECTOR eye = XMLoadFloat3(&probePosition);
+	XMFLOAT3 cam = gameContext.input.cameraControls.get_position();
 
-	XMMATRIX projection = XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.0f, 0.1f, 100.0f);
+	XMVECTOR camPos = XMLoadFloat3(&cam);	
+	XMVECTOR probePos = XMLoadFloat3(&probePosition);
+	float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(camPos - probePos));
 
-	if (optionFlags & DIRTY)
-	{
-		for (int i = 0; i < 6; ++i)
-		{
-			XMMATRIX view = XMMatrixLookAtLH(eye, eye + directions[i], ups[i]);
+	distance < range ? SetOptions(ACTIVE) : ClearOptions(ACTIVE);	
 
-			XMMATRIX VP = view * projection;
-
-			XMFLOAT4X4 viewProjection;
-			XMStoreFloat4x4(&viewProjection, VP);
-			gameContext.graphics.SetReplacementViewProjection(viewProjection);
-			gameContext.graphics.SceneConstantsUpdate(gameContext.input.cameraControls);
-
-			context->OMSetRenderTargets(1, rtv[i].GetAddressOf(), depthStencilView.Get());
-
-			D3D11_VIEWPORT viewport{};
-			viewport.Width = CUBE_MAP_SIZE;
-			viewport.Height = CUBE_MAP_SIZE;
-			viewport.MaxDepth = 1.0f;
-			context->RSSetViewports(1, &viewport);
-
-			float clearColor[4] = { 0, 0, 0, 1 };
-			context->ClearRenderTargetView(rtv[i].Get(), clearColor);
-			context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-			skyBox.Render(elapsedTime);
-			gameObject.Render(elapsedTime);
-		}
-		context->GenerateMips(srv.Get());
-		context->OMSetRenderTargets(0, nullptr, nullptr);
-
-		gameContext.graphics.ResetViewport();
-		gameContext.graphics.ResetSceneReplacements();
-		gameContext.graphics.SceneConstantsUpdate(gameContext.input.cameraControls);
-
-		ClearOptions(DIRTY);
-
-		auto rtv = gameContext.graphics.GetRenderTargetView();
-		context->OMSetRenderTargets(1, &rtv, gameContext.graphics.GetDepthStencilView());
-	}
-
-	if (optionFlags & DYNAMIC)
+	if (optionFlags & ACTIVE)
 	{
 		dynamicUpdateInterval -= elapsedTime;
-		if(dynamicUpdateInterval <= 0.0f)
+		if (dynamicUpdateInterval <= 0.0f)
 		{
 			SetOptions(DIRTY);
 			dynamicUpdateInterval = 1.0f;
 		}
-	}
 
+		XMVECTOR eye = XMLoadFloat3(&probePosition);
+
+		XMMATRIX projection = XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.0f, 0.1f, 100.0f);
+
+		if (optionFlags & DIRTY)
+		{
+			for (int i = 0; i < 6; ++i)
+			{
+				XMMATRIX view = XMMatrixLookAtLH(eye, eye + directions[i], ups[i]);
+
+				XMMATRIX VP = view * projection;
+
+				XMFLOAT4X4 viewProjection;
+				XMStoreFloat4x4(&viewProjection, VP);
+				gameContext.graphics.SetReplacementViewProjection(viewProjection);
+				gameContext.graphics.SetReplacementCameraPosition({ probePosition.x, probePosition.y, probePosition.z, 0.0f });
+				gameContext.graphics.SceneConstantsUpdate(gameContext.input.cameraControls);
+
+				context->OMSetRenderTargets(1, rtv[i].GetAddressOf(), depthStencilView.Get());
+
+				D3D11_VIEWPORT viewport{};
+				viewport.Width = CUBE_MAP_SIZE;
+				viewport.Height = CUBE_MAP_SIZE;
+				viewport.MaxDepth = 1.0f;
+				context->RSSetViewports(1, &viewport);
+
+				float clearColor[4] = { 0, 0, 0, 1 };
+				context->ClearRenderTargetView(rtv[i].Get(), clearColor);
+				context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+				skyBox.Render(elapsedTime);
+				gameObject.Render(elapsedTime);
+			}
+			context->GenerateMips(srv.Get());
+			context->OMSetRenderTargets(0, nullptr, nullptr);
+
+			ClearOptions(DIRTY);
+
+			auto rtv = gameContext.graphics.GetRenderTargetView();
+			context->OMSetRenderTargets(1, &rtv, gameContext.graphics.GetDepthStencilView());
+
+			gameContext.graphics.ResetViewport();
+			gameContext.graphics.ResetSceneReplacements();
+			gameContext.graphics.SceneConstantsUpdate(gameContext.input.cameraControls);
+		}
+	}
 	context->PSSetShaderResources(127, 1, srv.GetAddressOf());
+}
+
+void EnvironmentProbe::Render(float elapsedTime)
+{
+	gameContext.graphics.SetRasterizerState(graphics::FS_ON_CB_ON_CW_OFF);
+
+
+	DirectX::XMVECTOR S = DirectX::XMVectorSet(1, 1, 1, 1);
+	DirectX::XMVECTOR R = DirectX::XMQuaternionIdentity();
+	DirectX::XMVECTOR T = DirectX::XMLoadFloat3(&probePosition);
+	DirectX::XMMATRIX W = DirectX::XMMatrixAffineTransformation(S, DirectX::XMVectorZero(), R, T);
+	DirectX::XMFLOAT4X4 world;
+	DirectX::XMStoreFloat4x4(&world, W);
+
+	model->Render(world);
+
+	gameContext.graphics.SetRasterizerState(graphics::FS_ON_CB_OFF_CW_OFF);
 }
 
 void EnvironmentProbe::DebugUI()
@@ -155,7 +181,6 @@ void EnvironmentProbe::DebugUI()
 	ImGui::Begin("Environment Probe");
 	ImGui::Text("Position: (%.2f, %.2f, %.2f)", probePosition.x, probePosition.y, probePosition.z);
 	ImGui::SliderFloat3("Probe Position", &probePosition.x, -10.0f, 10.0f);
-	ImGui::SliderFloat("Radius", &radius, 0.1f, 10.0f);
-	ImGui::Checkbox("Dynamic Update", reinterpret_cast<bool*>(&optionFlags));
+	ImGui::SliderFloat("Radius", &range, 1.0f, 1000.0f);
 	ImGui::End();
 }

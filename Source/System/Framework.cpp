@@ -29,6 +29,8 @@ bool framework::initialized()
 	// scene manager initialize(the first scene to load)
 	sceneManager.ChangeScene(std::make_unique<TestScene>(gameContext, sceneManager, assetManager));
 
+	gameContext.audio.Initialize();
+
 	return true;
 }
 
@@ -95,6 +97,8 @@ bool framework::uninitialized()
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+
+	gameContext.audio.Finalize();
 
 	gameContext.graphics.uninitialize();
 

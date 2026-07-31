@@ -183,6 +183,9 @@
     <ClCompile Include="Source\RenderingComponents\Static_Mesh.cpp" />
     <ClCompile Include="Source\RenderingComponents\Texture.cpp" />
     <ClCompile Include="Source\System\AssetManager.cpp" />
+    <ClCompile Include="Source\System\Audio.cpp" />
+    <ClCompile Include="Source\System\AudioResource.cpp" />
+    <ClCompile Include="Source\System\AudioSource.cpp" />
     <ClCompile Include="Source\System\Framework.cpp" />
     <ClCompile Include="Source\System\GameObject.cpp" />
     <ClCompile Include="Source\System\Main.cpp" />
@@ -232,6 +235,9 @@
     <ClInclude Include="Source\RenderingComponents\Static_Mesh.h" />
     <ClInclude Include="Source\RenderingComponents\Texture.h" />
     <ClInclude Include="Source\System\AssetManager.h" />
+    <ClInclude Include="Source\System\Audio.h" />
+    <ClInclude Include="Source\System\AudioResource.h" />
+    <ClInclude Include="Source\System\AudioSource.h" />
     <ClInclude Include="Source\System\Framework.h" />
     <ClInclude Include="Source\System\GameContext.h" />
     <ClInclude Include="Source\System\GameObject.h" />

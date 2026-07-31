@@ -8,6 +8,7 @@
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 #include "../tinygltf-release/tiny_gltf.h"
 #include "../HitCheck/AABB.h"
+#include "../System/Serializer.h"
 #include <memory>
 
 class GltfModel
@@ -21,17 +22,7 @@ protected :
 
 	GameContext& gameContext;
 
-private :
-
-	struct Scene
-	{
-		std::string name;
-		std::vector<int> nodes;
-	};
-
-	std::vector<Scene> scenes;
-	int defaultScene = 0;
-
+public:
 	struct BufferView
 	{
 		DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
@@ -40,6 +31,31 @@ private :
 		size_t byteOffset{ 0 };
 		size_t count{ 0 };
 	};
+	std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>> buffers;
+
+	struct Image
+	{
+		std::string name;
+		int width{ -1 };
+		int height{ -1 };
+		int component{ -1 };
+		int bits{ -1 };
+		int pixelType{ -1 };
+		int bufferView{ -1 };
+		std::string mimeType;
+		std::string uri;
+		bool asIs{ false };
+	};
+	std::vector<Image> images;
+	std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> textureResourceViews;
+
+	struct Scene
+	{
+		std::string name;
+		std::vector<int> nodes;
+	};
+	std::vector<Scene> scenes;
+	int defaultScene = 0;
 
 	struct Mesh
 	{
@@ -56,10 +72,63 @@ private :
 					vertexBufferViews.at(attribute).buffer != -1;
 			}
 		};
-		std::vector<Primitive> primitives;	
+		std::vector<Primitive> primitives;
 	};
 	std::vector<Mesh> meshes;
-	std::vector<Microsoft::WRL::ComPtr<ID3D11Buffer>> buffers;
+	
+	struct Skin
+	{
+		std::vector<DirectX::XMFLOAT4X4> inverseBindMatrices;
+		std::vector<int> joints;
+	};
+	std::vector<Skin> skins;
+
+	struct Node
+	{
+		std::string name;
+		int skin{ -1 };
+		int mesh{ -1 };
+
+		std::vector<int> children;
+
+		DirectX::XMFLOAT4 rotation{ 0, 0, 0, 1 };
+		DirectX::XMFLOAT3 scale{ 1, 1, 1 };
+		DirectX::XMFLOAT3 translation{ 0, 0, 0 };
+
+		DirectX::XMFLOAT4X4 globalTransform{ 1, 0, 0, 0,
+									   0, 1, 0, 0,
+									   0, 0, 1, 0,
+									   0, 0, 0, 1 };
+	};
+	std::vector<Node> nodes;
+
+	struct Animation
+	{
+		std::string name;
+		float duration{ 0 };
+		struct Channel
+		{
+			int sampler{ -1 };
+			int targetNode{ -1 };
+			std::string targetPath;
+		};
+		std::vector<Channel> channels;
+
+		struct Sampler
+		{
+			int input{ -1 };
+			int output{ -1 };
+			std::string interpolation;
+		};
+		std::vector<Sampler> samplers;
+		//sampler input
+		std::unordered_map<int, std::vector<float>> timelines;
+		//sampler output
+		std::unordered_map<int, std::vector<DirectX::XMFLOAT3>> scales;
+		std::unordered_map<int, std::vector<DirectX::XMFLOAT4>> rotation;
+		std::unordered_map<int, std::vector<DirectX::XMFLOAT3>> translations;
+	};
+	std::vector<Animation> animations;
 
 	struct TextureInfo
 	{
@@ -103,7 +172,6 @@ private :
 			OcclusionTextureInfo occlusionTexture;
 			TextureInfo emissiveTexture;
 		};
-
 		CBuffer data;
 	};
 	std::vector<Material> materials;
@@ -115,77 +183,6 @@ private :
 		int source{ -1 };
 	};
 	std::vector<Texture> textures;
-	struct Image
-	{
-		std::string name;
-		int width{ -1 };
-		int height{ -1 };
-		int component{ -1 };
-		int bits{ -1 };
-		int pixelType{ -1 };
-		int bufferView{ -1 };
-		std::string mimeType;
-		std::string uri;
-		bool asIs{ false };
-	};
-	std::vector<Image> images;
-	std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> textureResourceViews;
-
-public:
-
-	struct Node
-	{
-		std::string name;
-		int skin{ -1 };
-		int mesh{ -1 };
-
-		std::vector<int> children;
-
-		DirectX::XMFLOAT4 rotation{ 0, 0, 0, 1 };
-		DirectX::XMFLOAT3 scale{ 1, 1, 1 };
-		DirectX::XMFLOAT3 translation{ 0, 0, 0 };
-
-		DirectX::XMFLOAT4X4 globalTransform{ 1, 0, 0, 0,
-									   0, 1, 0, 0,
-									   0, 0, 1, 0,
-									   0, 0, 0, 1 };
-	};
-	std::vector<Node> nodes;
-
-	struct Skin
-	{
-		std::vector<DirectX::XMFLOAT4X4> inverseBindMatrices;
-		std::vector<int> joints;
-	};
-	std::vector<Skin> skins;
-
-	struct Animation
-	{
-		std::string name;
-		float duration{ 0 };
-		struct Channel
-		{
-			int sampler{ -1 };
-			int targetNode{ -1 };
-			std::string targetPath;
-		};
-		std::vector<Channel> channels;
-
-		struct Sampler
-		{
-			int input{ -1 };
-			int output{ -1 };
-			std::string interpolation;
-		};
-		std::vector<Sampler> samplers;
-		//sampler input
-		std::unordered_map<int, std::vector<float>> timelines;
-		//sampler output
-		std::unordered_map<int, std::vector<DirectX::XMFLOAT3>> scales;
-		std::unordered_map<int, std::vector<DirectX::XMFLOAT4>> rotation;
-		std::unordered_map<int, std::vector<DirectX::XMFLOAT3>> translations;
-	};
-	std::vector<Animation> animations;
 
 	void Animate(size_t animationIndex, float time, std::vector<Node>& animatedNodes);
 
