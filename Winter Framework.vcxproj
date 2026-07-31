@@ -187,6 +187,7 @@
     <ClCompile Include="Source\System\AudioResource.cpp" />
     <ClCompile Include="Source\System\AudioSource.cpp" />
     <ClCompile Include="Source\System\Framework.cpp" />
+    <ClCompile Include="Source\System\FrustumCulling.cpp" />
     <ClCompile Include="Source\System\GameObject.cpp" />
     <ClCompile Include="Source\System\Main.cpp" />
     <ClCompile Include="Source\System\SceneManager.cpp" />
@@ -239,6 +240,7 @@
     <ClInclude Include="Source\System\AudioResource.h" />
     <ClInclude Include="Source\System\AudioSource.h" />
     <ClInclude Include="Source\System\Framework.h" />
+    <ClInclude Include="Source\System\FrustumCulling.h" />
     <ClInclude Include="Source\System\GameContext.h" />
     <ClInclude Include="Source\System\GameObject.h" />
     <ClInclude Include="Source\System\Input.h" />

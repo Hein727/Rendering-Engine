@@ -61,8 +61,9 @@ void framework::update(float delta_time)
 	{
 		gameContext.input.mouseControl.UpdateMouseRay(gameContext.graphics);
 	}
-
 #endif
+
+	gameContext.frustumCulling.Update(delta_time);
 }
 
 void framework::render(float delta_time)

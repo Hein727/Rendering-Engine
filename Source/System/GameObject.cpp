@@ -138,8 +138,12 @@ void GameObject::ShadowMapRender(float deltaTime)
 
 void GameObject::Render(float deltaTime)
 {
+	auto& frustum = gameContext->frustumCulling.GetFrustum();
+
 	for (auto& data : datas)
 	{
+		if (!frustum.Intersects(data.GetAABB()->GetCollider())) continue;
+
 		if (auto modelPtr = data.model.lock())
 		{
 			modelPtr->Render(data.world);

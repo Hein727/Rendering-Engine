@@ -165,6 +165,9 @@
     <ClCompile Include="Source\System\Audio.cpp">
       <Filter>Source\System</Filter>
     </ClCompile>
+    <ClCompile Include="Source\System\FrustumCulling.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\Framework.h">
@@ -333,6 +336,9 @@
       <Filter>Source\System</Filter>
     </ClInclude>
     <ClInclude Include="Source\System\Audio.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\FrustumCulling.h">
       <Filter>Source\System</Filter>
     </ClInclude>
   </ItemGroup>
