@@ -4,6 +4,7 @@
 #include "../System/AssetManager.h"
 #include "../System/GameObject.h"
 #include "../HitCheck/CollisionManager.h"
+#include "../System/AudioSource.h"
 #include "Grid.h"
 #include <memory>	
 #include <vector>
@@ -18,8 +19,12 @@ public:
 		grid = std::make_unique<Grid>(gameContext);
 	};
 
-	~LevelEditorBridge() = default;
+	~LevelEditorBridge()
+	{
+		
+	};
 
+	void Init();
 	void Update(float elapsedTime);
 	void Render(float elapsedTime);
 	void DebugUI();
@@ -36,4 +41,5 @@ protected:
 	std::list<std::string> loadedModelNames;
 	std::string selectedModelName;
 	std::unique_ptr<Grid> grid;
+	std::unique_ptr<AudioSource> editorTrack;
 };

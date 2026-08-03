@@ -14,6 +14,8 @@ bool framework::initialized()
 
 	graph.initialize(hwnd);
 
+	gameContext.audio.Initialize();
+
 	// imgui initialize
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -28,8 +30,6 @@ bool framework::initialized()
 
 	// scene manager initialize(the first scene to load)
 	sceneManager.ChangeScene(std::make_unique<TestScene>(gameContext, sceneManager, assetManager));
-
-	gameContext.audio.Initialize();
 
 	return true;
 }
@@ -98,8 +98,6 @@ bool framework::uninitialized()
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
-
-	gameContext.audio.Finalize();
 
 	gameContext.graphics.uninitialize();
 

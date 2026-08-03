@@ -43,6 +43,8 @@ void TestScene::Init()
 	//loadTextureFromFile(device, L"Data/environments/test texture/diffuse_iem.dds", srvs[1].GetAddressOf(), &desc);
 	//loadTextureFromFile(device, L"Data/environments/test texture/specular_pmrem.dds", srvs[2].GetAddressOf(), &desc);
 	//loadTextureFromFile(device, L"Data/environments/test texture/lut_ggx.dds", srvs[3].GetAddressOf(), &desc);
+
+	levelEditorBridge->Init();
 }
 
 void TestScene::Update(float deltaTime)

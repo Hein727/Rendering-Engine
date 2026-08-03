@@ -15,9 +15,16 @@ void Audio::Initialize()
 
 	hr = xaudio->CreateMasteringVoice(&masteringVoice);
 	_ASSERT_EXPR(SUCCEEDED(hr), trace_back(hr));
+
+	DWORD channelMask;
+	masteringVoice->GetChannelMask(&channelMask);
+
+	float soundSpeed = 343.5f;
+
+	X3DAudioInitialize(channelMask, soundSpeed, x3dAudioHandle);
 }
 
-void Audio::Finalize()
+Audio::~Audio()
 {
 	if (masteringVoice != nullptr)
 	{
@@ -34,8 +41,8 @@ void Audio::Finalize()
 	CoUninitialize();
 }
 
-AudioSource* Audio::LoadAudioSource(const char* filename)
+std::unique_ptr<AudioSource> Audio::LoadAudioSource(const char* filename)
 {
 	std::shared_ptr<AudioResource> resource = std::make_shared<AudioResource>(filename);
-	return new AudioSource(xaudio, resource);
+	return std::make_unique<AudioSource>(xaudio, resource);
 }

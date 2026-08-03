@@ -1,7 +1,7 @@
 #include "AudioSource.h"
 #include "Misc.h"
 
-AudioSource::AudioSource(IXAudio2* xaudio, std::shared_ptr<AudioResource>& resource)
+AudioSource::AudioSource(IXAudio2* xaudio, std::shared_ptr<AudioResource>& resource) : resource(resource)	
 {
 	HRESULT hr;
 

@@ -4,6 +4,13 @@
 #include <string>
 #include <list>
 
+void LevelEditorBridge::Init()
+{
+	editorTrack = gameContext.audio.LoadAudioSource("Data/Audio/SoundTracks/EditorOST.wav");
+
+	editorTrack->Play(true);
+}
+
 void LevelEditorBridge::Update(float elapsedTime)
 {
 
